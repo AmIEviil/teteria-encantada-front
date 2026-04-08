@@ -1,0 +1,29 @@
+.mainLayoutContainer {
+  min-height: 100vh;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.main-content {
+  padding: 20px clamp(12px, 2vw, 32px) 24px;
+  flex: 1;
+  margin: 0 auto;
+  margin-top: 72px;
+  min-height: calc(100vh - 84px);
+}
+
+.main-content > * {
+  animation: casona-fade-up 320ms ease;
+}
+
+@keyframes casona-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,132 @@
+.reservationDangerButton {
+  border: 1px solid #d32f2f !important;
+  color: #d32f2f !important;
+  border-radius: 10px !important;
+}
+
+.reservationDangerButton:hover {
+  background-color: rgba(211, 47, 47, 0.1) !important;
+}
+
+.reservationActionsRow {
+  flex-wrap: wrap;
+}
+
+.reservationTableSelectorGroup {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.reservationLayoutIconButton {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(0, 0, 0, 0.24) !important;
+  border-radius: 10px !important;
+  margin-top: 10px;
+}
+
+.reservationLayoutIconButton:hover {
+  background-color: rgba(25, 118, 210, 0.08) !important;
+}
+
+.reservationPeopleField {
+  width: 100%;
+  max-width: 240px;
+  min-width: 0;
+}
+
+.reservationPeopleLabel {
+  display: block;
+  margin-bottom: 6px !important;
+}
+
+.reservationStepperButton {
+  min-width: 46px !important;
+  min-height: 42px !important;
+  padding: 8px 12px !important;
+  border-radius: 10px !important;
+}
+
+.reservationNumberInput .MuiInputBase-input {
+  text-align: center;
+  font-weight: 600;
+}
+
+.reservationNumberInput .MuiInputBase-root {
+  min-height: 42px;
+}
+
+.reservationNumberInput input::-webkit-outer-spin-button,
+.reservationNumberInput input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.reservationNumberInput input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.reservationLayoutFloorPlan {
+  width: 100%;
+  height: min(78dvh, 860px);
+}
+
+.reservationLayoutDialogPaper {
+  border-radius: 18px !important;
+  overflow: hidden;
+}
+
+.reservationLayoutDialogTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px !important;
+}
+
+.reservationLayoutDialogContent {
+  padding: 12px !important;
+}
+
+.reservationLayoutDialogActions {
+  padding: 12px 18px 16px !important;
+}
+
+@media (max-width: 900px) {
+  .reservationTableSelectorGroup {
+    grid-template-columns: 1fr;
+  }
+
+  .reservationPeopleField {
+    max-width: 100%;
+  }
+
+  .reservationLayoutIconButton {
+    margin-top: 0;
+    justify-self: start;
+  }
+
+  .reservationLayoutFloorPlan {
+    height: min(72dvh, 700px);
+  }
+}
+
+@media (max-width: 680px) {
+  .reservationLayoutDialogPaper {
+    border-radius: 0 !important;
+    margin: 0;
+    width: 100%;
+    max-height: 100dvh;
+  }
+
+  .reservationLayoutFloorPlan {
+    height: calc(100dvh - 128px);
+  }
+
+  .reservationLayoutDialogContent {
+    padding: 8px !important;
+  }
+}

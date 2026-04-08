@@ -1,0 +1,29 @@
+.tabsContainer {
+  display: flex;
+  width: fit-content;
+  gap: 0.5rem;
+  padding: 0.35rem;
+  color: var(--ink-soft);
+  background: rgba(255, 253, 249, 0.66);
+  border: 1px solid var(--surface-border);
+  border-radius: 999px;
+}
+
+.tabOption {
+  cursor: pointer;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.tabOption:hover {
+  background-color: rgba(141, 78, 115, 0.12);
+  color: var(--ink-strong);
+}
+
+.tabOption.selected {
+  color: var(--color-5);
+  background: linear-gradient(120deg, var(--color-1), var(--color-6));
+  box-shadow: 0 8px 16px rgba(101, 71, 55, 0.22);
+}

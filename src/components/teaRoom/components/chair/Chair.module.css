@@ -1,0 +1,89 @@
+/* Limpiamos la silla para que solo se dedique a dibujar y rotar fluidamente */
+.chair {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: rotate 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Animación más suave */
+}
+
+.grabCursor {
+  cursor: grab;
+}
+.grabCursor:active {
+  cursor: grabbing;
+}
+
+/* El asiento */
+.chair::before {
+  content: "";
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(150deg, #e8d4bc, #d4b18f);
+  border-radius: 8px;
+  border: 2px solid #7b4f2b;
+  position: relative;
+  z-index: 1;
+  box-shadow: inset 0 0 0 1px rgba(255, 246, 234, 0.5);
+}
+
+/* El respaldo */
+.headerTable {
+  position: absolute;
+  top: 10px;
+  width: 55px;
+  height: 14px;
+  background: linear-gradient(160deg, #7d4d27, #603818);
+  border-radius: 10px;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.22);
+}
+
+.menuIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: rgba(255, 248, 237, 0.9);
+  border: 1px solid rgba(123, 79, 43, 0.28);
+  border-radius: 50%;
+  color: #3f2c1a;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.26);
+  font-size: 16px;
+  line-height: 1;
+  transition: background-color 0.2s;
+}
+
+.menuIcon:hover {
+  background-color: #ffffff;
+}
+.onlyView {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: rotate 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+.headerTableView {
+  margin-bottom: -5px;
+  width: 55px;
+  height: 14px;
+  background: linear-gradient(160deg, #7d4d27, #603818);
+  border-radius: 10px;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.22);
+}
+.onlyView::before {
+  content: "";
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(150deg, #e8d4bc, #d4b18f);
+  border-radius: 8px;
+  border: 2px solid #7b4f2b;
+}

@@ -1,0 +1,34 @@
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinnerContainer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinnerCircle {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 180deg at 50% 50%,
+    var(--color-fondo) 0deg,
+    var(--color-secundario) 360deg
+  );
+  animation: rotate 1s linear infinite;
+  mask: radial-gradient(transparent 45%, var(--color-primario) 45%);
+}
+
+.icon {
+  position: relative;
+  z-index: 1;
+}

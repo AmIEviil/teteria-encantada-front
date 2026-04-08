@@ -1,0 +1,165 @@
+.sideBarContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 16px;
+  padding: 16px;
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid var(--surface-border);
+  background: linear-gradient(160deg, var(--surface-0), var(--surface-1));
+  box-shadow: var(--shadow-card);
+}
+
+.header {
+  display: flex;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+
+.toggleButton:hover {
+  background: linear-gradient(130deg, var(--color-1), var(--color-6));
+  color: var(--color-5);
+}
+.toggleButton:focus {
+  border: 0px;
+  outline: 0px;
+}
+
+.componentsList {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  height: 100%;
+  width: 100%;
+  color: var(--ink-strong);
+}
+
+.hideList {
+  display: none;
+}
+
+.showList {
+  display: flex;
+}
+
+.content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  height: fit-content;
+}
+
+.elements {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.elementButton {
+  padding: 10px 12px;
+  background: linear-gradient(170deg, var(--surface-0), var(--surface-1));
+  color: var(--ink-strong);
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  font-size: 14px;
+  min-height: 44px;
+  width: auto;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.elementButton:hover {
+  background: linear-gradient(140deg, var(--color-1), var(--color-6));
+  color: var(--color-5);
+}
+
+.componentItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: grab;
+}
+.componentItem:active {
+  cursor: grabbing;
+}
+
+.layoutControls {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.gridControlsContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  width: 100%;
+}
+
+.gridControls {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.saveButton {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+}
+
+@media (max-width: 1080px) {
+  .sideBarContainer {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .content {
+    flex-direction: column;
+  }
+
+  .elements,
+  .gridControls,
+  .layoutControls {
+    width: 100%;
+  }
+
+  .elements {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .gridControls,
+  .layoutControls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .elementButton,
+  .saveButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .elements,
+  .gridControls,
+  .layoutControls {
+    grid-template-columns: 1fr;
+  }
+}

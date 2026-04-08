@@ -1,0 +1,96 @@
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--shadow-card);
+  border-radius: 18px;
+  overflow-y: auto;
+  max-height: 80dvh;
+  background: linear-gradient(165deg, var(--surface-0), var(--surface-1));
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: linear-gradient(120deg, var(--color-1), #78875a);
+  color: var(--color-5);
+  position: sticky;
+  top: 0;
+}
+
+th {
+  padding: 1rem 1.2rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid rgba(255, 253, 249, 0.4);
+  border-right: 1px solid rgba(255, 253, 249, 0.25);
+
+  background: transparent;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+th:last-child {
+  border-right: none;
+}
+
+tbody tr {
+  transition: all 0.2s ease;
+}
+
+tbody tr:nth-child(even) {
+  background-color: rgba(247, 240, 230, 0.85);
+}
+
+tbody tr:nth-child(odd) {
+  background-color: rgba(255, 253, 249, 0.95);
+}
+
+tbody tr:hover {
+  background-color: rgba(141, 155, 109, 0.18);
+}
+
+td {
+  padding: 0.8rem 1.2rem;
+  color: var(--ink-strong);
+  border-bottom: 1px solid rgba(196, 201, 197, 0.7);
+}
+
+.iconTd {
+  margin-top: 2rem;
+  position: fixed;
+  left: 50%;
+}
+
+td:not(:last-child) {
+  border-right: 1px solid rgba(196, 201, 197, 0.55);
+}
+
+button {
+  /* background: linear-gradient(130deg, var(--color-1), var(--color-6)); */
+  color: var(--color-5);
+  border: none;
+  padding: 0.5rem 0.8rem;
+  margin-right: 0.5rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+tbody tr:hover button {
+  background: linear-gradient(130deg, #6f7e52, #74415f);
+  color: var(--color-5);
+}
+
+.noData {
+  padding: 1rem;
+  text-align: start;
+  color: var(--ink-strong);
+  margin: 0;
+  background-color: var(--surface-1);
+}

@@ -1,0 +1,115 @@
+.event-ticket-type-card {
+  padding: 0.9rem;
+}
+
+.event-modal-content {
+  padding-top: 0.2rem;
+}
+
+.event-wizard-step-content {
+  padding: 0.2rem 0 0.35rem;
+}
+
+.event-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 0.9rem;
+}
+
+.event-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.9rem;
+}
+
+.event-summary-card {
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  padding: 0.9rem;
+  background: linear-gradient(160deg, rgba(255, 253, 249, 0.92), rgba(244, 237, 225, 0.92));
+}
+
+.event-summary-card h3 {
+  margin: 0 0 0.45rem;
+  font-size: 1.05rem;
+}
+
+.event-summary-card p {
+  margin: 0.24rem 0;
+  color: var(--ink-soft);
+}
+
+.event-summary-ticket-item {
+  margin-top: 0.55rem;
+  padding-top: 0.55rem;
+  border-top: 1px dashed rgba(141, 78, 115, 0.35);
+}
+
+.event-list-card {
+  border: 1px solid var(--surface-border);
+  padding: 0.9rem;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(255, 253, 249, 0.96), rgba(245, 238, 226, 0.93));
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.event-list-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(65, 48, 34, 0.12);
+}
+
+.event-list-card.selected {
+  border-color: var(--color-6);
+  box-shadow: 0 0 0 2px rgba(141, 78, 115, 0.2);
+}
+
+.event-card-actions {
+  margin-top: 0.2rem;
+}
+
+.event-status-chip {
+  color: var(--ink-strong) !important;
+  background: rgba(141, 155, 109, 0.22) !important;
+  border: 1px solid rgba(109, 122, 82, 0.35) !important;
+}
+
+.event-ticket-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--surface-border);
+  background: linear-gradient(140deg, rgba(255, 253, 249, 0.9), rgba(231, 222, 206, 0.85));
+}
+
+.event-ticket-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.8rem;
+}
+
+.event-ticket-card {
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  padding: 0.85rem;
+  background: linear-gradient(160deg, rgba(255, 253, 249, 0.95), rgba(247, 240, 230, 0.95));
+}
+
+.event-ticket-card h3 {
+  margin: 0 0 0.45rem;
+  font-size: 1.02rem;
+}
+
+.event-ticket-card p {
+  margin: 0.24rem 0;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 960px) {
+  .event-ticket-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

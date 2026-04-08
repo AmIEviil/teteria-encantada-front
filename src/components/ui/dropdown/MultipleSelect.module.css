@@ -1,0 +1,37 @@
+.dropdown {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.customDropdownToggle {
+  display: flex;
+  width: 100%;
+  background: linear-gradient(180deg, var(--surface-0), var(--surface-1)) !important;
+  border: 1px solid var(--surface-border) !important;
+  padding: 0.5rem !important;
+  border-radius: 12px !important;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  color: var(--ink-strong);
+  min-width: 200px;
+  max-width: 360px;
+  overflow: hidden;
+}
+
+.customDropdownToggle::after {
+  display: none !important;
+}
+
+.customMenuDropdown {
+  width: 100%;
+  padding: 0.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 12px;
+  border: 1px solid var(--surface-border);
+  background: linear-gradient(175deg, var(--surface-0), var(--surface-1));
+  box-shadow: var(--shadow-card);
+}
+

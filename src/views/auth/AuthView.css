@@ -1,0 +1,124 @@
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(16px, 4vw, 36px);
+}
+
+.auth-card {
+  width: min(520px, 100%);
+  background:
+    radial-gradient(circle at 90% 0%, rgba(141, 78, 115, 0.2), transparent 42%),
+    linear-gradient(160deg, var(--surface-0), var(--surface-1));
+  border: 1px solid var(--surface-border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-soft);
+  padding: clamp(18px, 3vw, 30px);
+}
+
+.auth-title {
+  margin: 0;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+}
+
+.auth-subtitle {
+  margin: 8px 0 20px;
+  color: var(--ink-soft);
+}
+
+.auth-form {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.auth-label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.auth-input,
+.auth-select {
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--surface-border);
+  padding: 0 12px;
+  background: var(--surface-0);
+  color: var(--ink-strong);
+  font-size: 0.96rem;
+}
+
+.auth-input:focus,
+.auth-select:focus {
+  outline: 2px solid rgba(141, 78, 115, 0.35);
+  outline-offset: 1px;
+  border-color: var(--color-6);
+}
+
+.auth-button {
+  margin-top: 6px;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  color: #20170f;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(130deg, var(--color-1), var(--color-6));
+}
+
+.auth-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.auth-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  color: var(--ink-soft);
+}
+
+.auth-link {
+  color: var(--color-6);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-alert {
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.92rem;
+}
+
+.auth-alert-error {
+  background: rgba(180, 84, 97, 0.16);
+  border: 1px solid rgba(180, 84, 97, 0.35);
+  color: #7f2734;
+}
+
+.auth-alert-success {
+  background: rgba(107, 127, 75, 0.16);
+  border: 1px solid rgba(107, 127, 75, 0.35);
+  color: #35511a;
+}
+
+.auth-inline-token {
+  font-family: ui-monospace, "Cascadia Code", "Fira Code", monospace;
+  font-size: 0.82rem;
+  word-break: break-all;
+}

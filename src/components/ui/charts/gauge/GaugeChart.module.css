@@ -1,0 +1,35 @@
+.gaugeContainer {
+  height: fit-content;
+  width: fit-content;
+}
+.titleGaugeContainer {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  top: 1rem;
+}
+.titleGauge {
+  font-weight: 700;
+}
+.spanGaugeContainer {
+  display: inline-flex;
+  position: relative;
+  width: 100%;
+  top: -2rem;
+  justify-content: space-between;
+  height: 30px;
+}
+.minRange {
+  position: relative;
+  top: -1rem;
+  left: 1.5rem;
+}
+.actualValue {
+  position: relative;
+  top: -1rem;
+}
+.maxRange {
+  position: relative;
+  top: -1rem;
+  right: 1.5rem;
+}

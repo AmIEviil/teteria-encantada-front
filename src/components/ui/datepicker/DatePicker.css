@@ -1,0 +1,110 @@
+.custom-date-button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 12px 8px 12px 8px;
+  border: 1px solid var(--color-secundario);
+  border-radius: 8px;
+  height: 40px;
+  min-width: fit-content;
+  width: 100%;
+  min-width: 200px;
+  justify-content: space-between;
+  background-color: white;
+  color: var(--color-primario);
+}
+
+.custom-date-button:hover {
+  background-color: var(--color-secundario);
+  border: 1px solid var(--color-secundario);
+}
+
+.custom-date-button:focus {
+  background-color: var(--color-secundario);
+  border: 1px solid var(--color-secundario);
+  box-shadow: 0px 0px 4px 0px var(--color-secundario);
+}
+
+.custom-calendar-wrapper {
+  background-color: white;
+  width: 100%;
+  box-shadow: 0px 4px 8px 0px rgba(0, 67, 135, 0.24);
+  border-radius: 8px;
+}
+
+.custom-datepicker-header {
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.custom-datepicker-selects {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.custom-select {
+  width: fit-content;
+}
+
+.custom-arrows {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Style for native header */
+.react-datepicker__header {
+  background-color: var(--black-50);
+  border: none;
+}
+
+/* Style for native week days */
+.react-datepicker__day-names {
+  background-color: var(--black-50);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+.react-datepicker__day-name {
+  flex: 1;
+  text-align: center;
+}
+.react-datepicker__day {
+  font-size: 12px;
+  font-weight: bold;
+}
+.react-datepicker__day--selected {
+  background-color: #006cd9;
+}
+.react-datepicker__triangle {
+  display: none;
+}
+.react-datepicker-popper {
+  z-index: 2;
+}
+
+.btn-footer {
+  color: var(--Primary-600_cta, #006cd9);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 24px;
+  text-decoration: underline;
+
+  &.delete {
+    margin-left: 1rem;
+  }
+  &.today {
+    position: fixed;
+    margin-right: 2rem;
+    right: 1rem;
+  }
+}

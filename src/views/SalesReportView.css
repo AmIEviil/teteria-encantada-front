@@ -1,0 +1,70 @@
+.sales-kpi-card {
+  flex: 1;
+  min-width: 180px;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--surface-border);
+  background: linear-gradient(160deg, rgba(255, 253, 249, 0.95), rgba(244, 237, 225, 0.95));
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sales-kpi-card span {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.sales-kpi-card strong {
+  color: var(--ink-strong);
+  font-size: 1.05rem;
+}
+
+.sales-month-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.9rem;
+}
+
+.sales-month-card {
+  border: 1px solid var(--surface-border);
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(255, 253, 249, 0.95), rgba(247, 240, 230, 0.95));
+  padding: 0.9rem 1rem;
+}
+
+.sales-month-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.sales-month-card p {
+  margin: 0.3rem 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.sales-status-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink-strong);
+  background: rgba(141, 155, 109, 0.18);
+}
+
+.sales-reset-button {
+  min-width: 150px;
+  align-self: stretch;
+  white-space: nowrap;
+}
+
+@media (max-width: 960px) {
+  .sales-reset-button {
+    width: 100%;
+    margin-right: 0;
+  }
+}

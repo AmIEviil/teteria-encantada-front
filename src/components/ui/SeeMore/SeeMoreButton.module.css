@@ -1,0 +1,67 @@
+.dropmenuContainer {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.dropmenuLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  transform: rotate(270deg);
+  background-color: var(--color-secundario);
+  border-radius: 0.5rem 0.5rem 0 0;
+  color: var(--color-blanco);
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  margin-right: -0.5rem;
+}
+
+.dropmenuLabel.active {
+  background-color: var(--color-primario);
+  color: var(--color-fondo);
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+.dropmenuLabel:hover,
+.dropmenuIcon:hover {
+  background-color: var(--color-fondo);
+  color: var(--color-secundario);
+}
+
+.dropmenuOptionsContainer {
+  position: absolute;
+  top: -34%;
+  right: 1.5rem;
+  border-radius: 0.5rem 0 0.5rem 0.5rem;
+  background-color: var(--color-sombra);
+  z-index: 9999;
+  display: flex;
+  align-items: start;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  min-width: 10rem;
+  min-height: 3rem;
+}
+
+.optionLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  padding: 0.2rem 0.5rem;
+  width: 100%;
+  transition: background-color 0.2s ease-in-out;
+  color: var(--color-fondo);
+}
+
+.optionLabel:hover:last-child {
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+.optionLabel:hover:first-child {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}

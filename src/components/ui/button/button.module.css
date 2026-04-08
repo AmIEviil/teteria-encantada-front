@@ -1,0 +1,192 @@
+/* general config */
+.btn-primary,
+.btn-secondary,
+.btn-tertiary,
+.btn-destructive,
+.btn-tool,
+.btn-tool-no-stroke {
+  display: inline-flex;
+  padding: 8px 16px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-tertiary:disabled,
+.btn-destructive:disabled,
+.btn-tool:disabled,
+.btn-tool-no-stroke {
+  background-color: var(--black-300);
+  border-color: var(--black-300);
+  color: var(--ink-soft);
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  /* background: linear-gradient(130deg, var(--color-1), var(--color-6)); */
+  color: var(--color-5);
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+}
+
+.btn-secondary {
+  background: linear-gradient(170deg, var(--surface-0), var(--surface-1));
+  border: 1px solid var(--color-6);
+  color: var(--color-6);
+}
+
+.btn-tertiary {
+  color: var(--ink-strong);
+  border: 1px dashed rgba(141, 78, 115, 0.5);
+  background: rgba(255, 253, 249, 0.65);
+}
+
+.btn-destructive {
+  background-color: var(--red-600);
+  border-color: var(--red-600);
+  color: white;
+}
+
+.btn-tool {
+  background-color: var(--surface-1) !important;
+  border: 1px solid var(--surface-border) !important;
+  color: var(--ink-strong) !important;
+}
+
+.btn-tool-no-stroke {
+  background-color: transparent;
+  border: none;
+}
+
+/* primary btn config */
+.btn-primary:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 8px 16px rgba(93, 58, 79, 0.32);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+  filter: brightness(0.97);
+}
+
+.btn-primary:focus {
+  outline: none;
+  border: 1px solid transparent;
+  box-shadow: 0 0 0 3px rgba(141, 155, 109, 0.35);
+}
+
+/* secondary btn config */
+.btn-secondary:hover {
+  border: 1px solid var(--color-6);
+  background: var(--color-6);
+  color: var(--color-5);
+}
+
+.btn-secondary:active {
+  background-color: #7a4464 !important;
+  border: 1px solid #7a4464 !important;
+  color: var(--color-5) !important;
+}
+
+.btn-secondary:focus {
+  border: 1px solid var(--gold-500);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(169, 130, 67, 0.3);
+}
+
+.btn-secondary:focus::after {
+  content: none;
+}
+
+/* terciary btn config */
+.btn-tertiary:hover {
+  background-color: rgba(141, 78, 115, 0.1);
+  border-color: var(--gold-400);
+  color: var(--color-6);
+}
+
+.btn-tertiary:active {
+  background-color: rgba(141, 78, 115, 0.16) !important;
+  border-color: var(--gold-600);
+  color: var(--color-6);
+}
+
+.btn-tertiary:focus {
+  color: var(--ink-strong);
+  box-shadow: 0 0 0 3px rgba(141, 155, 109, 0.28);
+}
+
+/* destructive btn config */
+.btn-destructive:hover {
+  background-color: var(--red-800);
+  border-color: var(--red-800);
+  color: white;
+}
+
+.btn-destructive:active {
+  background-color: var(--red-900) !important;
+  border-color: var(--red-900) !important;
+  color: white !important;
+}
+
+.btn-destructive:focus {
+  outline: none;
+  border: 1px solid #9f4251;
+  box-shadow: 0 0 0 3px rgba(180, 84, 97, 0.3);
+}
+
+/* tool btn config */
+.btn-tool:hover {
+  background-color: var(--surface-2);
+  border-color: var(--black-400);
+}
+
+.btn-tool:active {
+  background-color: var(--black-300) !important;
+  border-color: var(--black-400) !important;
+  color: var(--ink-strong) !important;
+}
+
+.btn-tool:focus {
+  background-color: var(--surface-1);
+  border: 1px solid var(--black-400);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(141, 155, 109, 0.24);
+}
+
+.btn-tool:focus::after {
+  content: none;
+}
+
+/* tool-no-stroke btn config */
+.btn-tool-no-stroke:hover {
+  background-color: rgba(141, 155, 109, 0.12) !important;
+  border-color: var(--black-900);
+}
+
+.btn-tool-no-stroke:active {
+  background-color: rgba(141, 155, 109, 0.2) !important;
+  border: none !important;
+  color: var(--ink-strong);
+}
+
+.btn-tool-no-stroke:focus {
+  background-color: rgba(141, 155, 109, 0.12);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(141, 155, 109, 0.24);
+  color: var(--ink-strong);
+}
+
+.Linkbutton {
+  font-size: 14px;
+  text-decoration: underline;
+  color: var(--color-6);
+}

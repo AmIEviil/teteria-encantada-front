@@ -1,0 +1,14 @@
+.withIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+  width: 100% !important;
+}
+
+.input-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}

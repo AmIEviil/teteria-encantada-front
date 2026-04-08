@@ -1,0 +1,301 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "EFCO Brookshire";
+  src: url("./assets/fonts/EFCO Brookshire Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  font-family: "Trebuchet MS", "Palatino Linotype", Georgia, serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light;
+  color: #30261c;
+  background-color: #ead2b3;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+
+  --font-brookshire: "EFCO Brookshire", sans-serif;
+  --font-display: "EFCO Brookshire", "Times New Roman", serif;
+  --font-body: "Trebuchet MS", "Palatino Linotype", Georgia, serif;
+
+  --background-color-primary: #ead2b3;
+  --color-primario: #2f2a20;
+  --color-secundario: #8d4e73;
+  --color-fondo: #fffdf9;
+  --color-sombra: #5d5349;
+  --color-detalle-claro: #c4c9c5;
+  --color-gris-medio: #7a7369;
+  --color-gris-oscuro: #3f372f;
+  --color-fondo-suave: #f4ede1;
+  --color-celeste-oscuro: #8d9b6d;
+
+  --blue-600: #8d9b6d;
+  --red-500: #b45461;
+  --green-700: #6b7f4b;
+  --yellow-500: #bb8b42;
+
+  /* Paleta Casona */
+  --color-1: #8d9b6d;
+  --color-2: #c4c9c5;
+  --color-3: #ead2b3;
+  --color-4: #faade0;
+  --color-5: #ffffff;
+  --color-6: #8d4e73;
+
+  /* Escala neutra y acentos reutilizada por componentes legacy */
+  --black-50: #f7f0e6;
+  --black-100: #e7dece;
+  --black-300: #c2b59d;
+  --black-400: #a59479;
+  --black-800: #4b4133;
+  --black-900: #2f2a20;
+  --blue-50: #f4ede1;
+  --blue-100: #e6ddca;
+  --blue-800: #6d7a52;
+  --gold-400: #bc9a62;
+  --gold-500: #a98243;
+  --gold-600: #8b6b34;
+  --red-600: #b45461;
+  --red-800: #923946;
+  --red-900: #7c2e3a;
+  --primary-gold-300-cta: #8d4e73;
+
+  --surface-0: #fffdf9;
+  --surface-1: #f7f0e6;
+  --surface-2: #efe4d2;
+  --surface-border: #cebfa7;
+  --ink-strong: #2f2a20;
+  --ink-soft: #5f5448;
+  --shadow-soft: 0 14px 40px rgba(80, 62, 41, 0.18);
+  --shadow-card: 0 10px 24px rgba(67, 51, 34, 0.12);
+
+}
+
+:root[data-theme="dark"] {
+  --background-color-primary: #2f2a20;
+  --color-primario: #f4ede1;
+  --color-secundario: #faade0;
+  --color-fondo: #2f2a20;
+  --color-sombra: #140f0a;
+  --color-detalle-claro: #6c6358;
+  --color-gris-medio: #c4c9c5;
+  --color-gris-oscuro: #f4ede1;
+  --color-fondo-suave: #43392f;
+  --surface-0: #362d24;
+  --surface-1: #43392f;
+  --surface-2: #4d4337;
+  --surface-border: #736453;
+  --ink-strong: #f4ede1;
+  --ink-soft: #ddd2c1;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(141, 78, 115, 0.12), transparent 38%),
+    radial-gradient(circle at 88% 10%, rgba(141, 155, 109, 0.18), transparent 35%),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.2) 0,
+      rgba(255, 255, 255, 0.2) 2px,
+      transparent 2px,
+      transparent 12px
+    ),
+    var(--background-color-primary);
+  color: var(--ink-strong);
+  font-family: var(--font-body);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+  color: var(--ink-strong);
+}
+
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--surface-1);
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--color-1), var(--color-6));
+    border: 2px solid var(--surface-1);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #7d8d5e, #7a4464);
+  }
+}
+
+button.secondary {
+  color: var(--ink-strong);
+  border: 2px solid var(--color-6);
+  padding: 0.5rem 0.9rem;
+  margin-right: 0.5rem;
+  border-radius: 14px;
+  /* background: linear-gradient(180deg, #fffdf9, #f6eee1); */
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button.secondary:hover {
+  background: var(--color-6);
+  color: var(--color-5);
+}
+
+button.normal {
+  background-color: transparent;
+  color: var(--color-6);
+  padding: 0;
+}
+
+button.normal:hover {
+  background-color: rgba(141, 78, 115, 0.14);
+}
+
+button:focus {
+  border: 0;
+  outline: 0;
+}
+
+.MuiButton-root,
+.btn {
+  border-radius: 12px !important;
+  text-transform: none !important;
+  font-weight: 700 !important;
+}
+
+.MuiButton-contained {
+  background: linear-gradient(130deg, var(--color-1), var(--color-6)) !important;
+  color: #2b251d !important;
+  box-shadow: 0 8px 16px rgba(101, 71, 55, 0.24) !important;
+}
+
+.MuiButton-contained:hover {
+  filter: brightness(1.04);
+}
+
+.MuiButton-outlined {
+  border-color: var(--color-6) !important;
+  color: var(--color-6) !important;
+}
+
+.MuiButton-outlined:hover {
+  background-color: rgba(141, 78, 115, 0.1) !important;
+}
+
+.MuiPaper-root,
+.MuiCard-root {
+  background: linear-gradient(160deg, var(--surface-0), var(--surface-1)) !important;
+  border: 1px solid var(--surface-border) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+.MuiTableHead-root .MuiTableCell-root {
+  background: linear-gradient(120deg, var(--color-1), #758557) !important;
+  color: #000000 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+.MuiInputBase-root {
+  background: linear-gradient(180deg, var(--surface-0), var(--surface-1));
+  border-radius: 12px !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: var(--surface-border) !important;
+}
+
+.MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--color-6) !important;
+  box-shadow: 0 0 0 3px rgba(141, 78, 115, 0.16);
+}
+
+.MuiInputLabel-root.Mui-focused {
+  color: var(--color-6) !important;
+}
+
+.MuiTableBody-root .MuiTableRow-root:nth-of-type(odd) {
+  background-color: rgba(255, 253, 249, 0.66);
+}
+
+.MuiTableBody-root .MuiTableRow-root:hover {
+  background-color: rgba(141, 155, 109, 0.16);
+}
+
+.MuiDialog-paper,
+.modal-content {
+  border-radius: 18px !important;
+  border: 1px solid var(--surface-border) !important;
+  background:
+    radial-gradient(circle at 90% -20%, rgba(141, 78, 115, 0.1), transparent 45%),
+    linear-gradient(165deg, var(--surface-0), var(--surface-1)) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.casona-modal-dialog {
+  max-width: min(1080px, 92vw) !important;
+}
+
+.casona-modal .modal-body {
+  background-color: rgba(255, 253, 249, 0.72);
+}
+
+.MuiDialogTitle-root,
+.modal-header {
+  font-family: var(--font-display);
+  color: var(--ink-strong) !important;
+  border-bottom: 1px solid rgba(141, 78, 115, 0.2) !important;
+}
+
+.MuiDialogActions-root,
+.modal-footer {
+  border-top: 1px solid rgba(141, 155, 109, 0.22) !important;
+  background: rgba(255, 253, 249, 0.7);
+}
+
+.modal-backdrop.show {
+  opacity: 0.58 !important;
+  backdrop-filter: blur(3px);
+  background: rgba(29, 20, 15, 0.72) !important;
+}
+
+.modal.show .modal-dialog {
+  animation: modal-rise 280ms ease;
+}
+
+@keyframes modal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

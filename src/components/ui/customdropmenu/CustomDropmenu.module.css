@@ -1,0 +1,146 @@
+.dropmenuContainer {
+  display: flex;
+  cursor: pointer;
+  position: relative;
+  z-index: 40;
+}
+
+.dropmenuOptionsContainer {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  min-width: 210px;
+  border-radius: 14px;
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 18px 40px rgba(44, 31, 20, 0.28);
+  background:
+    radial-gradient(circle at top right, rgba(141, 78, 115, 0.18), transparent 45%),
+    linear-gradient(170deg, var(--surface-0), var(--surface-1));
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: visible;
+}
+
+.optionRow {
+  position: relative;
+  width: 100%;
+}
+
+.submenuContainer {
+  position: absolute;
+  top: 0;
+  min-width: 190px;
+  border-radius: 14px;
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 18px 40px rgba(44, 31, 20, 0.28);
+  background:
+    radial-gradient(circle at top right, rgba(141, 78, 115, 0.18), transparent 45%),
+    linear-gradient(170deg, var(--surface-0), var(--surface-1));
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.submenuContainerRight {
+  left: calc(100% + 0.45rem);
+}
+
+.submenuContainerLeft {
+  right: calc(100% + 0.45rem);
+}
+
+.dropmenuLabel,
+.dropmenuLabelNav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 0;
+  font-weight: 600;
+  border-radius: 999px;
+  transition: background-color 0.2s ease;
+}
+
+.dropmenuLabelNav {
+  font-size: 1.1rem;
+  color: var(--color-5);
+  padding: 0.25rem 0.65rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dropmenuLabelNav:hover {
+  background-color: rgba(255, 255, 255, 0.16);
+}
+
+.optionLabel,
+.optionLabelNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border: none;
+  background: transparent;
+  color: var(--ink-strong);
+  font-size: 0.95rem;
+  padding: 0.55rem 0.85rem;
+  width: 100%;
+  text-align: left;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.optionLabel:hover,
+.optionLabelNav:hover {
+  background-color: rgba(141, 78, 115, 0.14);
+  width: 100%;
+}
+
+.optionLabel:hover:last-child,
+.optionLabelNav:hover:last-child {
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+.optionLabel:hover:first-child,
+.optionLabelNav:hover:first-child {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.optionLabelNav {
+  font-size: 1rem;
+}
+
+.primary {
+  color: var(--ink-strong);
+}
+
+.secondary {
+  background-color: rgba(141, 155, 109, 0.14);
+  color: var(--ink-strong);
+  min-width: 165px;
+  margin-right: 0;
+}
+
+.danger {
+  color: #7c2e3a;
+}
+
+.ghost {
+  background: rgba(255, 253, 249, 0.78);
+  color: var(--ink-strong);
+  border: 1px solid rgba(141, 155, 109, 0.4);
+  border-radius: 10px;
+  padding: 0.1rem 0.35rem;
+}
+
+.ghost:hover {
+  background: rgba(141, 155, 109, 0.18);
+}

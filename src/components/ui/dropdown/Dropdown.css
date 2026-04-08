@@ -1,0 +1,59 @@
+/* Custom Style for Dropdown or CustomDropdown */
+.custom-dropdown-toggle::after {
+  display: none !important;
+}
+
+.custom-menu-dropdown {
+  width: 100%;
+  padding: 0.55rem;
+  border-radius: 14px;
+  border: 1px solid var(--surface-border);
+  background: linear-gradient(175deg, var(--surface-0), var(--surface-1));
+  box-shadow: var(--shadow-card);
+}
+
+.dropdown-toggle {  
+  color: var(--ink-strong);
+  background: linear-gradient(180deg, var(--surface-0), var(--surface-1));
+  border-color: var(--surface-border);
+  height: 40px;
+}
+
+.dropdown-toggle:hover {
+  background-color: #f9f1e4;
+  color: var(--ink-strong);
+  box-shadow: 0 0 0 3px rgba(141, 155, 109, 0.2);
+  border: 1px solid var(--color-1);
+}
+
+.dropdown-item {
+  color: var(--ink-strong);
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 22.7px;
+  border-radius: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(141, 155, 109, 0.15);
+}
+
+.dropdown-item.active {
+  background-color: transparent;
+  color: var(--ink-strong);
+}
+
+.dropdown-item.active:hover {
+  background-color: rgba(141, 155, 109, 0.2);
+  color: var(--ink-strong);
+}
+
+/* Custom style for ReactDropdown or ActionDropdown */
+.custom-action-menu-dropdown {
+  padding: 0.5rem;
+}

@@ -1,0 +1,65 @@
+.fieldValue{
+  width: 100%;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+.textArea {
+  border-radius: 8px;
+  border: 1px solid var(--blue-800);
+  background: var(--blue-50);
+  width: 100%;
+  padding: 2px;
+  resize: none;
+}
+
+.active {
+  box-shadow: 0 0 4px 0 #b6dbff;
+}
+
+.inactive {
+  box-shadow: none;
+}
+
+.commentFieldContainer {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.headerComments {
+  color: var(--black-900);
+  font-weight: 700;
+  letter-spacing: 0.28px;
+}
+
+.actionButton {
+  color: var(--gold-500);
+  text-align: right;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 22.7px; /* 162.143% */
+  letter-spacing: 0.28px;
+  text-decoration-line: underline;
+  text-decoration-style: solid;
+  text-decoration-skip-ink: auto;
+  text-decoration-thickness: auto;
+  text-underline-offset: auto;
+  text-underline-position: from-font;
+}
+
+.commentsList {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--blue-100);
+  padding: 1rem;
+}
+.actionsContainer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.commentItem {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
