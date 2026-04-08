@@ -6,9 +6,8 @@ import "./DatePicker.css";
 
 import { useTranslation } from "react-i18next";
 import { enUS, es, type Locale } from "date-fns/locale";
-import i18n from "../../../i18n";
-import CalendarIcon from "../Icons/CalendarIcon";
-import FullArrowIcon from "../Icons/FullArrow";
+import CalendarIcon from "../icons/CalendarIcon";
+import FullArrowIcon from "../icons/FullArrow";
 
 // Locale config
 const localeMap: Record<string, Locale> = { en: enUS, es };
@@ -98,7 +97,7 @@ export default function Calendar({
   title,
   required,
 }: Readonly<CalendarProps>) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const monthNames = [
     t("modules.common.months.january"),
     t("modules.common.months.february"),

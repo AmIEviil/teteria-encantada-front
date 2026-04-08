@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
 import "./InputText.css";
-import EyeIcon from "../Icons/EyeIcon";
+import EyeIcon from "../icons/EyeIcon";
 
 interface InputTextProps {
   title?: string;

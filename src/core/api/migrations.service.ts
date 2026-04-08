@@ -54,7 +54,7 @@ const getTimestampString = (value: unknown): string | null => {
   return null;
 };
 
-const getObjectOrNull = <T extends object>(value: unknown): T | null => {
+const getObjectOrNull = <T>(value: unknown): T | null => {
   if (value && typeof value === "object") {
     return value as T;
   }

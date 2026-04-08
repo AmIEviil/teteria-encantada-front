@@ -1,4 +1,4 @@
-import ArrowIcon from "../Icons/ArrowIcon";
+import ArrowIcon from "../icons/ArrowIcon";
 import "./Pagination.css";
 
 interface PaginationProps {

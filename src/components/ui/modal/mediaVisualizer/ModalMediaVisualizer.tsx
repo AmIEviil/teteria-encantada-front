@@ -1,19 +1,38 @@
+import type { ReactNode } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "../../button/Button";
-import { useModalStore } from "../../../../store/ModalStore";
+import { useModalStore } from "../../../../store/modalStore";
+
+const MEDIA_VISUALIZER_MODAL_KEY = "media-visualizer-modal";
+
+interface MediaVisualizerPayload {
+  dialogClassName?: string;
+  bodyClassName?: string;
+  headerContent?: ReactNode;
+  modalContent?: ReactNode;
+  footerContent?: ReactNode;
+  onAccept?: () => void;
+}
 
 const ModalMediaVisualizer = () => {
-  const visible = useModalStore((state) => state.isModalOpen);
-  const dialogClassName = useModalStore((state) => state.dialogClassName);
-  const bodyClassName = useModalStore((state) => state.bodyClassName);
-  const headerData = useModalStore((state) => state.headerContent);
-  const mediaData = useModalStore((state) => state.modalContent);
-  const footerData = useModalStore((state) => state.footerContent);
-  const onClose = useModalStore((state) => state.closeModal);
-  const onAccept = useModalStore((state) => state.onAccept);
+  const openModals = useModalStore((state) => state.openModals);
+  const modalPayloads = useModalStore((state) => state.modalPayloads);
+  const closeModal = useModalStore((state) => state.closeModal);
+
+  const visible = Boolean(openModals[MEDIA_VISUALIZER_MODAL_KEY]);
+  const payload =
+    (modalPayloads[MEDIA_VISUALIZER_MODAL_KEY] as MediaVisualizerPayload) ??
+    undefined;
+
+  const dialogClassName = payload?.dialogClassName;
+  const bodyClassName = payload?.bodyClassName;
+  const headerData = payload?.headerContent;
+  const mediaData = payload?.modalContent;
+  const footerData = payload?.footerContent;
+  const onAccept = payload?.onAccept;
 
   const handleClose = () => {
-    onClose();
+    closeModal(MEDIA_VISUALIZER_MODAL_KEY);
   };
 
   return (

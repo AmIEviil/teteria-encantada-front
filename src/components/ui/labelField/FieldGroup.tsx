@@ -2,11 +2,10 @@ import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import MultiSelectDropdown from "../dropdown/MultipleSelectDropdown";
 import style from "./FieldGroup.module.css";
-import { checkValue } from "../../../utils/formUtils";
-import CheckIcon from "../Icons/CheckIcon";
-import CloseIcon from "../Icons/CloseIcon";
-import PencilIcon from "../Icons/PencilIcon";
-import CommentIcon from "../Icons/CommentIcon";
+import CheckIcon from "../icons/CheckIcon";
+import CloseIcon from "../icons/CloseIcon";
+import PencilIcon from "../icons/PencilIcon";
+import CommentIcon from "../icons/CommentIcon";
 import { CustomCalendarV2 } from "../calendar/CustomCalendarV2";
 export interface Options {
   value: number;
@@ -78,6 +77,10 @@ const FieldGroup: React.FC<FieldGroupProps> = ({
     string | number | null | undefined
   >(value);
   const parsedEditedDate = parseEditedDateValue(editedValue);
+  const isOptionSelected = (
+    currentValue: string | number | null | undefined,
+    optionLabel: string,
+  ) => String(currentValue ?? "") === optionLabel;
 
   // const { setIsEditing, setIsCommenting } = useActionsStore();
   // const { isFormDetailCommentable } = useFormDetailsStore();
@@ -210,7 +213,7 @@ const FieldGroup: React.FC<FieldGroupProps> = ({
                           name={label}
                           // mapLabelToDb
                           value={option.label ?? ""}
-                          checked={checkValue(editedValue, option.label)}
+                          checked={isOptionSelected(editedValue, option.label)}
                           onChange={(e) => setEditedValue(e.target.value)}
                         />
                         <label

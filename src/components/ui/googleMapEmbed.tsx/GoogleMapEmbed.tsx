@@ -1,8 +1,8 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 // Asegúrate de importar tus iconos correctamente
-import WazeIcon from "../Icons/WazeIcon";
-import GoogleMapsIcon from "../Icons/GoogleMapsIcon";
+import WazeIcon from "../icons/WazeIcon";
+import GoogleMapsIcon from "../icons/GoogleMapsIcon";
 
 interface Props {
   lat: number;

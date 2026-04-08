@@ -2,7 +2,7 @@ import { Modal } from "react-bootstrap";
 import style from "./CustomModal.module.css";
 import Button from "../button/Button";
 import { useEffect, useRef, useState } from "react";
-import CheckIcon from "../Icons/CheckIcon";
+import CheckIcon from "../icons/CheckIcon";
 import SaveIcon from "@mui/icons-material/Save";
 
 interface CustomModalProps {

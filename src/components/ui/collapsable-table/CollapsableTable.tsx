@@ -2,11 +2,15 @@
 import React, { useState } from "react";
 // Styles
 import style from "./CollapsableTable.module.css";
-import CaretIcon from "../Icons/CaretIcon";
-import OrderIcon from "../Icons/OrderIcon";
-import type { Client } from "../../../service/client.interface";
+import CaretIcon from "../icons/CaretIcon";
+import OrderIcon from "../icons/OrderIcon";
 import LoadingSpinner from "../loading/Loading";
 import { Checkbox } from "@mui/material";
+
+interface Client {
+  id: string;
+  [key: string]: unknown;
+}
 
 export interface TableHeader {
   label: string;

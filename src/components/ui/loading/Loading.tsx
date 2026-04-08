@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./loading.module.css";
-import PiscinasElMaipoIcon from "../Icons/piscinasDelMaipoIcon";
+import PiscinasElMaipoIcon from "../icons/piscinasDelMaipoIcon";
 
 interface LoadingSpinnerProps {
   size?: number;

@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import style from "./MultipleSelect.module.css";
 import "./Dropdown.css";
-import CaretIcon from "../Icons/CaretIcon";
-import ArrowIcon from "../Icons/ArrowIcon";
-import CheckIcon from "../Icons/CheckIcon";
+import CaretIcon from "../icons/CaretIcon";
+import ArrowIcon from "../icons/ArrowIcon";
+import CheckIcon from "../icons/CheckIcon";
 
 export interface DropdownOptions {
   value: string | number;
