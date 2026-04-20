@@ -3,7 +3,9 @@ import type {
   CreateReservationPayload,
   FindReservationsFilters,
   Reservation,
+  ReservationScheduleDay,
   RemoveResponse,
+  UpdateReservationSchedulePayload,
   UpdateReservationPayload,
 } from "./types";
 
@@ -13,6 +15,7 @@ export const reservationsService = {
       params: {
         tableId: filters?.tableId,
         status: filters?.status,
+        phone: filters?.phone,
         startDate: filters?.startDate,
         endDate: filters?.endDate,
       },
@@ -54,6 +57,21 @@ export const reservationsService = {
 
   remove: async (id: string): Promise<RemoveResponse> => {
     const response = await apiClient.delete<RemoveResponse>(`/reservations/${id}`);
+    return response.data;
+  },
+
+  findSchedule: async (): Promise<ReservationScheduleDay[]> => {
+    const response = await apiClient.get<ReservationScheduleDay[]>("/reservations/schedule");
+    return response.data;
+  },
+
+  updateSchedule: async (
+    payload: UpdateReservationSchedulePayload,
+  ): Promise<ReservationScheduleDay[]> => {
+    const response = await apiClient.put<ReservationScheduleDay[]>(
+      "/reservations/schedule",
+      payload,
+    );
     return response.data;
   },
 };

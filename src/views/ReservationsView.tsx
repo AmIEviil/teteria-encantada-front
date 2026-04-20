@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
+  Divider,
   Dialog,
   DialogActions,
   DialogContent,
@@ -22,13 +24,26 @@ import { CustomCalendarV2 } from "../components/ui/calendar/CustomCalendarV2";
 import {
   useCreateReservationMutation,
   useDeleteReservationMutation,
+  useReservationScheduleQuery,
   useReservationsQuery,
+  useUpdateReservationScheduleMutation,
   useUpdateReservationMutation,
 } from "../core/api/reservations.hooks";
 import { FloorPlan } from "../components/teaRoom/FloorPlan/FloorPlan";
 import { useLayoutsQuery } from "../core/api/layouts.hooks";
 import { useTablesQuery } from "../core/api/tables.hooks";
-import type { ReservationStatus, RestaurantTable } from "../core/api/types";
+import type {
+  ReservationScheduleDay,
+  ReservationStatus,
+  RestaurantTable,
+} from "../core/api/types";
+import {
+  buildAllTimeOptions,
+  buildAvailableDateKeys,
+  buildTimeSlotsForDate,
+  normalizeScheduleDays,
+  WEEK_DAY_OPTIONS,
+} from "../utils/reservationSchedule.utils";
 import "./ReservationsView.css";
 
 type ReservationFilterStatus = ReservationStatus | "ALL";
@@ -108,10 +123,55 @@ export const ReservationsView = () => {
   const [guestNames, setGuestNames] = useState<GuestInput[]>([]);
   const [statusFilter, setStatusFilter] = useState<ReservationFilterStatus>("ACTIVE");
   const [isLayoutModalOpen, setIsLayoutModalOpen] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
 
   const createReservationMutation = useCreateReservationMutation();
   const updateReservationMutation = useUpdateReservationMutation();
   const deleteReservationMutation = useDeleteReservationMutation();
+  const { data: reservationSchedule = [], isLoading: loadingReservationSchedule } =
+    useReservationScheduleQuery();
+  const updateReservationScheduleMutation = useUpdateReservationScheduleMutation();
+  const [scheduleDraft, setScheduleDraft] = useState<ReservationScheduleDay[]>([]);
+  const [scheduleValidationMessage, setScheduleValidationMessage] = useState<string | null>(null);
+
+  const allTimeOptions = useMemo(() => buildAllTimeOptions(), []);
+
+  useEffect(() => {
+    setScheduleDraft(normalizeScheduleDays(reservationSchedule));
+  }, [reservationSchedule]);
+
+  const availableDateKeys = useMemo(
+    () => buildAvailableDateKeys(scheduleDraft),
+    [scheduleDraft],
+  );
+
+  const availableTimeSlots = useMemo(
+    () => buildTimeSlotsForDate(date, scheduleDraft),
+    [date, scheduleDraft],
+  );
+
+  useEffect(() => {
+    if (availableDateKeys.length === 0) {
+      return;
+    }
+
+    if (!availableDateKeys.includes(date)) {
+      setDate(availableDateKeys[0]);
+    }
+  }, [availableDateKeys, date]);
+
+  useEffect(() => {
+    if (availableTimeSlots.length === 0) {
+      if (time) {
+        setTime("");
+      }
+      return;
+    }
+
+    if (!availableTimeSlots.includes(time)) {
+      setTime(availableTimeSlots[0]);
+    }
+  }, [availableTimeSlots, time]);
 
   const reservationFilters = useMemo(
     () => ({
@@ -152,7 +212,7 @@ export const ReservationsView = () => {
   };
 
   const handleCreateReservation = async () => {
-    if (!tableId) {
+    if (!tableId || !time) {
       return;
     }
 
@@ -188,11 +248,80 @@ export const ReservationsView = () => {
     setPeopleCount(sanitizeInteger(Number(rawValue), 1));
   };
 
+  const handleScheduleDayChange = (
+    dayOfWeek: number,
+    patch: Partial<ReservationScheduleDay>,
+  ) => {
+    setScheduleDraft((prev) =>
+      prev.map((scheduleDay) => {
+        if (scheduleDay.dayOfWeek !== dayOfWeek) {
+          return scheduleDay;
+        }
+
+        return { ...scheduleDay, ...patch };
+      }),
+    );
+  };
+
+  const handleSaveSchedule = async () => {
+    setScheduleValidationMessage(null);
+
+    const invalidDay = scheduleDraft.find((scheduleDay) => {
+      if (!scheduleDay.isOpen) {
+        return false;
+      }
+
+      if (!scheduleDay.opensAt || !scheduleDay.closesAt) {
+        return true;
+      }
+
+      return scheduleDay.opensAt >= scheduleDay.closesAt;
+    });
+
+    if (invalidDay) {
+      const dayLabel =
+        WEEK_DAY_OPTIONS.find((option) => option.dayOfWeek === invalidDay.dayOfWeek)?.label ??
+        "Dia";
+      setScheduleValidationMessage(
+        `${dayLabel}: el horario de apertura debe ser menor que el de cierre.`,
+      );
+      return;
+    }
+
+    await updateReservationScheduleMutation.mutateAsync({
+      days: scheduleDraft.map((scheduleDay) => ({
+        dayOfWeek: scheduleDay.dayOfWeek,
+        isOpen: scheduleDay.isOpen,
+        opensAt: scheduleDay.isOpen ? scheduleDay.opensAt : null,
+        closesAt: scheduleDay.isOpen ? scheduleDay.closesAt : null,
+      })),
+    });
+
+    setIsScheduleModalOpen(false);
+  };
+
+  const handleOpenScheduleModal = () => {
+    setScheduleDraft(normalizeScheduleDays(reservationSchedule));
+    setScheduleValidationMessage(null);
+    setIsScheduleModalOpen(true);
+  };
+
+  const handleCloseScheduleModal = () => {
+    setScheduleValidationMessage(null);
+    setIsScheduleModalOpen(false);
+  };
+
   return (
     <Stack spacing={2}>
-      <Typography variant="h4" fontWeight={600}>
-        Modulo de Reservas
-      </Typography>
+      <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={1.5}>
+        <Typography variant="h4" fontWeight={600}>
+          Modulo de Reservas
+        </Typography>
+
+        <Button variant="outlined" onClick={handleOpenScheduleModal}>
+          Configurar horario semanal
+        </Button>
+      </Stack>
 
       <Paper sx={{ p: 2 }}>
         <Stack spacing={1.5}>
@@ -238,17 +367,27 @@ export const ReservationsView = () => {
               label="Dia"
               showLabel={false}
               initialDate={parseInputDate(date) ?? undefined}
+              availableDates={availableDateKeys}
               onSave={(value) => setDate(value ? formatDateForInput(value) : "")}
             />
 
             <TextField
-              type="time"
+              select
               label="Hora"
               value={time}
               onChange={(event) => setTime(event.target.value)}
-              slotProps={{ inputLabel: { shrink: true } }}
+              disabled={availableTimeSlots.length === 0}
               fullWidth
-            />
+            >
+              {availableTimeSlots.length === 0 ? (
+                <MenuItem value="">Sin horarios disponibles</MenuItem>
+              ) : null}
+              {availableTimeSlots.map((slot) => (
+                <MenuItem key={slot} value={slot}>
+                  {slot}
+                </MenuItem>
+              ))}
+            </TextField>
           </Stack>
 
           <Stack direction={{ xs: "column", md: "row" }} spacing={1.5}>
@@ -362,13 +501,127 @@ export const ReservationsView = () => {
             <Button
               variant="contained"
               onClick={handleCreateReservation}
-              disabled={!tableId || isSubmitting}
+              disabled={!tableId || !time || isSubmitting}
             >
               Guardar reserva
             </Button>
           </Box>
         </Stack>
       </Paper>
+
+      <Dialog
+        open={isScheduleModalOpen}
+        onClose={handleCloseScheduleModal}
+        fullWidth
+        maxWidth="md"
+        fullScreen={isPhoneViewport}
+      >
+        <DialogTitle>Horario semanal de reservas</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={1.5}>
+            {loadingReservationSchedule ? (
+              <Typography color="text.secondary">Cargando configuracion...</Typography>
+            ) : null}
+
+            {!loadingReservationSchedule && scheduleDraft.length > 0 ? (
+              <Stack spacing={1}>
+                {scheduleDraft.map((scheduleDay) => {
+                  const dayLabel =
+                    WEEK_DAY_OPTIONS.find((option) => option.dayOfWeek === scheduleDay.dayOfWeek)
+                      ?.label ?? "Dia";
+
+                  return (
+                    <Box key={scheduleDay.dayOfWeek} className="reservationScheduleRow">
+                      <Typography className="reservationScheduleDayLabel">{dayLabel}</Typography>
+
+                      <TextField
+                        select
+                        label="Estado"
+                        value={scheduleDay.isOpen ? "OPEN" : "CLOSED"}
+                        onChange={(event) => {
+                          const isOpen = event.target.value === "OPEN";
+                          handleScheduleDayChange(scheduleDay.dayOfWeek, {
+                            isOpen,
+                            opensAt: isOpen ? scheduleDay.opensAt ?? "10:00" : null,
+                            closesAt: isOpen ? scheduleDay.closesAt ?? "23:30" : null,
+                          });
+                        }}
+                        size="small"
+                        sx={{ minWidth: 150 }}
+                      >
+                        <MenuItem value="OPEN">Abierto</MenuItem>
+                        <MenuItem value="CLOSED">Cerrado</MenuItem>
+                      </TextField>
+
+                      <TextField
+                        select
+                        label="Desde"
+                        value={scheduleDay.opensAt ?? ""}
+                        onChange={(event) =>
+                          handleScheduleDayChange(scheduleDay.dayOfWeek, {
+                            opensAt: event.target.value,
+                          })
+                        }
+                        size="small"
+                        disabled={!scheduleDay.isOpen}
+                        sx={{ minWidth: 130 }}
+                      >
+                        {allTimeOptions.map((option) => (
+                          <MenuItem key={`open-${scheduleDay.dayOfWeek}-${option}`} value={option}>
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+
+                      <TextField
+                        select
+                        label="Hasta"
+                        value={scheduleDay.closesAt ?? ""}
+                        onChange={(event) =>
+                          handleScheduleDayChange(scheduleDay.dayOfWeek, {
+                            closesAt: event.target.value,
+                          })
+                        }
+                        size="small"
+                        disabled={!scheduleDay.isOpen}
+                        sx={{ minWidth: 130 }}
+                      >
+                        {allTimeOptions.map((option) => (
+                          <MenuItem key={`close-${scheduleDay.dayOfWeek}-${option}`} value={option}>
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Box>
+                  );
+                })}
+
+                {scheduleValidationMessage ? (
+                  <Alert severity="error">{scheduleValidationMessage}</Alert>
+                ) : null}
+
+                <Divider />
+
+                <Typography variant="body2" color="text.secondary">
+                  Los dias cerrados no apareceran como seleccionables al crear reservas.
+                </Typography>
+              </Stack>
+            ) : null}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseScheduleModal}>Cancelar</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              void handleSaveSchedule();
+            }}
+            disabled={updateReservationScheduleMutation.isPending || loadingReservationSchedule}
+          >
+            {updateReservationScheduleMutation.isPending ? "Guardando..." : "Guardar horario"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog
         open={isLayoutModalOpen}

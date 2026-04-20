@@ -84,6 +84,18 @@ const ForbiddenView = lazy(() =>
   })),
 );
 
+const PublicReservationsView = lazy(() =>
+  import("../views/PublicReservationsView.tsx").then((module) => ({
+    default: module.PublicReservationsView,
+  })),
+);
+
+const PublicMenuView = lazy(() =>
+  import("../views/PublicMenuView.tsx").then((module) => ({
+    default: module.PublicMenuView,
+  })),
+);
+
 const withRoles = (
   View: ComponentType,
   allowedRoles: string[],
@@ -133,6 +145,8 @@ const EmpleadosProtected = withRoles(EmpleadosView, [roles.SUPER_ADMIN]);
 const MigrationsProtected = withRoles(MigrationsView, [roles.SUPER_ADMIN]);
 
 const DefaultRedirect = () => createElement(Navigate, { to: "/", replace: true });
+const PublicRedirect = () =>
+  createElement(Navigate, { to: PAGE_ROUTES.PublicReservas, replace: true });
 
 export const router = createBrowserRouter(
   [
@@ -155,6 +169,18 @@ export const router = createBrowserRouter(
     {
       path: PAGE_ROUTES.Forbidden,
       Component: ForbiddenView,
+    },
+    {
+      path: "/publico",
+      Component: PublicRedirect,
+    },
+    {
+      path: PAGE_ROUTES.PublicReservas,
+      Component: PublicReservationsView,
+    },
+    {
+      path: PAGE_ROUTES.PublicCarta,
+      Component: PublicMenuView,
     },
     {
       path: "/",

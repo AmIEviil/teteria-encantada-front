@@ -1,0 +1,307 @@
+.publicPage {
+  min-height: 100vh;
+  padding: clamp(16px, 2.5vw, 36px);
+  background:
+    radial-gradient(circle at 4% -2%, rgba(188, 154, 98, 0.22), transparent 42%),
+    radial-gradient(circle at 96% 0%, rgba(141, 78, 115, 0.2), transparent 38%),
+    linear-gradient(180deg, #f8efdd 0%, #f2e2c4 100%);
+  color: var(--ink-strong);
+}
+
+.publicPageContainer {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  gap: 16px;
+}
+
+.publicHeader {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(150deg, #fffaf0, #f4e8d2);
+  border: 1px solid #d9c6a8;
+  border-radius: 18px;
+  padding: 14px 18px;
+  box-shadow: 0 12px 24px rgba(77, 57, 37, 0.12);
+}
+
+.publicHeaderEyebrow {
+  margin: 0;
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: #8b6b34;
+}
+
+.publicHeaderTitle {
+  margin: 2px 0 0;
+  font-size: clamp(1.7rem, 2.8vw, 2.3rem);
+}
+
+.publicHeaderNav {
+  display: flex;
+  gap: 10px;
+}
+
+.publicHeaderLink {
+  text-decoration: none;
+  font-weight: 700;
+  color: #5a4735;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #cdb596;
+  background: rgba(255, 255, 255, 0.75);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+}
+
+.publicHeaderLink:hover {
+  transform: translateY(-1px);
+  color: #3c2d20;
+  box-shadow: 0 6px 14px rgba(76, 52, 30, 0.2);
+}
+
+.publicHeaderLink--active {
+  background: linear-gradient(140deg, #8d9b6d, #8d4e73);
+  border-color: transparent;
+  color: #fffdf9;
+}
+
+.publicPanel {
+  background: linear-gradient(165deg, #fffdf7, #f7ecd8);
+  border-radius: 18px;
+  border: 1px solid #d7c3a3;
+  box-shadow: 0 14px 28px rgba(75, 58, 40, 0.12);
+  padding: clamp(14px, 2vw, 22px);
+}
+
+.publicPanel h2 {
+  margin-top: 0;
+  font-size: clamp(1.25rem, 2.1vw, 1.7rem);
+}
+
+.publicMuted {
+  color: #675846;
+}
+
+.publicGridTwo {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1.15fr 1fr;
+}
+
+.publicFormGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.publicField,
+.publicSelect,
+.publicTextarea {
+  width: 100%;
+  border: 1px solid #cdb596;
+  border-radius: 12px;
+  background: #fffdf9;
+  color: #34281d;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.publicStepperGroup {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 8px;
+  align-items: center;
+}
+
+.publicStepperButton {
+  min-height: 42px;
+  border-radius: 10px;
+  border: 1px solid #b99772;
+  background: linear-gradient(170deg, #fffaf0, #f2e4cb);
+  color: #3b2c1f;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.publicStepperButton:hover {
+  background: linear-gradient(170deg, #fef4e1, #ead3ae);
+}
+
+.publicStepperInput {
+  text-align: center;
+  font-weight: 700;
+}
+
+.publicFormGrid .customCalendarV2_wrapper__36SLY,
+.publicFormGrid [class*="wrapper"] {
+  width: 100%;
+}
+
+.publicField:focus,
+.publicSelect:focus,
+.publicTextarea:focus {
+  border-color: #8d4e73;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(141, 78, 115, 0.18);
+}
+
+.publicTextarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.publicFormActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.publicButton {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(145deg, #8d9b6d, #8d4e73);
+  color: #fffdf9;
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.publicButton:hover {
+  transform: translateY(-1px);
+  filter: saturate(1.07);
+}
+
+.publicButton:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.publicMessage {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.publicMessage--error {
+  color: #8f2f3c;
+}
+
+.publicMessage--success {
+  color: #365e2d;
+}
+
+.publicReservationsList {
+  display: grid;
+  gap: 10px;
+}
+
+.publicReservationCard {
+  border-radius: 12px;
+  border: 1px solid #d6c1a2;
+  background: rgba(255, 255, 255, 0.86);
+  padding: 12px;
+  display: grid;
+  gap: 5px;
+}
+
+.publicReservationMeta {
+  margin: 0;
+  color: #5a4a39;
+  font-size: 0.93rem;
+}
+
+.publicStatus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.publicStatus--active {
+  background: rgba(82, 134, 62, 0.18);
+  color: #355826;
+}
+
+.publicStatus--cancelled {
+  background: rgba(184, 84, 97, 0.18);
+  color: #7f2934;
+}
+
+.publicStatus--completed {
+  background: rgba(98, 119, 175, 0.18);
+  color: #324a7b;
+}
+
+.publicMenuToolbar {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.publicMenuGrid {
+  margin-top: 12px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+}
+
+.publicMenuCard {
+  border-radius: 14px;
+  border: 1px solid #d8c2a1;
+  background: linear-gradient(165deg, #fffdf7, #f6ead2);
+  padding: 12px;
+  box-shadow: 0 8px 20px rgba(80, 58, 38, 0.1);
+  display: grid;
+  gap: 8px;
+}
+
+.publicMenuCode {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: #846447;
+}
+
+.publicMenuName {
+  margin: 0;
+  font-size: 1.08rem;
+}
+
+.publicMenuDescription {
+  margin: 0;
+  color: #5b4c3a;
+  min-height: 42px;
+}
+
+.publicMenuPrice {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #6c3d5f;
+}
+
+@media (max-width: 940px) {
+  .publicGridTwo {
+    grid-template-columns: 1fr;
+  }
+
+  .publicFormGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .publicMenuToolbar {
+    grid-template-columns: 1fr;
+  }
+}

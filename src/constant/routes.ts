@@ -14,6 +14,8 @@ export const PAGE_ROUTES = {
   ReporteVentas: "/reporte-ventas",
   Empleados: "/empleados",
   Migraciones: "/migraciones",
+  PublicReservas: "/publico/reservas",
+  PublicCarta: "/publico/carta",
 };
 
 export const topbarOptions = [

@@ -3,19 +3,32 @@ export interface Product {
   code: string;
   name: string;
   description: string | null;
+  imageId: string | null;
+  imageBase64: string | null;
   price: number;
   minimumQuantity: number;
   currentQuantity: number;
   maximumQuantity: number;
   isActive: boolean;
+  priceHistory?: ProductPriceHistoryEntry[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ProductPriceHistoryEntry {
+  id: string;
+  productId: string;
+  changedBy: string;
+  previousPrice: number;
+  newPrice: number;
+  changedAt: string;
 }
 
 export interface CreateProductPayload {
   code: string;
   name: string;
   description?: string;
+  imageBase64?: string;
   price: number;
   minimumQuantity: number;
   currentQuantity: number;
@@ -27,6 +40,7 @@ export interface UpdateProductPayload {
   code?: string;
   name?: string;
   description?: string;
+  imageBase64?: string | null;
   price?: number;
   minimumQuantity?: number;
   currentQuantity?: number;
@@ -312,6 +326,8 @@ export interface Reservation {
   reservedFor: string;
   peopleCount: number;
   holderName: string | null;
+  email: string | null;
+  phone: string | null;
   guestNames: string[];
   notes: string | null;
   waitingUntil?: string | null;
@@ -325,6 +341,8 @@ export interface CreateReservationPayload {
   reservedFor: string;
   peopleCount: number;
   holderName?: string;
+  email?: string;
+  phone?: string;
   guestNames?: string[];
   notes?: string;
 }
@@ -335,12 +353,76 @@ export interface UpdateReservationPayload {
   waitingUntil?: string | null;
   peopleCount?: number;
   holderName?: string;
+  email?: string;
+  phone?: string;
   guestNames?: string[];
   notes?: string;
   status?: ReservationStatus;
 }
 
 export interface FindReservationsFilters {
+  tableId?: string;
+  status?: ReservationStatus;
+  phone?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface ReservationScheduleDay {
+  id?: string;
+  dayOfWeek: number;
+  isOpen: boolean;
+  opensAt: string | null;
+  closesAt: string | null;
+}
+
+export interface UpdateReservationScheduleDayPayload {
+  dayOfWeek: number;
+  isOpen: boolean;
+  opensAt?: string | null;
+  closesAt?: string | null;
+}
+
+export interface UpdateReservationSchedulePayload {
+  days: UpdateReservationScheduleDayPayload[];
+}
+
+export interface PublicMenuItem {
+  id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  price: number;
+}
+
+export interface PublicTable {
+  id: string;
+  code: string;
+  label: string | null;
+  capacity: number;
+  status: TableStatus;
+}
+
+export interface PublicReservation {
+  id: string;
+  tableId: string;
+  tableCode: string;
+  tableLabel: string | null;
+  reservedFor: string;
+  peopleCount: number;
+  holderName: string | null;
+  email: string | null;
+  phone: string | null;
+  guestNames: string[];
+  notes: string | null;
+  waitingUntil: string | null;
+  status: ReservationStatus;
+  createdAt: string;
+}
+
+export interface FindPublicReservationsFilters {
+  email?: string;
+  phone?: string;
   tableId?: string;
   status?: ReservationStatus;
   startDate?: string;

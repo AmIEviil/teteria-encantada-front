@@ -5,10 +5,12 @@ import { reservationsService } from "./reservations.service";
 import type {
   CreateReservationPayload,
   FindReservationsFilters,
+  UpdateReservationSchedulePayload,
   UpdateReservationPayload,
 } from "./types";
 
 const RESERVATIONS_QUERY_KEY = ["reservations"] as const;
+const RESERVATIONS_SCHEDULE_QUERY_KEY = ["reservations-schedule"] as const;
 
 export const useReservationsQuery = (
   filters?: FindReservationsFilters,
@@ -19,6 +21,7 @@ export const useReservationsQuery = (
       ...RESERVATIONS_QUERY_KEY,
       filters?.tableId ?? "all",
       filters?.status ?? "all",
+      filters?.phone ?? "all",
       filters?.startDate ?? "all",
       filters?.endDate ?? "all",
     ],
@@ -93,6 +96,36 @@ export const useDeleteReservationMutation = () => {
       useSnackBarResponseStore
         .getState()
         .openSnackbar(getApiErrorMessage(error, "No se pudo eliminar la reserva"), "error");
+    },
+  });
+};
+
+export const useReservationScheduleQuery = () => {
+  return useQuery({
+    queryKey: RESERVATIONS_SCHEDULE_QUERY_KEY,
+    queryFn: reservationsService.findSchedule,
+  });
+};
+
+export const useUpdateReservationScheduleMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: UpdateReservationSchedulePayload) =>
+      reservationsService.updateSchedule(payload),
+    onSuccess: () => {
+      useSnackBarResponseStore
+        .getState()
+        .openSnackbar("Horario de reservas actualizado", "success");
+      queryClient.invalidateQueries({ queryKey: RESERVATIONS_SCHEDULE_QUERY_KEY });
+    },
+    onError: (error) => {
+      useSnackBarResponseStore
+        .getState()
+        .openSnackbar(
+          getApiErrorMessage(error, "No se pudo actualizar el horario de reservas"),
+          "error",
+        );
     },
   });
 };

@@ -95,6 +95,17 @@
   padding: 12px 18px 16px !important;
 }
 
+.reservationScheduleRow {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) repeat(3, minmax(120px, auto));
+  gap: 10px;
+  align-items: center;
+}
+
+.reservationScheduleDayLabel {
+  font-weight: 600 !important;
+}
+
 @media (max-width: 900px) {
   .reservationTableSelectorGroup {
     grid-template-columns: 1fr;
@@ -111,6 +122,10 @@
 
   .reservationLayoutFloorPlan {
     height: min(72dvh, 700px);
+  }
+
+  .reservationScheduleRow {
+    grid-template-columns: 1fr;
   }
 }
 

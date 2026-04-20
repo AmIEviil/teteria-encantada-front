@@ -6,6 +6,14 @@ import { useSnackBarResponseStore } from "../../store/snackBarStore";
 
 const PRODUCTS_QUERY_KEY = ["products"] as const;
 
+export const useProductQuery = (productId?: string, enabled = true) => {
+  return ReactQuery.useQuery({
+    queryKey: [...PRODUCTS_QUERY_KEY, "detail", productId ?? "none"],
+    queryFn: () => productsService.findOne(productId ?? ""),
+    enabled: enabled && Boolean(productId),
+  });
+};
+
 export const useProductsQuery = () => {
   return ReactQuery.useQuery({
     queryKey: PRODUCTS_QUERY_KEY,
