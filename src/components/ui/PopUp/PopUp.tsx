@@ -26,8 +26,8 @@ const PopUp = ({
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>{children}</DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cerrar</Button>
-        <Button onClick={onConfirm}>{confirmText || "Confirmar"}</Button>
+        <Button onClick={onClose} aria-label="Close">Cerrar</Button>
+        <Button onClick={onConfirm} aria-label={confirmText ?? "Confirm"}>{confirmText || "Confirmar"}</Button>
       </DialogActions>
     </Dialog>
   );

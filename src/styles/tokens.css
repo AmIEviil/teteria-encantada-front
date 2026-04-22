@@ -1,0 +1,49 @@
+/* Design Tokens */
+:root {
+  /* Colors */
+  --color-1: #4a90e2;
+  --color-2: #50e3c2;
+  --color-3: #9013fe;
+  --color-4: #f5a623;
+  --color-5: #d0021b;
+  --color-6: #4a4a4a;
+  --red-600: #d32f2f;
+  --red-800: #c62828;
+  --red-900: #b71c1c;
+  --black-300: #888;
+  --black-400: #555;
+  --black-900: #000;
+  --gold-400: #ff9800;
+  --gold-500: #ffb300;
+  --gold-600: #ff8f00;
+  --surface-0: #fafafa;
+  --surface-1: #f5f5f5;
+  --surface-2: #eeeeee;
+  --surface-border: #e0e0e0;
+  --ink-soft: #777;
+  --ink-strong: #222;
+  /* Typography */
+  --font-body: "Inter", sans-serif;
+  --font-title: "Montserrat", sans-serif;
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+/* Utility classes */
+.p-xs { padding: var(--space-xs); }
+.m-xs { margin: var(--space-xs); }
+.p-sm { padding: var(--space-sm); }
+.m-sm { margin: var(--space-sm); }
+.p-md { padding: var(--space-md); }
+.m-md { margin: var(--space-md); }
+.p-lg { padding: var(--space-lg); }
+.m-lg { margin: var(--space-lg); }
+.text-primary { color: var(--color-1); }
+.bg-primary { background-color: var(--color-1); }

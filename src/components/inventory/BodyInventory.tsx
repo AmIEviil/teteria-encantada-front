@@ -545,7 +545,7 @@ export const BodyInventory = () => {
                       {resolveImageSrc(product.imageBase64) ? (
                         <Box
                           component="img"
-                          src={resolveImageSrc(product.imageBase64)}
+                          src={resolveImageSrc(product.imageBase64) ?? undefined}
                           alt={`Imagen de ${product.name}`}
                           sx={{
                             width: 52,
@@ -707,7 +707,7 @@ export const BodyInventory = () => {
             {resolveImageSrc(formState.imageBase64) ? (
               <Box
                 component="img"
-                src={resolveImageSrc(formState.imageBase64)}
+                src={resolveImageSrc(formState.imageBase64) ?? undefined}
                 alt="Vista previa de producto"
                 sx={{
                   width: "100%",
@@ -834,7 +834,7 @@ export const BodyInventory = () => {
                 {resolveImageSrc(productForView.imageBase64) ? (
                   <Box
                     component="img"
-                    src={resolveImageSrc(productForView.imageBase64)}
+                    src={resolveImageSrc(productForView.imageBase64) ?? undefined}
                     alt={`Imagen de ${productForView.name}`}
                     className="inventoryDetailImage"
                   />

@@ -39,29 +39,20 @@ const InputText = ({
   }, [value]);
 
   return (
-    <div>
-      <TextField
-        label={title}
-        value={internalValue}
-        onChange={handleChange}
-        placeholder={placeholder}
-        disabled={disabled}
-        sx={{
-          "& .MuiOutlinedInput-input": {
-            padding: "0.5rem",
-          },
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderRadius: "24px",
-          },
-          "& .MuiInputLabel-root": {
-            top: "-0.5rem",
-          },
-          "& .MuiInputLabel-shrink": {
-            top: "-0.1rem",
-          },
-        }}
-      />
-    </div>
+    <TextField
+      label={title}
+      value={internalValue}
+      onChange={handleChange}
+      placeholder={placeholder}
+      disabled={disabled}
+      sx={{
+        "& .MuiOutlinedInput-input": { padding: "0.5rem" },
+        "& .MuiOutlinedInput-notchedOutline": { borderRadius: "24px" },
+        "& .MuiInputLabel-root": { top: "-0.5rem" },
+        "& .MuiInputLabel-shrink": { top: "-0.1rem" },
+      }}
+      inputProps={{ 'aria-label': title }}
+    />
   );
 };
 
