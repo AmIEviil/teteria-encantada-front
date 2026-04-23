@@ -1,7 +1,8 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+# Forzar instalación de dependencias nativas de Rollup para Linux
+RUN npm install && npm install @rollup/rollup-linux-x64-musl
 COPY . .
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
