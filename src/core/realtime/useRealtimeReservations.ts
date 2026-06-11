@@ -13,7 +13,9 @@ export const useRealtimeReservations = (): void => {
   useEffect(() => {
     const socket = getSocket();
 
-    const handleChange = (_payload: ReservationsChangedPayload) => {
+    // El payload (ReservationsChangedPayload) no se usa: ante cualquier
+    // cambio, refrescamos tablas y reservas vía React Query.
+    const handleChange = () => {
       void queryClient.invalidateQueries({ queryKey: ["tables"] });
       void queryClient.invalidateQueries({ queryKey: ["reservations"] });
     };
