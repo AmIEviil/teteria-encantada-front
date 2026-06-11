@@ -173,6 +173,7 @@ export const FloorPlan = ({
                 position={table.position}
                 isRotated={table.isRotated}
                 status={table.status}
+                confirmationStatus={table.confirmationStatus}
                 isSelected={Boolean(selectedTableId && table.id === selectedTableId)}
                 hasOpenOrder={table.id ? openOrderTableIds.has(table.id) : false}
                 onSelectTable={isEditing ? undefined : onSelectTable}

@@ -212,6 +212,13 @@ export type TableStatus =
 
 export type ReservationStatus = "ACTIVE" | "CANCELLED" | "COMPLETED";
 
+export type ReservationConfirmationStatus =
+  | "NOT_SENT"
+  | "PENDING"
+  | "CONFIRMED"
+  | "DECLINED"
+  | "NO_RESPONSE";
+
 export type EventStatus =
   | "ENABLED"
   | "CANCELLED"
@@ -332,6 +339,7 @@ export interface Reservation {
   notes: string | null;
   waitingUntil?: string | null;
   status: ReservationStatus;
+  confirmationStatus: ReservationConfirmationStatus;
   createdAt: string;
   updatedAt: string;
 }

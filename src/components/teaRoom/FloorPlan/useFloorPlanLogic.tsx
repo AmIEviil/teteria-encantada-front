@@ -6,11 +6,14 @@ import { initial_floor_plan } from "./initialFloorPlan";
 import type { ChairProps } from "../components/chair/Chair";
 import { useLayoutsQuery } from "../../../core/api/layouts.hooks";
 import { useOrdersQuery } from "../../../core/api/orders.hooks";
+import { useReservationsQuery } from "../../../core/api/reservations.hooks";
 import { getApiErrorMessage } from "../../../core/api/apiError";
 import { layoutsService } from "../../../core/api/layouts.service";
 import { useTablesQuery } from "../../../core/api/tables.hooks";
 import { useSnackBarResponseStore } from "../../../store/snackBarStore";
+import { useRealtimeReservations } from "../../../core/realtime/useRealtimeReservations";
 import type {
+  ReservationConfirmationStatus,
   RestaurantTable,
   SaveLayoutSnapshotPayload,
   TableStatus,
@@ -233,6 +236,22 @@ export const useFloorPlanLogic = () => {
     return ids;
   }, [openOrders]);
 
+  useRealtimeReservations();
+
+  const { data: activeReservations = [] } = useReservationsQuery({
+    status: "ACTIVE",
+  });
+
+  const confirmationByTableId = useMemo(() => {
+    const map = new Map<string, ReservationConfirmationStatus>();
+    for (const reservation of activeReservations) {
+      if (reservation.tableId) {
+        map.set(reservation.tableId, reservation.confirmationStatus);
+      }
+    }
+    return map;
+  }, [activeReservations]);
+
   useEffect(() => {
     if (!activeLayout || isEditing) {
       return;
@@ -251,6 +270,7 @@ export const useFloorPlanLogic = () => {
       },
       isRotated: inferTableRotation(table),
       status: table.status,
+      confirmationStatus: confirmationByTableId.get(table.id),
       onDragStop: handleDragStop,
       onRotate: handleRotate,
       onChangeStatus: handleChangeTableStatus,
@@ -269,7 +289,7 @@ export const useFloorPlanLogic = () => {
       gridSize: nextGridSize,
       tables: nextTables,
     });
-  }, [activeLayout, isEditing, persistedTables]);
+  }, [activeLayout, isEditing, persistedTables, confirmationByTableId]);
 
   const handleAddTable = (type: "small" | "large") => {
     const id = createTempId();
@@ -597,5 +617,6 @@ export const useFloorPlanLogic = () => {
     handleEdit,
     handleCancelEdit,
     openOrderTableIds,
+    confirmationByTableId,
   };
 };

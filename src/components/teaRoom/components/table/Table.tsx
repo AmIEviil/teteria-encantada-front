@@ -2,7 +2,7 @@ import Draggable from "react-draggable";
 import s from "./Table.module.css";
 import { useRef } from "react";
 import CustomDropmenuV2 from "../../../ui/customdropmenu/CustomDropmenuV2";
-import type { TableStatus } from "../../../../core/api/types";
+import type { ReservationConfirmationStatus, TableStatus } from "../../../../core/api/types";
 
 type BasicTableRef = {
   id?: string;
@@ -21,6 +21,7 @@ export interface TableProps {
   isSelected?: boolean;
   hasOpenOrder?: boolean;
   status?: TableStatus;
+  confirmationStatus?: ReservationConfirmationStatus;
   onlyView?: boolean;
   usePositionInView?: boolean;
   showOptions?: boolean;
@@ -33,6 +34,17 @@ export interface TableProps {
   allTables?: BasicTableRef[];
   menuAreaElement?: HTMLElement | null;
 }
+
+const CONFIRMATION_BADGE: Record<
+  ReservationConfirmationStatus,
+  { color: string; label: string } | null
+> = {
+  NOT_SENT: null,
+  PENDING: { color: "#facc15", label: "Esperando confirmación" },
+  CONFIRMED: { color: "#22c55e", label: "Confirmado WA" },
+  DECLINED: null,
+  NO_RESPONSE: { color: "#f97316", label: "Sin respuesta" },
+};
 
 const getTableTypeClass = (
   type: TableProps["type"],
@@ -69,6 +81,7 @@ export const Table = ({
   isSelected = false,
   hasOpenOrder = false,
   status = "AVAILABLE",
+  confirmationStatus,
   onlyView = false,
   usePositionInView = false,
   showOptions = true,
@@ -111,6 +124,7 @@ export const Table = ({
 
   const tableTypeClass = getTableTypeClass(type, isRotated);
   const swapNameOptions = buildSwapNameOptions(id, allTables, onSwapLabels);
+  const badge = confirmationStatus ? CONFIRMATION_BADGE[confirmationStatus] : null;
 
   const options = [
     {
@@ -147,13 +161,29 @@ export const Table = ({
           ref={nodeRef}
           onClick={handleSelectTable}
           className={`${s.onlyView} ${tableTypeClass} ${openOrderClass} ${reservedClass} ${outOfServiceClass} ${selectedClass}`}
-          style={onlyViewPositionStyle}
+          style={{ ...onlyViewPositionStyle, position: "relative" }}
           disabled={isOutOfService}
         >
           <div className={s.headerTable}>
             <p>{tableName}</p>
             {numberOfSeats !== undefined && <p>{numberOfSeats} asientos</p>}
           </div>
+          {badge && (
+            <span
+              title={badge.label}
+              style={{
+                position: "absolute",
+                top: 4,
+                right: 4,
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                backgroundColor: badge.color,
+                border: "2px solid white",
+                zIndex: 2,
+              }}
+            />
+          )}
         </button>
       );
     }
@@ -162,12 +192,28 @@ export const Table = ({
       <div
         ref={nodeRef}
         className={`${s.onlyView} ${tableTypeClass} ${openOrderClass} ${reservedClass} ${outOfServiceClass} ${selectedClass}`}
-        style={onlyViewPositionStyle}
+        style={{ ...onlyViewPositionStyle, position: "relative" }}
       >
         <div className={s.headerTable}>
           <p>{tableName}</p>
           {numberOfSeats !== undefined && <p>{numberOfSeats} asientos</p>}
         </div>
+        {badge && (
+          <span
+            title={badge.label}
+            style={{
+              position: "absolute",
+              top: 4,
+              right: 4,
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              backgroundColor: badge.color,
+              border: "2px solid white",
+              zIndex: 2,
+            }}
+          />
+        )}
       </div>
     );
   }
@@ -187,17 +233,35 @@ export const Table = ({
           ref={nodeRef}
           onClick={handleSelectTable}
           className={`${s.table} ${tableTypeClass} ${openOrderClass} ${reservedClass} ${outOfServiceClass} ${selectedClass}`}
+          style={{ position: "relative" }}
           disabled={isOutOfService}
         >
           <div className={s.headerTable}>
             <p>{tableName}</p>
             {numberOfSeats !== undefined && <p>{numberOfSeats} asientos</p>}
           </div>
+          {badge && (
+            <span
+              title={badge.label}
+              style={{
+                position: "absolute",
+                top: 4,
+                right: 4,
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                backgroundColor: badge.color,
+                border: "2px solid white",
+                zIndex: 2,
+              }}
+            />
+          )}
         </button>
       ) : (
         <div
           ref={nodeRef}
           className={`${s.table} ${tableTypeClass} ${openOrderClass} ${reservedClass} ${outOfServiceClass} ${selectedClass}`}
+          style={{ position: "relative" }}
         >
           <div className={s.headerTable}>
             <p>{tableName}</p>
@@ -212,6 +276,22 @@ export const Table = ({
                 menuAreaElement={menuAreaElement}
               />
             </div>
+          )}
+          {badge && (
+            <span
+              title={badge.label}
+              style={{
+                position: "absolute",
+                top: 4,
+                right: 4,
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                backgroundColor: badge.color,
+                border: "2px solid white",
+                zIndex: 2,
+              }}
+            />
           )}
         </div>
       )}
