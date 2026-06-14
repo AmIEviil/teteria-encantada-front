@@ -5,7 +5,6 @@ import { ThemeProvider } from "@mui/material";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider } from "react-router-dom";
 
-// @ts-expect-error modulo JS sin declaracion de tipos propia
 import theme from "./theme.js";
 import { router } from "./router";
 
