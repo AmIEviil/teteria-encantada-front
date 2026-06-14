@@ -22,12 +22,12 @@ const theme = createTheme({
       light: '#7c2e3a',
     },
     background: {
-      default: 'var(--surface-1)',
-      paper: 'var(--surface-0)',
+      default: '#f7f0e6',
+      paper: '#fffdf9',
     },
     text: {
-      primary: 'var(--ink-strong)',
-      secondary: 'var(--ink-soft)',
+      primary: '#2f2a20',
+      secondary: '#5f5448',
     },
   },
   typography: {
