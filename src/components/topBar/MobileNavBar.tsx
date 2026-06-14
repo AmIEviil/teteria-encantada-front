@@ -16,7 +16,7 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import EventSeatIcon from "@mui/icons-material/EventSeat";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import { topbarOptions } from "../../constant/routes";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function CustomNavBar() {
   const navigate = useNavigate();

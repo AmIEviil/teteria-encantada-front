@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import style from "./CustomDropmenu.module.css";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 import { topbarOptions } from "../../../constant/routes";
 import { toUpperCaseFirstLetter } from "../../../utils/formatText.utils";
