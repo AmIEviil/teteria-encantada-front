@@ -1,4 +1,6 @@
+import type { Theme } from '@mui/material/styles';
+
 declare module './theme' {
-  const theme: any;
+  const theme: Theme;
   export default theme;
 }

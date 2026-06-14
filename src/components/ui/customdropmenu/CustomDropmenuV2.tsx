@@ -54,6 +54,16 @@ const CustomDropmenuV2 = ({
 
   const resolvedClass = typeClassMap[typeClass ?? "primary"];
 
+  const closeMenu = () => {
+    setIsOpen(false);
+    setOpenSubmenuIndex(null);
+  };
+
+  const toggleMenu = () => {
+    setIsOpen((prev) => !prev);
+    setOpenSubmenuIndex(null);
+  };
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -62,7 +72,7 @@ const CustomDropmenuV2 = ({
         menuRef.current &&
         !menuRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false);
+        closeMenu();
       }
     };
 
@@ -72,11 +82,10 @@ const CustomDropmenuV2 = ({
     };
   }, [isOpen]);
 
+  // La posición del menú depende de medir el DOM (getBoundingClientRect), que
+  // solo está disponible tras el render: el setState aquí es intencional.
   useEffect(() => {
-    if (!isOpen) {
-      setOpenSubmenuIndex(null);
-      return;
-    }
+    if (!isOpen) return;
 
     const triggerElement = triggerRef.current;
     if (!triggerElement) {
@@ -87,6 +96,7 @@ const CustomDropmenuV2 = ({
     const areaRect = menuAreaElement?.getBoundingClientRect();
 
     if (!areaRect || areaRect.width <= 0 || areaRect.height <= 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- placement basado en medición del DOM
       setPlacement({
         horizontal: "left",
         vertical: "down",
@@ -129,7 +139,7 @@ const CustomDropmenuV2 = ({
         type="button"
         ref={triggerRef}
         className={`${style.dropmenuLabel} ${resolvedClass}`}
-        onClick={() => setIsOpen((v) => !v)}
+        onClick={toggleMenu}
         aria-haspopup="menu"
         aria-expanded={isOpen}
       >
@@ -159,7 +169,7 @@ const CustomDropmenuV2 = ({
                   }
 
                   option.onClick();
-                  setIsOpen(false);
+                  closeMenu();
                 }}
               >
                 <span>{option.label}</span>
@@ -176,7 +186,7 @@ const CustomDropmenuV2 = ({
                       role="menuitem"
                       onClick={() => {
                         subOption.onClick();
-                        setIsOpen(false);
+                        closeMenu();
                       }}
                     >
                       {subOption.label}

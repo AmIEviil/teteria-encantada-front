@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { CustomCalendarV2 } from "../components/ui/calendar/CustomCalendarV2";
 import { PublicHeader } from "../components/public/PublicHeader";
 import {
@@ -106,28 +106,19 @@ export const PublicReservationsView = () => {
     [date, reservationSchedule],
   );
 
-  useEffect(() => {
-    if (availableDateKeys.length === 0) {
-      return;
-    }
+  // Mantiene date/time válidos respecto a las opciones disponibles, ajustando
+  // el estado durante el render (convergente, sin efecto).
+  if (availableDateKeys.length > 0 && !availableDateKeys.includes(date)) {
+    setDate(availableDateKeys[0]);
+  }
 
-    if (!availableDateKeys.includes(date)) {
-      setDate(availableDateKeys[0]);
+  if (availableTimeSlots.length === 0) {
+    if (time) {
+      setTime("");
     }
-  }, [availableDateKeys, date]);
-
-  useEffect(() => {
-    if (availableTimeSlots.length === 0) {
-      if (time) {
-        setTime("");
-      }
-      return;
-    }
-
-    if (!availableTimeSlots.includes(time)) {
-      setTime(availableTimeSlots[0]);
-    }
-  }, [availableTimeSlots, time]);
+  } else if (!availableTimeSlots.includes(time)) {
+    setTime(availableTimeSlots[0]);
+  }
 
   const normalizedLookupInput = lookupInput.trim();
   const canQueryReservations = isValidLookupInput(normalizedLookupInput);
