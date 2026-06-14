@@ -52,6 +52,12 @@ const CELL_SIZE = 80; // Tamaño de cada cuadro en píxeles
 const DEFAULT_GRID_SIZE = { rows: 5, cols: 8 };
 const DEFAULT_LAYOUT_NAME = "Plano Principal";
 
+// Referencias vacías estables: evitan que la sincronización en render
+// (ver más abajo) entre en bucle infinito por un `[]` nuevo en cada render
+// mientras las queries aún no resuelven.
+const EMPTY_TABLES: RestaurantTable[] = [];
+const EMPTY_LAYOUTS: NonNullable<ReturnType<typeof useLayoutsQuery>["data"]> = [];
+
 const createTempId = () => `tmp-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -159,7 +165,7 @@ const isPersistedTableId = (id: string | undefined): id is string => {
 
 export const useFloorPlanLogic = () => {
   const queryClient = useQueryClient();
-  const { data: layouts = [] } = useLayoutsQuery();
+  const { data: layouts = EMPTY_LAYOUTS } = useLayoutsQuery();
 
   const [selectedLayoutId, setSelectedLayoutId] = useState<string | null>(null);
   const [tables, setTables] = useState<TableProps[]>([]);
@@ -254,7 +260,7 @@ export const useFloorPlanLogic = () => {
   }, [layouts, selectedLayoutId]);
 
   const activeLayoutId = activeLayout?.id;
-  const { data: persistedTables = [] } = useTablesQuery(activeLayoutId, Boolean(activeLayoutId));
+  const { data: persistedTables = EMPTY_TABLES } = useTablesQuery(activeLayoutId, Boolean(activeLayoutId));
   const { data: openOrders = [] } = useOrdersQuery({
     status: "OPEN",
   });
