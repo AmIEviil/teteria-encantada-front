@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useState } from "react";
 import {
   Button,
@@ -26,7 +27,10 @@ import "./TeaRoomView.css";
 
 const DEFAULT_WAITING_WINDOW_MS = 15 * 60 * 1000;
 
-const normalizeMesaLabel = (tableLabel?: string | null, tableCode?: string): string => {
+const normalizeMesaLabel = (
+  tableLabel?: string | null,
+  tableCode?: string,
+): string => {
   const source = (tableLabel || tableCode || "").trim().toUpperCase();
   const numberMatch = /MESA[_\-\s]?(\d+)/.exec(source)?.[1];
 
@@ -54,7 +58,8 @@ const getReservationDeadline = (reservation: Reservation): Date => {
 };
 
 export const TeaRoomView = () => {
-  const [selectedOrderTableId, setSelectedOrderTableId] = useState<string>("__NO_TABLE__");
+  const [selectedOrderTableId, setSelectedOrderTableId] =
+    useState<string>("__NO_TABLE__");
   const [isWideFloorPlanMode, setIsWideFloorPlanMode] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [nowMs, setNowMs] = useState(0);
@@ -62,9 +67,10 @@ export const TeaRoomView = () => {
   const isPhoneViewport = useMediaQuery("(max-width: 680px)");
   const effectiveWideFloorPlanMode = isCompactViewport || isWideFloorPlanMode;
 
-  const { data: activeReservations = [], refetch: refetchActiveReservations } = useReservationsQuery({
-    status: "ACTIVE",
-  });
+  const { data: activeReservations = [], refetch: refetchActiveReservations } =
+    useReservationsQuery({
+      status: "ACTIVE",
+    });
   const updateReservationMutation = useUpdateReservationMutation();
 
   const expiredReservations = useMemo(() => {
@@ -73,10 +79,13 @@ export const TeaRoomView = () => {
     }
 
     return activeReservations
-      .filter((reservation) => getReservationDeadline(reservation).getTime() < nowMs)
+      .filter(
+        (reservation) => getReservationDeadline(reservation).getTime() < nowMs,
+      )
       .sort(
         (left, right) =>
-          getReservationDeadline(left).getTime() - getReservationDeadline(right).getTime(),
+          getReservationDeadline(left).getTime() -
+          getReservationDeadline(right).getTime(),
       );
   }, [activeReservations, nowMs]);
 
@@ -154,13 +163,16 @@ export const TeaRoomView = () => {
       return;
     }
 
-    const currentDeadline = getReservationDeadline(expiredReservation).getTime();
+    const currentDeadline =
+      getReservationDeadline(expiredReservation).getTime();
     const extensionBase = Math.max(currentDeadline, Date.now());
 
     await updateReservationMutation.mutateAsync({
       id: expiredReservation.id,
       payload: {
-        waitingUntil: new Date(extensionBase + DEFAULT_WAITING_WINDOW_MS).toISOString(),
+        waitingUntil: new Date(
+          extensionBase + DEFAULT_WAITING_WINDOW_MS,
+        ).toISOString(),
       },
     });
     void refetchActiveReservations();
@@ -183,8 +195,12 @@ export const TeaRoomView = () => {
   const isResolvingExpiredReservation = updateReservationMutation.isPending;
 
   return (
-    <div className={`teaRoomView ${isCompactViewport ? "teaRoomView--compact" : ""}`}>
-      <div className={`teaRoomGrid ${effectiveWideFloorPlanMode ? "teaRoomGrid--wide" : ""}`}>
+    <div
+      className={`teaRoomView ${isCompactViewport ? "teaRoomView--compact" : ""}`}
+    >
+      <div
+        className={`teaRoomGrid ${effectiveWideFloorPlanMode ? "teaRoomGrid--wide" : ""}`}
+      >
         <div className="teaRoomGrid__floorPlan">
           <FloorPlan
             selectedTableId={selectedOrderTableId}
@@ -217,7 +233,10 @@ export const TeaRoomView = () => {
       >
         <DialogTitle className="teaRoomModalTitle">
           Gestionar orden
-          <IconButton onClick={handleCloseOrderModal} aria-label="Cerrar modal de orden">
+          <IconButton
+            onClick={handleCloseOrderModal}
+            aria-label="Cerrar modal de orden"
+          >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
@@ -241,14 +260,20 @@ export const TeaRoomView = () => {
         </Button>
       ) : (
         <Tooltip
-          title={isWideFloorPlanMode ? "Cambiar a vista dividida" : "Cambiar a pantalla grande"}
+          title={
+            isWideFloorPlanMode
+              ? "Cambiar a vista dividida"
+              : "Cambiar a pantalla grande"
+          }
           arrow
         >
           <Button
             variant="contained"
             className="teaRoomModeToggleButton"
             onClick={handleToggleViewMode}
-            startIcon={isWideFloorPlanMode ? <ViewSidebarIcon /> : <OpenInFullIcon />}
+            startIcon={
+              isWideFloorPlanMode ? <ViewSidebarIcon /> : <OpenInFullIcon />
+            }
           >
             {isWideFloorPlanMode ? "Vista dividida" : "Pantalla grande"}
           </Button>
@@ -263,7 +288,9 @@ export const TeaRoomView = () => {
         fullWidth
         fullScreen={isPhoneViewport}
       >
-        <DialogTitle className="teaRoomExpiredDialogTitle">Reserva vencida</DialogTitle>
+        <DialogTitle className="teaRoomExpiredDialogTitle">
+          Reserva vencida
+        </DialogTitle>
         <DialogContent dividers className="teaRoomExpiredDialogContent">
           {expiredReservation && (
             <Stack spacing={1}>
@@ -280,7 +307,8 @@ export const TeaRoomView = () => {
                 Hora reserva: {formatDateTime(expiredReservation.reservedFor)}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Se supero la espera de 15 minutos hace {expirationDelayMinutes} min.
+                Se supero la espera de 15 minutos hace {expirationDelayMinutes}{" "}
+                min.
               </Typography>
             </Stack>
           )}

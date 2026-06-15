@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 interface EyeIconProps {
   color?: string;
@@ -21,13 +21,7 @@ const EyeIcon: React.FC<EyeIconProps> = ({
 }) => {
   const [show, setShow] = useState(open);
 
-  // Sync internal state with open prop only when controlled
-  useEffect(() => {
-    if (controlled) {
-      setShow(open);
-    }
-  }, [open, controlled]);
-
+  // controlled: usa open directo; uncontrolled: usa estado interno
   const currentShow = controlled ? open : show;
 
   if (currentShow) {

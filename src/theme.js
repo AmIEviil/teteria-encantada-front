@@ -2,29 +2,32 @@ import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   palette: {
+    // MUI corre augmentColor (darken/contrast) sobre estos valores: deben ser
+    // colores reales (hex/rgb), no CSS vars var(--...) o lanza MUI error #9.
+    // Hex tomados de index.css :root.
     primary: {
-      main: 'var(--color-1)',
-      light: 'var(--color-2)',
-      dark: 'var(--color-3)',
-      contrastText: 'var(--color-5)',
+      main: '#8d9b6d',
+      light: '#c4c9c5',
+      dark: '#ead2b3',
+      contrastText: '#ffffff',
     },
     secondary: {
-      main: 'var(--color-6)',
-      light: 'var(--color-5)',
-      dark: 'var(--color-4)',
+      main: '#8d4e73',
+      light: '#ffffff',
+      dark: '#faade0',
     },
     error: {
-      main: 'var(--red-600)',
-      dark: 'var(--red-800)',
-      light: 'var(--red-900)',
+      main: '#b45461',
+      dark: '#923946',
+      light: '#7c2e3a',
     },
     background: {
-      default: 'var(--surface-1)',
-      paper: 'var(--surface-0)',
+      default: '#f7f0e6',
+      paper: '#fffdf9',
     },
     text: {
-      primary: 'var(--ink-strong)',
-      secondary: 'var(--ink-soft)',
+      primary: '#2f2a20',
+      secondary: '#5f5448',
     },
   },
   typography: {

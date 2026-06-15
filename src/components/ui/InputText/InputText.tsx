@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import TextField from "@mui/material/TextField";
 import { debounce } from "@mui/material";
 
@@ -20,6 +20,14 @@ const InputText = ({
   onChange = () => {},
 }: InputTextProps) => {
   const [internalValue, setInternalValue] = useState(initialValue);
+  // Sincroniza con valor externo durante render (patrón sugerido por React).
+  const [prevValue, setPrevValue] = useState(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
+    if (typeof value === "string") {
+      setInternalValue(value);
+    }
+  }
 
   const debouncedChange = debounce((val: string) => {
     onChange(val);
@@ -30,13 +38,6 @@ const InputText = ({
     setInternalValue(newValue);
     debouncedChange(newValue);
   };
-
-  useEffect(() => {
-    // Mantener sincronización con el valor externo si se provee
-    if (typeof value === "string") {
-      setInternalValue(value);
-    }
-  }, [value]);
 
   return (
     <TextField

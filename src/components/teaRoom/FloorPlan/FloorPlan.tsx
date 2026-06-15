@@ -7,7 +7,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import { Tooltip } from "@mui/material";
 import { Chair } from "../components/chair/Chair";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface FloorPlanProps {
   selectedTableId?: string;
@@ -50,7 +50,7 @@ export const FloorPlan = ({
     width: canUseWindow ? globalThis.window.innerWidth : 1280,
     height: canUseWindow ? globalThis.window.innerHeight : 720,
   });
-  const workspaceRef = useRef<HTMLDivElement | null>(null);
+  const [workspaceEl, setWorkspaceEl] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -153,7 +153,7 @@ export const FloorPlan = ({
           }}
         >
           <div
-            ref={workspaceRef}
+            ref={setWorkspaceEl}
             className={s.workspace}
             style={{
               width: `${baseWorkspaceWidth}px`,
@@ -186,7 +186,7 @@ export const FloorPlan = ({
                 usePositionInView={previewOnly}
                 showOptions={isEditing}
                 allTables={tables}
-                menuAreaElement={workspaceRef.current}
+                menuAreaElement={workspaceEl}
               />
             ))}
             {chairs.map((chair) => (

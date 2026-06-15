@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Deploy local (pre-push)
+.env.deploy
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

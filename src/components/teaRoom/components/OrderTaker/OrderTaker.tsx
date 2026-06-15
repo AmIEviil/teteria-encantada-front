@@ -366,15 +366,23 @@ const OrderHistorySection = ({
     return dayOrderPages[dayOrdersPage - 1] ?? [];
   }, [dayOrderPages, dayOrdersPage]);
 
-  useEffect(() => {
+  // Reinicia a la primera página cuando cambia la cantidad de páginas.
+  const [prevDayOrderPagesLength, setPrevDayOrderPagesLength] = useState(
+    dayOrderPages.length,
+  );
+  if (prevDayOrderPagesLength !== dayOrderPages.length) {
+    setPrevDayOrderPagesLength(dayOrderPages.length);
     setDayOrdersPage(1);
-  }, [dayOrderPages.length]);
+  }
 
-  useEffect(() => {
+  // Colapsa el historial cuando aparece una nueva orden activa.
+  const [prevLatestActiveOrder, setPrevLatestActiveOrder] = useState(latestActiveOrder);
+  if (prevLatestActiveOrder !== latestActiveOrder) {
+    setPrevLatestActiveOrder(latestActiveOrder);
     if (latestActiveOrder) {
       setIsDayOrdersExpanded(false);
     }
-  }, [latestActiveOrder]);
+  }
 
   const renderOrderCard = (order: Order) => {
     const isPaidOrder = order.status === "PAID";

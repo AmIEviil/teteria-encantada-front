@@ -5,7 +5,7 @@ export const TopBar = () => {
   return (
     <div className={style.topBarContainer}>
       <div className={style.headerModuleContainer}>
-        <span>Casona Encantada</span>
+        <span>Portal D'Encanto</span>
       </div>
       <CustomDropmenu />
     </div>

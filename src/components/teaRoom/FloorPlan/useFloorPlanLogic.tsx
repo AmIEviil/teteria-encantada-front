@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/purity */
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { TableProps } from "../components/table/Table";
@@ -55,6 +54,12 @@ interface FloorLayoutMetadata {
 const CELL_SIZE = 80; // Tamaño de cada cuadro en píxeles
 const DEFAULT_GRID_SIZE = { rows: 5, cols: 8 };
 const DEFAULT_LAYOUT_NAME = "Plano Principal";
+
+// Referencias vacías estables: evitan que la sincronización en render
+// (ver más abajo) entre en bucle infinito por un `[]` nuevo en cada render
+// mientras las queries aún no resuelven.
+const EMPTY_TABLES: RestaurantTable[] = [];
+const EMPTY_LAYOUTS: NonNullable<ReturnType<typeof useLayoutsQuery>["data"]> = [];
 
 const createTempId = () => `tmp-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 const UUID_REGEX =
@@ -163,7 +168,7 @@ const isPersistedTableId = (id: string | undefined): id is string => {
 
 export const useFloorPlanLogic = () => {
   const queryClient = useQueryClient();
-  const { data: layouts = [] } = useLayoutsQuery();
+  const { data: layouts = EMPTY_LAYOUTS } = useLayoutsQuery();
 
   const [selectedLayoutId, setSelectedLayoutId] = useState<string | null>(null);
   const [tables, setTables] = useState<TableProps[]>([]);
@@ -177,6 +182,45 @@ export const useFloorPlanLogic = () => {
     gridSize: DEFAULT_GRID_SIZE,
     tables: [],
   });
+
+  const handleDragStop = (id: string, x: number, y: number) => {
+    setTables((prevTables) =>
+      prevTables.map((table) =>
+        table.id === id ? { ...table, position: { x, y } } : table,
+      ),
+    );
+    setChairs((prevChairs) =>
+      prevChairs.map((chair) =>
+        chair.id === id ? { ...chair, position: { x, y } } : chair,
+      ),
+    );
+  };
+
+  // Función para invertir el estado de rotación
+  const handleRotate = (id: string) => {
+    // Las mesas se mantienen con su booleano
+    setTables((prevTables) =>
+      prevTables.map((table) =>
+        table.id === id ? { ...table, isRotated: !table.isRotated } : table,
+      ),
+    );
+    // Las sillas ahora suman 90 grados, volviendo a 0 al llegar a 360
+    setChairs((prevChairs) =>
+      prevChairs.map((chair) =>
+        chair.id === id
+          ? { ...chair, rotation: ((chair.rotation || 0) + 90) % 360 }
+          : chair,
+      ),
+    );
+  };
+
+  const handleChangeTableStatus = (id: string, status: TableStatus) => {
+    setTables((prevTables) =>
+      prevTables.map((table) =>
+        table.id === id ? { ...table, status } : table,
+      ),
+    );
+  };
 
   const buildTablesSnapshot = (source: TableProps[]): TableProps[] => {
     return source.map((table) => ({
@@ -219,7 +263,7 @@ export const useFloorPlanLogic = () => {
   }, [layouts, selectedLayoutId]);
 
   const activeLayoutId = activeLayout?.id;
-  const { data: persistedTables = [] } = useTablesQuery(activeLayoutId, Boolean(activeLayoutId));
+  const { data: persistedTables = EMPTY_TABLES } = useTablesQuery(activeLayoutId, Boolean(activeLayoutId));
   const { data: openOrders = [] } = useOrdersQuery({
     status: "OPEN",
   });
@@ -327,45 +371,6 @@ export const useFloorPlanLogic = () => {
 
   const handleDeleteChair = (id: string) => {
     setChairs((prevChairs) => prevChairs.filter((chair) => chair.id !== id));
-  };
-
-  const handleDragStop = (id: string, x: number, y: number) => {
-    setTables((prevTables) =>
-      prevTables.map((table) =>
-        table.id === id ? { ...table, position: { x, y } } : table,
-      ),
-    );
-    setChairs((prevChairs) =>
-      prevChairs.map((chair) =>
-        chair.id === id ? { ...chair, position: { x, y } } : chair,
-      ),
-    );
-  };
-
-  // Función para invertir el estado de rotación
-  const handleRotate = (id: string) => {
-    // Las mesas se mantienen con su booleano
-    setTables((prevTables) =>
-      prevTables.map((table) =>
-        table.id === id ? { ...table, isRotated: !table.isRotated } : table,
-      ),
-    );
-    // Las sillas ahora suman 90 grados, volviendo a 0 al llegar a 360
-    setChairs((prevChairs) =>
-      prevChairs.map((chair) =>
-        chair.id === id
-          ? { ...chair, rotation: ((chair.rotation || 0) + 90) % 360 }
-          : chair,
-      ),
-    );
-  };
-
-  const handleChangeTableStatus = (id: string, status: TableStatus) => {
-    setTables((prevTables) =>
-      prevTables.map((table) =>
-        table.id === id ? { ...table, status } : table,
-      ),
-    );
   };
 
   const handleSwapTableLabels = (firstTableId: string, secondTableId: string) => {

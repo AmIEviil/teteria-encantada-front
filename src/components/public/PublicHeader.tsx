@@ -9,7 +9,7 @@ export const PublicHeader = () => {
   return (
     <header className="publicHeader">
       <div>
-        <p className="publicHeaderEyebrow">Teteria Encantada</p>
+        <p className="publicHeaderEyebrow">Teteria</p>
         <h1 className="publicHeaderTitle">Portal Publico</h1>
       </div>
 
