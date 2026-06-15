@@ -1,4 +1,4 @@
-import { type ChangeEvent, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -36,6 +36,7 @@ import {
 } from "../../core/api/products.hooks";
 import type { Product } from "../../core/api/types";
 import { useModalStore } from "../../store/modalStore";
+import { ImageUploadField } from "../ui/imageUpload/ImageUploadField";
 import "./BodyInventory.css";
 
 const PRODUCT_FORM_MODAL_KEY = "product-form-modal";
@@ -46,7 +47,7 @@ interface ProductFormState {
   code: string;
   name: string;
   description: string;
-  imageBase64: string;
+  image: { id: string; url: string } | null;
   price: string;
   minimumQuantity: string;
   currentQuantity: string;
@@ -58,7 +59,7 @@ const emptyProductForm: ProductFormState = {
   code: "",
   name: "",
   description: "",
-  imageBase64: "",
+  image: null,
   price: "0",
   minimumQuantity: "0",
   currentQuantity: "0",
@@ -70,7 +71,10 @@ const mapProductToForm = (product: Product): ProductFormState => ({
   code: product.code,
   name: product.name,
   description: product.description ?? "",
-  imageBase64: product.imageBase64 ?? "",
+  image:
+    product.imageId && product.imageUrl
+      ? { id: product.imageId, url: product.imageUrl }
+      : null,
   price: String(product.price),
   minimumQuantity: String(product.minimumQuantity),
   currentQuantity: String(product.currentQuantity),
@@ -86,44 +90,6 @@ const parsePositiveNumber = (value: string): number => {
   }
 
   return parsed;
-};
-
-const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
-
-const fileToDataUrl = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const result = reader.result;
-      if (typeof result !== "string") {
-        reject(new Error("No se pudo leer el archivo seleccionado"));
-        return;
-      }
-
-      resolve(result);
-    };
-
-    reader.onerror = () => {
-      reject(new Error("No se pudo convertir la imagen a base64"));
-    };
-
-    reader.readAsDataURL(file);
-  });
-};
-
-const resolveImageSrc = (imageBase64: string | null | undefined): string | null => {
-  const normalized = imageBase64?.trim() ?? "";
-
-  if (!normalized) {
-    return null;
-  }
-
-  if (normalized.startsWith("data:")) {
-    return normalized;
-  }
-
-  return `data:image/png;base64,${normalized}`;
 };
 
 const formatCurrency = (value: number): string => {
@@ -331,7 +297,7 @@ export const BodyInventory = () => {
     if (selectedProduct) {
       const updatePayload = {
         ...basePayload,
-        imageBase64: formState.imageBase64.trim() || null,
+        imageId: formState.image?.id ?? null,
       };
 
       await updateProductMutation.mutateAsync({
@@ -341,42 +307,11 @@ export const BodyInventory = () => {
     } else {
       await createProductMutation.mutateAsync({
         ...basePayload,
-        imageBase64: formState.imageBase64.trim() || undefined,
+        imageId: formState.image?.id ?? null,
       });
     }
 
     handleCloseFormModal();
-  };
-
-  const handleImageFileChange = async (
-    event: ChangeEvent<HTMLInputElement>,
-  ) => {
-    const selectedFile = event.target.files?.[0];
-    if (!selectedFile) {
-      return;
-    }
-
-    if (!selectedFile.type.startsWith("image/")) {
-      setValidationError("El archivo seleccionado no es una imagen valida");
-      event.target.value = "";
-      return;
-    }
-
-    if (selectedFile.size > MAX_IMAGE_SIZE_BYTES) {
-      setValidationError("La imagen no puede superar 5MB");
-      event.target.value = "";
-      return;
-    }
-
-    try {
-      const base64DataUrl = await fileToDataUrl(selectedFile);
-      handleFieldChange("imageBase64", base64DataUrl);
-      setValidationError("");
-    } catch {
-      setValidationError("No se pudo convertir la imagen a base64");
-    }
-
-    event.target.value = "";
   };
 
   const handleConfirmDelete = async () => {
@@ -542,10 +477,10 @@ export const BodyInventory = () => {
                 filteredProducts.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell>
-                      {resolveImageSrc(product.imageBase64) ? (
+                      {product.imageUrl ? (
                         <Box
                           component="img"
-                          src={resolveImageSrc(product.imageBase64) ?? undefined}
+                          src={product.imageUrl}
                           alt={`Imagen de ${product.name}`}
                           sx={{
                             width: 52,
@@ -678,47 +613,11 @@ export const BodyInventory = () => {
               minRows={2}
               fullWidth
             />
-            <Stack direction="row" spacing={1.5} alignItems="center">
-              <Button component="label" variant="outlined">
-                <span>Cargar imagen</span>
-                <input
-                  hidden
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) => {
-                    void handleImageFileChange(event);
-                  }}
-                />
-              </Button>
-              <Button
-                variant="text"
-                color="inherit"
-                disabled={!formState.imageBase64}
-                onClick={() => handleFieldChange("imageBase64", "")}
-              >
-                Quitar imagen
-              </Button>
-              <Typography variant="body2" color="text.secondary">
-                {formState.imageBase64
-                  ? "Imagen lista en base64"
-                  : "Sin imagen cargada"}
-              </Typography>
-            </Stack>
-            {resolveImageSrc(formState.imageBase64) ? (
-              <Box
-                component="img"
-                src={resolveImageSrc(formState.imageBase64) ?? undefined}
-                alt="Vista previa de producto"
-                sx={{
-                  width: "100%",
-                  maxWidth: 220,
-                  borderRadius: 1,
-                  objectFit: "cover",
-                  border: "1px solid",
-                  borderColor: "divider",
-                }}
-              />
-            ) : null}
+            <ImageUploadField
+              label="Imagen del producto"
+              value={formState.image}
+              onChange={(image) => handleFieldChange("image", image)}
+            />
             <TextField
               label="Precio"
               type="number"
@@ -831,10 +730,10 @@ export const BodyInventory = () => {
           {!isLoadingViewedProduct && productForView && (
             <Stack spacing={1.5} mt={1} className="inventoryDetailContent">
               <Box className="inventoryDetailHero">
-                {resolveImageSrc(productForView.imageBase64) ? (
+                {productForView.imageUrl ? (
                   <Box
                     component="img"
-                    src={resolveImageSrc(productForView.imageBase64) ?? undefined}
+                    src={productForView.imageUrl}
                     alt={`Imagen de ${productForView.name}`}
                     className="inventoryDetailImage"
                   />
