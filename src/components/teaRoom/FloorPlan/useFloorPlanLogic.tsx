@@ -325,6 +325,10 @@ export const useFloorPlanLogic = () => {
       onRotate: handleRotate,
     }));
 
+    // Sincroniza el estado editable local con los datos del servidor cuando
+    // cambia el layout activo y no se está editando. Es una sincronización
+    // externa legítima (query → estado local), por eso se desactiva la regla.
+    /* eslint-disable react-hooks/set-state-in-effect */
     setGridSize(nextGridSize);
     setTables(nextTables);
     setChairs(nextChairs);
@@ -333,6 +337,7 @@ export const useFloorPlanLogic = () => {
       gridSize: nextGridSize,
       tables: nextTables,
     });
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [activeLayout, isEditing, persistedTables, confirmationByTableId]);
 
   const handleAddTable = (type: "small" | "large") => {
