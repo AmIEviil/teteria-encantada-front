@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { ImageUploadField } from "../components/ui/imageUpload/ImageUploadField";
 import {
   Box,
   Button,
@@ -2325,16 +2326,19 @@ export const EventsTicketsView = () => {
           </Stack>
 
           <Stack direction={{ xs: "column", md: "row" }} spacing={1.25}>
-            <TextField
-              label="Imagen oficial (URL)"
-              value={eventForm.officialImageUrl}
-              onChange={(event) =>
+            <ImageUploadField
+              label="Imagen oficial del evento"
+              value={
+                eventForm.officialImageUrl
+                  ? { id: "", url: eventForm.officialImageUrl }
+                  : null
+              }
+              onChange={(image) =>
                 setEventForm((previous) => ({
                   ...previous,
-                  officialImageUrl: event.target.value,
+                  officialImageUrl: image?.url ?? "",
                 }))
               }
-              fullWidth
             />
 
             <TextField
