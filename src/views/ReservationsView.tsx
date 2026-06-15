@@ -21,6 +21,8 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import GridViewIcon from "@mui/icons-material/GridView";
 import { CustomCalendarV2 } from "../components/ui/calendar/CustomCalendarV2";
+import { ImageUploadField } from "../components/ui/imageUpload/ImageUploadField";
+import type { UploadedImage } from "../core/api/images.service";
 import {
   useCreateReservationMutation,
   useDeleteReservationMutation,
@@ -121,6 +123,7 @@ export const ReservationsView = () => {
   const [holderName, setHolderName] = useState("");
   const [notes, setNotes] = useState("");
   const [guestNames, setGuestNames] = useState<GuestInput[]>([]);
+  const [comprobante, setComprobante] = useState<UploadedImage | null>(null);
   const [statusFilter, setStatusFilter] = useState<ReservationFilterStatus>("ACTIVE");
   const [isLayoutModalOpen, setIsLayoutModalOpen] = useState(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
@@ -227,11 +230,13 @@ export const ReservationsView = () => {
       holderName: holderName.trim() || undefined,
       notes: notes.trim() || undefined,
       guestNames: normalizedGuests.length > 0 ? normalizedGuests : undefined,
+      comprobanteImageId: comprobante?.id ?? undefined,
     });
 
     setHolderName("");
     setNotes("");
     setGuestNames([]);
+    setComprobante(null);
   };
 
   const handleSelectTableFromLayout = (selectedTableId: string) => {
@@ -462,6 +467,12 @@ export const ReservationsView = () => {
             multiline
             minRows={2}
             fullWidth
+          />
+
+          <ImageUploadField
+            label="Comprobante (opcional)"
+            value={comprobante}
+            onChange={setComprobante}
           />
 
           <Stack spacing={1}>

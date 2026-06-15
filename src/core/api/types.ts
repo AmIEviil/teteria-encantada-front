@@ -360,6 +360,7 @@ export interface CreateReservationPayload {
   phone?: string;
   guestNames?: string[];
   notes?: string;
+  comprobanteImageId?: string;
 }
 
 export interface UpdateReservationPayload {
