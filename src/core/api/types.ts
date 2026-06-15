@@ -1,10 +1,15 @@
+export interface UploadedImage {
+  id: string;
+  url: string;
+}
+
 export interface Product {
   id: string;
   code: string;
   name: string;
   description: string | null;
-  imageId: string | null;
-  imageBase64: string | null;
+  imageId?: string | null;
+  imageUrl?: string | null;
   price: number;
   minimumQuantity: number;
   currentQuantity: number;
@@ -28,7 +33,7 @@ export interface CreateProductPayload {
   code: string;
   name: string;
   description?: string;
-  imageBase64?: string;
+  imageId?: string | null;
   price: number;
   minimumQuantity: number;
   currentQuantity: number;
@@ -40,7 +45,7 @@ export interface UpdateProductPayload {
   code?: string;
   name?: string;
   description?: string;
-  imageBase64?: string | null;
+  imageId?: string | null;
   price?: number;
   minimumQuantity?: number;
   currentQuantity?: number;
@@ -340,6 +345,8 @@ export interface Reservation {
   waitingUntil?: string | null;
   status: ReservationStatus;
   confirmationStatus: ReservationConfirmationStatus;
+  comprobanteImageId?: string | null;
+  comprobanteImage?: { id: string; url: string } | null;
   createdAt: string;
   updatedAt: string;
 }
