@@ -36,7 +36,7 @@ export const PublicMenuView = () => {
         <section className="publicPanel">
           <h2>Carta de productos</h2>
           <p className="publicMuted">
-            Explora los productos disponibles actualmente en Teteria Encantada.
+            Explora los productos disponibles actualmente en Teteria.
           </p>
 
           <div className="publicMenuToolbar">
