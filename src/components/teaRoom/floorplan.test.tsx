@@ -107,6 +107,25 @@ describe("FloorPlan", () => {
     expect(screen.getByText("MESA_2")).toBeInTheDocument();
   });
 
+  it("mesas y sillas caen exactamente sobre la grilla (sin offset)", () => {
+    // Regresión: un padding en .workspace o un snap distinto a CELL_SIZE
+    // desfasaba cada figura de las líneas interiores de la grilla.
+    const CELL = 80;
+    const { container } = renderFloorPlan();
+    const nodes = container.querySelectorAll<HTMLElement>(
+      "[style*='translate']",
+    );
+    expect(nodes.length).toBeGreaterThan(0); // mesas (x:0, x:160) + silla (80,80)
+    for (const node of nodes) {
+      const m = new RegExp(
+        /translate\((-?\d+(?:\.\d+)?)px,\s*(-?\d+(?:\.\d+)?)px\)/,
+      ).exec(node.style.transform);
+      expect(m).toBeTruthy();
+      expect(Number(m![1]) % CELL).toBe(0);
+      expect(Number(m![2]) % CELL).toBe(0);
+    }
+  });
+
   it("previewOnly oculta acciones", () => {
     renderFloorPlan({ previewOnly: true });
     expect(screen.queryByText("Plano Inicial")).toBeNull();

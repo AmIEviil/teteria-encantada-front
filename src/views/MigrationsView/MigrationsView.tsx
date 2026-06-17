@@ -5,7 +5,6 @@ import {
   Button,
   Chip,
   CircularProgress,
-  IconButton,
   Paper,
   Stack,
   Table,
@@ -19,43 +18,17 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ReplayIcon from "@mui/icons-material/Replay";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import TerminalIcon from "@mui/icons-material/Terminal";
-import CaretIcon from "../components/ui/icons/CaretIcon";
-import { MigrationCommandModal } from "../components/migrations/MigrationCommandModal";
+import CaretIcon from "../../components/ui/icons/CaretIcon";
+import { MigrationCommandModal } from "../../components/migrations/MigrationCommandModal";
 import {
   useExecuteMigrationMutation,
   useMigrationsHistoryQuery,
   useMigrationsStatusQuery,
   useRevertMigrationMutation,
-} from "../core/api/migrations.hooks";
-import type { MigrationHistoryItem, MigrationStatusItem, MigrationOrder } from "../core/api/types";
+} from "../../core/api/migrations.hooks";
+import type { MigrationHistoryItem, MigrationOrder } from "../../core/api/types";
+import { MigrationStatusTable } from "./MigrationStatusTable/MigrationStatusTable";
 import "./MigrationsView.css";
-
-const parseTimestampToDate = (timestamp: string | null): Date | null => {
-  if (!timestamp) {
-    return null;
-  }
-
-  const parsed = Number.parseInt(timestamp, 10);
-
-  if (Number.isNaN(parsed)) {
-    return null;
-  }
-
-  return new Date(parsed);
-};
-
-const formatTimestamp = (timestamp: string | null): string => {
-  const parsedDate = parseTimestampToDate(timestamp);
-
-  if (!parsedDate) {
-    return "Sin fecha";
-  }
-
-  return new Intl.DateTimeFormat("es-CL", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(parsedDate);
-};
 
 const formatIsoDate = (value: string): string => {
   return new Intl.DateTimeFormat("es-CL", {
@@ -97,105 +70,6 @@ const groupHistoryByMigration = (historyItems: MigrationHistoryItem[]) => {
   }, {});
 };
 
-interface MigrationStatusTableProps {
-  title: string;
-  open: boolean;
-  onToggle: () => void;
-  rows: MigrationStatusItem[];
-  emptyLabel: string;
-  actionLabel: string;
-  actionIcon: React.ReactNode;
-  loadingAction: boolean;
-  actionTargetName?: string;
-  onAction: (migrationName: string) => void;
-  order: MigrationOrder;
-  onToggleOrder?: () => void;
-}
-
-const MigrationStatusTable = ({
-  title,
-  open,
-  onToggle,
-  rows,
-  emptyLabel,
-  actionLabel,
-  actionIcon,
-  loadingAction,
-  actionTargetName,
-  onAction,
-  order,
-  onToggleOrder,
-}: MigrationStatusTableProps) => {
-  return (
-    <Paper sx={{ p: 2 }}>
-      <Stack spacing={1}>
-        <button type="button" className="migration-section-toggle" onClick={onToggle}>
-          <Typography variant="h6">{title}</Typography>
-          <CaretIcon direction={open ? "down" : "right"} />
-        </button>
-
-        {!open && (
-          <Typography variant="body2" color="text.secondary">
-            {rows.length} registradas
-          </Typography>
-        )}
-
-        {open && rows.length === 0 && (
-          <Typography color="text.secondary">{emptyLabel}</Typography>
-        )}
-
-        {open && rows.length > 0 && (
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>Nombre</TableCell>
-                <TableCell>
-                  <Stack direction="row" spacing={0.75} alignItems="center">
-                    <span>Fecha</span>
-                    {onToggleOrder && (
-                      <IconButton
-                        size="small"
-                        aria-label="Cambiar orden"
-                        onClick={onToggleOrder}
-                      >
-                        <CaretIcon direction={order === "asc" ? "up" : "down"} />
-                      </IconButton>
-                    )}
-                  </Stack>
-                </TableCell>
-                <TableCell align="right">Acciones</TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {rows.map((migration) => (
-                <TableRow key={migration.name}>
-                  <TableCell>{migration.name}</TableCell>
-                  <TableCell>{formatTimestamp(migration.timestamp)}</TableCell>
-                  <TableCell align="right">
-                    <Button
-                      variant="contained"
-                      color={actionLabel === "Revertir" ? "error" : "success"}
-                      size="small"
-                      startIcon={actionIcon}
-                      disabled={loadingAction}
-                      onClick={() => onAction(migration.name)}
-                    >
-                      {loadingAction && actionTargetName === migration.name
-                        ? `${actionLabel}...`
-                        : actionLabel}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </Stack>
-    </Paper>
-  );
-};
-
 export const MigrationsView = () => {
   const [order, setOrder] = useState<MigrationOrder>("asc");
   const [showExecuted, setShowExecuted] = useState(false);
@@ -233,7 +107,7 @@ export const MigrationsView = () => {
 
   const handleExecute = async (migrationName: string) => {
     const approved = globalThis.confirm(
-      `\u00BFEstas seguro de ejecutar la migracion ${migrationName}?`,
+      `¿Estas seguro de ejecutar la migracion ${migrationName}?`,
     );
 
     if (!approved) {
@@ -245,7 +119,7 @@ export const MigrationsView = () => {
 
   const handleRevert = async (migrationName: string) => {
     const approved = globalThis.confirm(
-      `\u00BFEstas seguro de revertir la migracion ${migrationName}?`,
+      `¿Estas seguro de revertir la migracion ${migrationName}?`,
     );
 
     if (!approved) {

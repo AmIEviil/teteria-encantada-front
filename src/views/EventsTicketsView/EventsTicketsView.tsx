@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ImageUploadField } from "../components/ui/imageUpload/ImageUploadField";
+import { ImageUploadField } from "../../components/ui/imageUpload/ImageUploadField";
 import {
   Box,
   Button,
@@ -11,7 +11,6 @@ import {
   DialogTitle,
   Divider,
   FormControlLabel,
-  IconButton,
   MenuItem,
   Paper,
   Stack,
@@ -20,7 +19,6 @@ import {
   Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
 import ReplayIcon from "@mui/icons-material/Replay";
 import SettingsIcon from "@mui/icons-material/Settings";
 import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
@@ -33,7 +31,7 @@ import {
   useEventTicketsQuery,
   useUpdateEventMutation,
   useUpdateEventTicketMutation,
-} from "../core/api/events.hooks";
+} from "../../core/api/events.hooks";
 import type {
   CreateVenueEventPayload,
   EventTicketMenuMode,
@@ -45,81 +43,28 @@ import type {
   EventTicketTypePayload,
   UpdateEventTicketPayload,
   VenueEvent,
-} from "../core/api/types";
-import { CustomCalendarV2 } from "../components/ui/calendar/CustomCalendarV2";
-import { EventWizardProgress } from "../components/events/EventWizardProgress";
-import { useSnackBarResponseStore } from "../store/snackBarStore";
+} from "../../core/api/types";
+import { CustomCalendarV2 } from "../../components/ui/calendar/CustomCalendarV2";
+import { EventWizardProgress } from "../../components/events/EventWizardProgress";
+import { useSnackBarResponseStore } from "../../store/snackBarStore";
+import {
+  toLocalDateString,
+  parseLocalDateString,
+} from "../../utils/formatText.utils";
+import type {
+  EventFilterStatus,
+  TicketFilterStatus,
+  EventWizardStep,
+  TicketDailyStockDraft,
+  TicketMenuOptionDraft,
+  TicketMenuGroupDraft,
+  TicketMenuTemplateDraft,
+  TicketTypeDraft,
+  EventFormState,
+  TicketFormState,
+} from "../../service/events/events.interface";
+import { TicketTypeEditorCard } from "./TicketTypeEditorCard/TicketTypeEditorCard";
 import "./EventsTicketsView.css";
-
-type EventFilterStatus = EventStatus | "ALL";
-type TicketFilterStatus = EventTicketStatus | "ALL";
-type EventWizardStep = 0 | 1 | 2;
-
-interface TicketDailyStockDraft {
-  id: string;
-  date: string;
-  quantity: string;
-}
-
-interface TicketTypeDraft {
-  id: string;
-  name: string;
-  description: string;
-  price: string;
-  includesDetails: string;
-  menuMode: EventTicketMenuMode;
-  menuTemplate: TicketMenuTemplateDraft;
-  totalStock: string;
-  isPromotional: boolean;
-  promoMinQuantity: string;
-  promoBundlePrice: string;
-  dailyStocks: TicketDailyStockDraft[];
-}
-
-interface TicketMenuOptionDraft {
-  id: string;
-  optionId: string;
-  label: string;
-  extraPrice: string;
-  isActive: boolean;
-}
-
-interface TicketMenuGroupDraft {
-  id: string;
-  key: string;
-  label: string;
-  required: boolean;
-  minSelect: string;
-  maxSelect: string;
-  options: TicketMenuOptionDraft[];
-}
-
-interface TicketMenuTemplateDraft {
-  groups: TicketMenuGroupDraft[];
-}
-
-interface EventFormState {
-  title: string;
-  description: string;
-  startsAtDate: string;
-  startsAtTime: string;
-  endsAtDate: string;
-  endsAtTime: string;
-  officialImageUrl: string;
-  status: EventStatus;
-  isFreeEntry: boolean;
-  ticketTypes: TicketTypeDraft[];
-}
-
-interface TicketFormState {
-  ticketTypeId: string;
-  attendeeFirstName: string;
-  attendeeLastName: string;
-  attendanceDate: string;
-  quantity: string;
-  applyPromotion: boolean;
-  menuSelectionByGroup: Record<string, string[]>;
-}
 
 const MENU_GROUP_PRESETS: Array<{ key: string; label: string }> = [
   { key: "entrada", label: "Entrada" },
@@ -168,31 +113,6 @@ const TIME_OPTIONS = Array.from({ length: 48 }, (_, index) => {
     label: value,
   };
 });
-
-const toLocalDateString = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-};
-
-const parseLocalDateString = (value: string): Date | null => {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-
-  if (!match) {
-    return null;
-  }
-
-  const [, year, month, day] = match;
-  const parsedDate = new Date(Number(year), Number(month) - 1, Number(day));
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return null;
-  }
-
-  return parsedDate;
-};
 
 const getTodayDate = (): string => toLocalDateString(new Date());
 
@@ -1045,480 +965,6 @@ const updateMenuOptionInGroups = (
       }),
     };
   });
-};
-
-interface TicketTypeEditorCardProps {
-  ticketType: TicketTypeDraft;
-  index: number;
-  availableDateKeys?: string[];
-  onRemoveTicketType: (ticketTypeId: string) => void;
-  onTicketTypeFieldChange: (
-    ticketTypeId: string,
-    field: keyof Omit<TicketTypeDraft, "id" | "dailyStocks" | "menuTemplate">,
-    value: string | boolean,
-  ) => void;
-  onAddDailyStock: (ticketTypeId: string) => void;
-  onRemoveDailyStock: (ticketTypeId: string, dailyStockId: string) => void;
-  onDailyStockFieldChange: (
-    ticketTypeId: string,
-    dailyStockId: string,
-    field: keyof Omit<TicketDailyStockDraft, "id">,
-    value: string,
-  ) => void;
-  onAddMenuGroup: (ticketTypeId: string) => void;
-  onRemoveMenuGroup: (ticketTypeId: string, groupId: string) => void;
-  onMenuGroupFieldChange: (
-    ticketTypeId: string,
-    groupId: string,
-    field: keyof Omit<TicketMenuGroupDraft, "id" | "options">,
-    value: string | boolean,
-  ) => void;
-  onAddMenuOption: (ticketTypeId: string, groupId: string) => void;
-  onRemoveMenuOption: (
-    ticketTypeId: string,
-    groupId: string,
-    optionId: string,
-  ) => void;
-  onMenuOptionFieldChange: (
-    ticketTypeId: string,
-    groupId: string,
-    optionId: string,
-    field: keyof Omit<TicketMenuOptionDraft, "id">,
-    value: string | boolean,
-  ) => void;
-}
-
-const TicketTypeEditorCard = ({
-  ticketType,
-  index,
-  availableDateKeys,
-  onRemoveTicketType,
-  onTicketTypeFieldChange,
-  onAddDailyStock,
-  onRemoveDailyStock,
-  onDailyStockFieldChange,
-  onAddMenuGroup,
-  onRemoveMenuGroup,
-  onMenuGroupFieldChange,
-  onAddMenuOption,
-  onRemoveMenuOption,
-  onMenuOptionFieldChange,
-}: TicketTypeEditorCardProps) => {
-  return (
-    <Paper variant="outlined" className="event-ticket-type-card">
-      <Stack spacing={1.1}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography fontWeight={700}>Tipo {index + 1}</Typography>
-          <IconButton
-            onClick={() => onRemoveTicketType(ticketType.id)}
-            aria-label={`Eliminar tipo ${index + 1}`}
-          >
-            <DeleteIcon />
-          </IconButton>
-        </Stack>
-
-        <Stack direction={{ xs: "column", md: "row" }} spacing={1.25}>
-          <TextField
-            label="Nombre"
-            value={ticketType.name}
-            onChange={(event) =>
-              onTicketTypeFieldChange(ticketType.id, "name", event.target.value)
-            }
-            fullWidth
-          />
-
-          <TextField
-            label="Precio"
-            type="number"
-            value={ticketType.price}
-            onChange={(event) =>
-              onTicketTypeFieldChange(ticketType.id, "price", event.target.value)
-            }
-            slotProps={{ htmlInput: { min: 0, step: "0.01" } }}
-            fullWidth
-          />
-
-          <TextField
-            label="Cupo total (opcional)"
-            type="number"
-            value={ticketType.totalStock}
-            onChange={(event) =>
-              onTicketTypeFieldChange(ticketType.id, "totalStock", event.target.value)
-            }
-            slotProps={{ htmlInput: { min: 1, step: 1 } }}
-            fullWidth
-          />
-        </Stack>
-
-        <TextField
-          label="Descripcion"
-          value={ticketType.description}
-          onChange={(event) =>
-            onTicketTypeFieldChange(ticketType.id, "description", event.target.value)
-          }
-          fullWidth
-        />
-
-        <FormControlLabel
-          control={
-            <Switch
-              checked={ticketType.menuMode === "CUSTOMIZABLE"}
-              onChange={(event) =>
-                onTicketTypeFieldChange(
-                  ticketType.id,
-                  "menuMode",
-                  event.target.checked ? "CUSTOMIZABLE" : "FIXED",
-                )
-              }
-            />
-          }
-          label="Cena personalizada"
-        />
-
-        {ticketType.menuMode === "FIXED" ? (
-          <TextField
-            label="Que incluye"
-            value={ticketType.includesDetails}
-            onChange={(event) =>
-              onTicketTypeFieldChange(ticketType.id, "includesDetails", event.target.value)
-            }
-            fullWidth
-          />
-        ) : (
-          <Stack spacing={1.1}>
-            <TextField
-              label="Descripcion general (opcional)"
-              value={ticketType.includesDetails}
-              onChange={(event) =>
-                onTicketTypeFieldChange(ticketType.id, "includesDetails", event.target.value)
-              }
-              fullWidth
-            />
-
-            <Divider />
-
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography fontWeight={700}>Grupos de menu</Typography>
-              <Button
-                size="small"
-                startIcon={<AddIcon />}
-                onClick={() => onAddMenuGroup(ticketType.id)}
-              >
-                Agregar grupo
-              </Button>
-            </Stack>
-
-            <Stack spacing={1}>
-              {ticketType.menuTemplate.groups.map((group, groupIndex) => (
-                <Paper key={group.id} variant="outlined" sx={{ p: 1.1 }}>
-                  <Stack spacing={1}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                      <Typography fontWeight={600}>Grupo {groupIndex + 1}</Typography>
-                      <IconButton
-                        onClick={() => onRemoveMenuGroup(ticketType.id, group.id)}
-                        aria-label={`Eliminar grupo ${groupIndex + 1}`}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Stack>
-
-                    <Stack direction={{ xs: "column", md: "row" }} spacing={1}>
-                      <TextField
-                        label="Nombre del grupo"
-                        value={group.label}
-                        onChange={(event) =>
-                          onMenuGroupFieldChange(
-                            ticketType.id,
-                            group.id,
-                            "label",
-                            event.target.value,
-                          )
-                        }
-                        fullWidth
-                      />
-
-                      <TextField
-                        label="Clave"
-                        value={group.key}
-                        onChange={(event) =>
-                          onMenuGroupFieldChange(
-                            ticketType.id,
-                            group.id,
-                            "key",
-                            event.target.value,
-                          )
-                        }
-                        fullWidth
-                      />
-                    </Stack>
-
-                    <Stack direction={{ xs: "column", md: "row" }} spacing={1}>
-                      <TextField
-                        label="Minimo seleccion"
-                        type="number"
-                        value={group.minSelect}
-                        onChange={(event) =>
-                          onMenuGroupFieldChange(
-                            ticketType.id,
-                            group.id,
-                            "minSelect",
-                            event.target.value,
-                          )
-                        }
-                        slotProps={{ htmlInput: { min: 0, step: 1 } }}
-                        fullWidth
-                      />
-
-                      <TextField
-                        label="Maximo seleccion"
-                        type="number"
-                        value={group.maxSelect}
-                        onChange={(event) =>
-                          onMenuGroupFieldChange(
-                            ticketType.id,
-                            group.id,
-                            "maxSelect",
-                            event.target.value,
-                          )
-                        }
-                        slotProps={{ htmlInput: { min: 1, step: 1 } }}
-                        fullWidth
-                      />
-                    </Stack>
-
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={group.required}
-                          onChange={(event) =>
-                            onMenuGroupFieldChange(
-                              ticketType.id,
-                              group.id,
-                              "required",
-                              event.target.checked,
-                            )
-                          }
-                        />
-                      }
-                      label="Grupo obligatorio"
-                    />
-
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                      <Typography fontWeight={600}>Opciones</Typography>
-                      <Button
-                        size="small"
-                        startIcon={<AddIcon />}
-                        onClick={() => onAddMenuOption(ticketType.id, group.id)}
-                      >
-                        Agregar opcion
-                      </Button>
-                    </Stack>
-
-                    <Stack spacing={0.9}>
-                      {group.options.map((option, optionIndex) => (
-                        <Stack
-                          key={option.id}
-                          direction={{ xs: "column", md: "row" }}
-                          spacing={1}
-                          alignItems={{ md: "center" }}
-                        >
-                          <TextField
-                            label={`Opcion ${optionIndex + 1}`}
-                            value={option.label}
-                            onChange={(event) =>
-                              onMenuOptionFieldChange(
-                                ticketType.id,
-                                group.id,
-                                option.id,
-                                "label",
-                                event.target.value,
-                              )
-                            }
-                            fullWidth
-                          />
-
-                          <TextField
-                            label="ID opcion"
-                            value={option.optionId}
-                            onChange={(event) =>
-                              onMenuOptionFieldChange(
-                                ticketType.id,
-                                group.id,
-                                option.id,
-                                "optionId",
-                                event.target.value,
-                              )
-                            }
-                            sx={{ minWidth: 160 }}
-                          />
-
-                          <TextField
-                            label="Recargo"
-                            type="number"
-                            value={option.extraPrice}
-                            onChange={(event) =>
-                              onMenuOptionFieldChange(
-                                ticketType.id,
-                                group.id,
-                                option.id,
-                                "extraPrice",
-                                event.target.value,
-                              )
-                            }
-                            slotProps={{ htmlInput: { min: 0, step: "0.01" } }}
-                            sx={{ minWidth: 140 }}
-                          />
-
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                checked={option.isActive}
-                                onChange={(event) =>
-                                  onMenuOptionFieldChange(
-                                    ticketType.id,
-                                    group.id,
-                                    option.id,
-                                    "isActive",
-                                    event.target.checked,
-                                  )
-                                }
-                              />
-                            }
-                            label="Activa"
-                          />
-
-                          <IconButton
-                            onClick={() =>
-                              onRemoveMenuOption(ticketType.id, group.id, option.id)
-                            }
-                            aria-label={`Eliminar opcion ${optionIndex + 1}`}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Stack>
-                      ))}
-                    </Stack>
-                  </Stack>
-                </Paper>
-              ))}
-            </Stack>
-          </Stack>
-        )}
-
-        <FormControlLabel
-          control={
-            <Switch
-              checked={ticketType.isPromotional}
-              onChange={(event) =>
-                onTicketTypeFieldChange(
-                  ticketType.id,
-                  "isPromotional",
-                  event.target.checked,
-                )
-              }
-            />
-          }
-          label="Ticket promocional"
-        />
-
-        {ticketType.isPromotional && (
-          <Stack direction={{ xs: "column", md: "row" }} spacing={1.25}>
-            <TextField
-              label="Cantidad minima promo"
-              type="number"
-              value={ticketType.promoMinQuantity}
-              onChange={(event) =>
-                onTicketTypeFieldChange(
-                  ticketType.id,
-                  "promoMinQuantity",
-                  event.target.value,
-                )
-              }
-              slotProps={{ htmlInput: { min: 2, step: 1 } }}
-              fullWidth
-            />
-
-            <TextField
-              label="Precio por bloque promo"
-              type="number"
-              value={ticketType.promoBundlePrice}
-              onChange={(event) =>
-                onTicketTypeFieldChange(
-                  ticketType.id,
-                  "promoBundlePrice",
-                  event.target.value,
-                )
-              }
-              slotProps={{ htmlInput: { min: 0, step: "0.01" } }}
-              fullWidth
-            />
-          </Stack>
-        )}
-
-        <Divider />
-
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography fontWeight={700}>Cupos por dia</Typography>
-          <Button
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={() => onAddDailyStock(ticketType.id)}
-          >
-            Agregar dia
-          </Button>
-        </Stack>
-
-        <Stack spacing={1}>
-          {ticketType.dailyStocks.map((dailyStock, dailyStockIndex) => (
-            <Stack
-              key={dailyStock.id}
-              direction={{ xs: "column", md: "row" }}
-              spacing={1}
-              alignItems={{ md: "center" }}
-            >
-              <CustomCalendarV2
-                label={`Dia ${dailyStockIndex + 1}`}
-                placeholder="Selecciona fecha"
-                initialDate={parseLocalDateString(dailyStock.date) ?? undefined}
-                availableDates={availableDateKeys}
-                onSave={(date) => {
-                  onDailyStockFieldChange(
-                    ticketType.id,
-                    dailyStock.id,
-                    "date",
-                    date ? toLocalDateString(date) : "",
-                  );
-                }}
-              />
-
-              <TextField
-                label="Cantidad"
-                type="number"
-                value={dailyStock.quantity}
-                onChange={(event) =>
-                  onDailyStockFieldChange(
-                    ticketType.id,
-                    dailyStock.id,
-                    "quantity",
-                    event.target.value,
-                  )
-                }
-                slotProps={{ htmlInput: { min: 1, step: 1 } }}
-                sx={{ minWidth: 160 }}
-              />
-
-              <IconButton
-                onClick={() => onRemoveDailyStock(ticketType.id, dailyStock.id)}
-                aria-label={`Eliminar cupo del dia ${dailyStockIndex + 1}`}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Stack>
-          ))}
-        </Stack>
-      </Stack>
-    </Paper>
-  );
 };
 
 export const EventsTicketsView = () => {

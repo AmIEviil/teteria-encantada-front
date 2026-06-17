@@ -31,7 +31,7 @@ const ReservationsView = lazy(() =>
 );
 
 const EventsTicketsView = lazy(() =>
-  import("../views/EventsTicketsView.tsx").then((module) => ({
+  import("../views/EventsTicketsView/EventsTicketsView.tsx").then((module) => ({
     default: module.EventsTicketsView,
   })),
 );
@@ -49,7 +49,7 @@ const EmpleadosView = lazy(() =>
 );
 
 const MigrationsView = lazy(() =>
-  import("../views/MigrationsView.tsx").then((module) => ({
+  import("../views/MigrationsView/MigrationsView.tsx").then((module) => ({
     default: module.MigrationsView,
   })),
 );

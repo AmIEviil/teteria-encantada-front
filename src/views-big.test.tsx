@@ -128,14 +128,14 @@ vi.mock("./core/api/migrations.hooks", () => ({
   useRevertMigrationMutation: shared.m,
 }));
 
-import { MigrationsView } from "./views/MigrationsView";
+import { MigrationsView } from "./views/MigrationsView/MigrationsView";
 import { SalesReportView } from "./views/SalesReportView";
 import { PublicReservationsView } from "./views/PublicReservationsView";
 import { ReservationsView } from "./views/ReservationsView";
 import { BodyInventory } from "./components/inventory/BodyInventory";
 import { BodyEmpleados } from "./components/empleados/BodyEmpleados";
 import { OrderTaker } from "./components/teaRoom/components/OrderTaker/OrderTaker";
-import { EventsTicketsView } from "./views/EventsTicketsView";
+import { EventsTicketsView } from "./views/EventsTicketsView/EventsTicketsView";
 import { EmpleadosView } from "./views/EmpleadosView";
 import { InventoryView } from "./views/InventoryView";
 import { ForbiddenView } from "./views/auth/ForbiddenView";

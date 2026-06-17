@@ -16,6 +16,8 @@ export interface TableProps {
   label?: string;
   numberOfSeats?: number;
   type?: "small" | "large";
+  cellSize?: number;
+  scale?: number;
   position?: { x: number; y: number };
   isRotated?: boolean; // Propiedad para saber si está rotada
   isSelected?: boolean;
@@ -76,6 +78,8 @@ export const Table = ({
   label,
   numberOfSeats,
   type,
+  cellSize = 80,
+  scale = 1,
   position,
   isRotated,
   isSelected = false,
@@ -161,7 +165,7 @@ export const Table = ({
           ref={nodeRef}
           onClick={handleSelectTable}
           className={`${s.onlyView} ${tableTypeClass} ${openOrderClass} ${reservedClass} ${outOfServiceClass} ${selectedClass}`}
-          style={{ ...onlyViewPositionStyle, position: "relative" }}
+          style={onlyViewPositionStyle ?? { position: "relative" }}
           disabled={isOutOfService}
         >
           <div className={s.headerTable}>
@@ -223,7 +227,8 @@ export const Table = ({
       nodeRef={nodeRef}
       position={position}
       bounds="parent"
-      grid={[80, 80]} // ¡ESTO ES LA MAGIA! Hace que se mueva de a 80px
+      scale={scale} // Compensa el transform: scale() del workspace; sin esto el drag se desfasa
+      grid={[cellSize, cellSize]} // Snap igual al CELL_SIZE del fondo de la grilla
       onStop={(_, data) => onDragStop?.(id || "", data.x, data.y)}
       disabled={!isDraggable}
     >
@@ -233,7 +238,6 @@ export const Table = ({
           ref={nodeRef}
           onClick={handleSelectTable}
           className={`${s.table} ${tableTypeClass} ${openOrderClass} ${reservedClass} ${outOfServiceClass} ${selectedClass}`}
-          style={{ position: "relative" }}
           disabled={isOutOfService}
         >
           <div className={s.headerTable}>
@@ -261,7 +265,6 @@ export const Table = ({
         <div
           ref={nodeRef}
           className={`${s.table} ${tableTypeClass} ${openOrderClass} ${reservedClass} ${outOfServiceClass} ${selectedClass}`}
-          style={{ position: "relative" }}
         >
           <div className={s.headerTable}>
             <p>{tableName}</p>

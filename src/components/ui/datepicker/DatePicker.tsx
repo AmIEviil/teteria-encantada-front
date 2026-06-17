@@ -1,87 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from "react";
-import DatePicker, { CalendarContainer } from "react-datepicker";
+import { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./DatePicker.css";
 
 import { useTranslation } from "react-i18next";
 import { enUS, es, type Locale } from "date-fns/locale";
-import CalendarIcon from "../icons/CalendarIcon";
 import FullArrowIcon from "../icons/FullArrow";
+import type { CalendarProps } from "../../../service/datepicker/datepicker.interface";
+import { CustomInput } from "./CustomInput/CustomInput";
+import { CustomCalendarContainer } from "./CustomCalendarContainer/CustomCalendarContainer";
+import { DatePickerFooter } from "./DatePickerFooter/DatePickerFooter";
 
 // Locale config
 const localeMap: Record<string, Locale> = { en: enUS, es };
-
-// Custom input
-const CustomInput = React.forwardRef<HTMLInputElement, any>(
-  ({ value, onClick, buttonClassName }, ref) => {
-    const { t } = useTranslation();
-
-    return (
-      <button
-        className={`custom-date-button font-normal bg-[#FAFBFC] ${buttonClassName}`}
-        onClick={onClick}
-        ref={ref as React.RefObject<HTMLButtonElement>}
-      >
-        {value && typeof value === "string" && value !== "Invalid Date"
-          ? value
-          : t("modules.common.select_date")}
-        <CalendarIcon size={16} />
-      </button>
-    );
-  },
-);
-
-// Custom calendar container
-const CustomCalendarContainer = ({ children }: any) => {
-  return (
-    <div className="custom-calendar-wrapper">
-      <CalendarContainer>
-        <div
-          style={{ borderTop: "none", padding: "16px", borderRadius: "8px" }}
-        >
-          {children}
-        </div>
-      </CalendarContainer>
-    </div>
-  );
-};
-
-// Footer buttons
-const DatePickerFooter = ({
-  onClear,
-  onToday,
-}: {
-  onClear: () => void;
-  onToday: () => void;
-}) => {
-  const { t } = useTranslation();
-  return (
-    <div className="calendar-footer">
-      <button className="normal btn-footer delete" onClick={onClear}>
-        {t("modules.common.erase")}
-      </button>
-      <button className="normal btn-footer today" onClick={onToday}>
-        {t("modules.common.today")}
-      </button>
-    </div>
-  );
-};
-
-interface CalendarProps {
-  onCancel?: () => void;
-  onChange?: (range: { start: Date | null; end: Date | null }) => void;
-  onDelete?: () => void; // New prop for custom delete function
-  mode?: "range" | "day";
-  label?: string;
-  initialValue?: Date | [Date, Date] | null;
-  className?: string;
-  buttonClassName?: string;
-  minDate?: Date;
-  maxDate?: Date;
-  title?: string;
-  required?: boolean;
-}
 
 export default function Calendar({
   onCancel,
