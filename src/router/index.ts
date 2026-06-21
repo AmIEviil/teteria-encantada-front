@@ -78,6 +78,12 @@ const ResetPasswordView = lazy(() =>
   })),
 );
 
+const GoogleCallbackView = lazy(() =>
+  import("../views/auth/GoogleCallbackView.tsx").then((module) => ({
+    default: module.GoogleCallbackView,
+  })),
+);
+
 const ForbiddenView = lazy(() =>
   import("../views/auth/ForbiddenView.tsx").then((module) => ({
     default: module.ForbiddenView,
@@ -165,6 +171,10 @@ export const router = createBrowserRouter(
     {
       path: `${PAGE_ROUTES.ResetPassword}/:token?`,
       Component: ResetPasswordView,
+    },
+    {
+      path: PAGE_ROUTES.GoogleCallback,
+      Component: GoogleCallbackView,
     },
     {
       path: PAGE_ROUTES.Forbidden,

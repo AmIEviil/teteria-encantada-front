@@ -5,6 +5,7 @@ export const PAGE_ROUTES = {
   Register: "/register",
   ForgotPassword: "/forgot-password",
   ResetPassword: "/reset-password",
+  GoogleCallback: "/auth/google/callback",
   Forbidden: "/sin-permiso",
   Home: "/home",
   Teteria: "/teteria",

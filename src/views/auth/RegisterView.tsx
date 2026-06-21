@@ -5,6 +5,7 @@ import { getApiErrorMessage } from "../../core/api/apiError";
 import { authService } from "../../core/api/auth.service";
 import type { AuthRole } from "../../core/api/types";
 import { AuthInput } from "../../components/ui/form/AuthInput";
+import { GoogleLoginButton } from "../../components/ui/auth/GoogleLoginButton";
 import { validateEmail, validatePassword } from "../../utils/validation.utils";
 import { roles } from "../../utils/role.utils";
 import { useBoundStore } from "../../store/BoundedStore";
@@ -251,6 +252,8 @@ export const RegisterView = () => {
             {isSubmitting ? "Creando usuario..." : "Registrar"}
           </button>
         </form>
+
+        <GoogleLoginButton />
 
         <div className="auth-meta">
           <span>¿Ya tienes cuenta?</span>
