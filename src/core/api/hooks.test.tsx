@@ -71,13 +71,17 @@ const runQuery = async (hook: () => { isFetched: boolean }) => {
 };
 
 const runMutation = async (
-  hook: () => { mutateAsync: (p?: unknown) => Promise<unknown> },
+  // Cada hook expone un mutateAsync con payload específico; aceptamos cualquiera
+  // (param contravariante: never lo hace asignable) y casteamos al invocar.
+  hook: () => { mutateAsync: (p: never) => Promise<unknown> },
   payload?: unknown,
 ) => {
   const { result } = renderHook(hook, { wrapper: createWrapper() });
   await act(async () => {
     try {
-      await result.current.mutateAsync(payload);
+      await (result.current.mutateAsync as (p?: unknown) => Promise<unknown>)(
+        payload,
+      );
     } catch {
       /* error path */
     }
