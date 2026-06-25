@@ -15,7 +15,7 @@ vi.mock("../../core/api/events.hooks", () => ({
   useDeleteEventTicketMutation: m,
 }));
 vi.mock("../../store/snackBarStore", () => ({
-  useSnackBarResponseStore: (selector: (s: any) => any) =>
+  useSnackBarResponseStore: (selector: (s: { openSnackbar: () => void }) => unknown) =>
     selector({ openSnackbar: vi.fn() }),
 }));
 vi.mock("../../components/ui/imageUpload/ImageUploadField", () => ({

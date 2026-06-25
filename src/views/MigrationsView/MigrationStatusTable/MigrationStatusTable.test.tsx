@@ -6,7 +6,7 @@ const baseProps = {
   title: "Migraciones pendientes",
   open: true,
   onToggle: vi.fn(),
-  rows: [{ name: "1700000000-init", timestamp: "1700000000000" }] as any,
+  rows: [{ name: "1700000000-init", timestamp: "1700000000000" }],
   emptyLabel: "No hay migraciones pendientes.",
   actionLabel: "Ejecutar",
   actionIcon: null,
