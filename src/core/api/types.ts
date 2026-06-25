@@ -3,6 +3,40 @@ export interface UploadedImage {
   url: string;
 }
 
+export interface LoyaltyConfig {
+  id: string;
+  attendancePointsEnabled: boolean;
+  purchasePointsEnabled: boolean;
+  purchasePointsRate: number;
+}
+
+export type LoyaltyRewardType = "DISCOUNT_CODE" | "FREE_WORKSHOP";
+
+export interface LoyaltyReward {
+  id: string;
+  levelId: string;
+  type: LoyaltyRewardType;
+  description: string;
+  cost: number;
+  params: Record<string, unknown> | null;
+  isActive: boolean;
+}
+
+export interface LoyaltyLevel {
+  id: string;
+  name: string;
+  threshold: number;
+  sortOrder: number;
+  rewards?: LoyaltyReward[];
+}
+
+export interface LoyaltySummary {
+  points: number;
+  currentLevel: LoyaltyLevel | null;
+  nextLevel: LoyaltyLevel | null;
+  rewards: LoyaltyReward[];
+}
+
 export interface Product {
   id: string;
   code: string;
