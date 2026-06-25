@@ -2,6 +2,7 @@ import { roles } from "../utils/role.utils";
 
 export const PAGE_ROUTES = {
   Login: "/login",
+  PublicLogin: "/acceso",
   Register: "/register",
   ForgotPassword: "/forgot-password",
   ResetPassword: "/reset-password",
@@ -19,6 +20,7 @@ export const PAGE_ROUTES = {
   MisPuntos: "/mis-puntos",
   PublicReservas: "/publico/reservas",
   PublicCarta: "/publico/carta",
+  PublicMisPuntos: "/publico/mis-puntos",
 };
 
 export const topbarOptions = [
@@ -79,7 +81,7 @@ export const topbarOptions = [
   {
     name: "Mis puntos",
     path: PAGE_ROUTES.MisPuntos,
-    canAccess: [roles.CLIENT, roles.SUPER_ADMIN, roles.ADMIN],
+    canAccess: [roles.SUPER_ADMIN, roles.ADMIN],
     icon: "loyalty",
   },
   {

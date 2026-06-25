@@ -72,6 +72,12 @@ const LoginView = lazy(() =>
   })),
 );
 
+const PublicLoginView = lazy(() =>
+  import("../views/auth/PublicLoginView.tsx").then((module) => ({
+    default: module.PublicLoginView,
+  })),
+);
+
 const RegisterView = lazy(() =>
   import("../views/auth/RegisterView.tsx").then((module) => ({
     default: module.RegisterView,
@@ -111,6 +117,12 @@ const PublicReservationsView = lazy(() =>
 const PublicMenuView = lazy(() =>
   import("../views/PublicMenuView.tsx").then((module) => ({
     default: module.PublicMenuView,
+  })),
+);
+
+const PublicLoyaltyView = lazy(() =>
+  import("../views/PublicLoyaltyView.tsx").then((module) => ({
+    default: module.PublicLoyaltyView,
   })),
 );
 
@@ -182,6 +194,10 @@ export const router = createBrowserRouter(
       Component: LoginView,
     },
     {
+      path: PAGE_ROUTES.PublicLogin,
+      Component: PublicLoginView,
+    },
+    {
       path: PAGE_ROUTES.Register,
       Component: RegisterView,
     },
@@ -212,6 +228,14 @@ export const router = createBrowserRouter(
     {
       path: PAGE_ROUTES.PublicCarta,
       Component: PublicMenuView,
+    },
+    {
+      path: PAGE_ROUTES.PublicMisPuntos,
+      Component: withRoles(
+        PublicLoyaltyView,
+        [roles.CLIENT],
+        PAGE_ROUTES.PublicLogin,
+      ),
     },
     {
       path: "/",

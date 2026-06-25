@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { authService } from "../../core/api/auth.service";
 import { useBoundStore } from "../../store/BoundedStore";
+import { PAGE_ROUTES } from "../../constant/routes";
+import { roles } from "../../utils/role.utils";
 import "./AuthView.css";
 
 export const GoogleCallbackView = () => {
@@ -26,7 +28,9 @@ export const GoogleCallbackView = () => {
       .profile()
       .then((user) => {
         setSession(token, user);
-        navigate("/", { replace: true });
+        const landing =
+          user.role?.name === roles.CLIENT ? PAGE_ROUTES.PublicMisPuntos : "/";
+        navigate(landing, { replace: true });
       })
       .catch(() => navigate("/login", { replace: true }));
   }, [searchParams, setToken, setSession, navigate]);
