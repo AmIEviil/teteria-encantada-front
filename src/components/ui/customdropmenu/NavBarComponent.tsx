@@ -11,6 +11,7 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import EventSeatIcon from "@mui/icons-material/EventSeat";
 import EventNoteIcon from "@mui/icons-material/EventNote";
+import LoyaltyIcon from "@mui/icons-material/Loyalty";
 import LogoutIcon from "../icons/LogoutIcon";
 import MigrationsIcon from "../icons/MigrationsIcon";
 import { useBoundStore } from "../../../store/BoundedStore";
@@ -62,6 +63,8 @@ const CustomDropmenu = () => {
         return <PeopleOutlineIcon />;
       case "migration":
         return <MigrationsIcon />;
+      case "loyalty":
+        return <LoyaltyIcon />;
       case "logout":
         return <LogoutIcon />;
       default:

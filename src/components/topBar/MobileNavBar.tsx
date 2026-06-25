@@ -15,6 +15,7 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import EventSeatIcon from "@mui/icons-material/EventSeat";
 import EventNoteIcon from "@mui/icons-material/EventNote";
+import LoyaltyIcon from "@mui/icons-material/Loyalty";
 import { topbarOptions } from "../../constant/routes";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -43,6 +44,8 @@ export default function CustomNavBar() {
         return <EventSeatIcon />;
       case "events":
         return <EventNoteIcon />;
+      case "loyalty":
+        return <LoyaltyIcon />;
       default:
         return null;
     }

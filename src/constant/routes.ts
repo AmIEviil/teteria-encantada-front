@@ -15,6 +15,8 @@ export const PAGE_ROUTES = {
   ReporteVentas: "/reporte-ventas",
   Empleados: "/empleados",
   Migraciones: "/migraciones",
+  Fidelizacion: "/fidelizacion",
+  MisPuntos: "/mis-puntos",
   PublicReservas: "/publico/reservas",
   PublicCarta: "/publico/carta",
 };
@@ -67,6 +69,18 @@ export const topbarOptions = [
     path: PAGE_ROUTES.Migraciones,
     canAccess: [roles.SUPER_ADMIN],
     icon: "migration",
+  },
+  {
+    name: "Fidelización",
+    path: PAGE_ROUTES.Fidelizacion,
+    canAccess: [roles.SUPER_ADMIN, roles.ADMIN],
+    icon: "loyalty",
+  },
+  {
+    name: "Mis puntos",
+    path: PAGE_ROUTES.MisPuntos,
+    canAccess: [roles.CLIENT, roles.SUPER_ADMIN, roles.ADMIN],
+    icon: "loyalty",
   },
   {
     name: "Cerrar Sesión",
