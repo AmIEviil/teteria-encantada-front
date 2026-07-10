@@ -8,6 +8,21 @@ export type EventFilterStatus = EventStatus | "ALL";
 export type TicketFilterStatus = EventTicketStatus | "ALL";
 export type EventWizardStep = 0 | 1 | 2;
 
+export interface SessionDraft {
+  id: string;
+  startTime: string;
+  endTime: string;
+  capacity: string;
+}
+
+export interface SessionOccurrence {
+  key: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  capacity: string;
+}
+
 export interface TicketDailyStockDraft {
   id: string;
   date: string;
@@ -61,6 +76,12 @@ export interface EventFormState {
   officialImageUrl: string;
   status: EventStatus;
   isFreeEntry: boolean;
+  hasSessions: boolean;
+  sameSessionsEveryDay: boolean;
+  baseSessions: SessionDraft[];
+  sessionsByDate: Record<string, SessionDraft[]>;
+  /** clave: `${date}|${sessionDraftId}` -> ticketTypeDraftId -> cantidad (string de input) */
+  sessionAllocations: Record<string, Record<string, string>>;
   ticketTypes: TicketTypeDraft[];
 }
 
@@ -71,6 +92,7 @@ export interface TicketFormState {
   attendanceDate: string;
   quantity: string;
   applyPromotion: boolean;
+  sessionId: string;
   menuSelectionByGroup: Record<string, string[]>;
 }
 
@@ -78,6 +100,7 @@ export interface TicketTypeEditorCardProps {
   ticketType: TicketTypeDraft;
   index: number;
   availableDateKeys?: string[];
+  hideDailyStocks?: boolean;
   onRemoveTicketType: (ticketTypeId: string) => void;
   onTicketTypeFieldChange: (
     ticketTypeId: string,

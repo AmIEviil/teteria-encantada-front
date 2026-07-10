@@ -332,6 +332,11 @@ const createInitialEventForm = (): EventFormState => {
     officialImageUrl: "",
     status: "ENABLED",
     isFreeEntry: false,
+    hasSessions: false,
+    sameSessionsEveryDay: true,
+    baseSessions: [],
+    sessionsByDate: {},
+    sessionAllocations: {},
     ticketTypes: [createEmptyTicketType()],
   };
 };
@@ -357,6 +362,7 @@ const createInitialTicketForm = (selectedEvent: VenueEvent | null): TicketFormSt
     attendanceDate: defaultDate,
     quantity: "1",
     applyPromotion: false,
+    sessionId: "",
     menuSelectionByGroup,
   };
 };
@@ -1472,6 +1478,11 @@ export const EventsTicketsView = () => {
       officialImageUrl: eventItem.officialImageUrl ?? "",
       status: eventItem.status,
       isFreeEntry: eventItem.isFreeEntry,
+      hasSessions: false,
+      sameSessionsEveryDay: true,
+      baseSessions: [],
+      sessionsByDate: {},
+      sessionAllocations: {},
       ticketTypes:
         eventItem.ticketTypes.length > 0
           ? eventItem.ticketTypes.map((ticketType) =>
@@ -1637,6 +1648,7 @@ export const EventsTicketsView = () => {
       attendanceDate: toDateOnlyKey(ticket.attendanceDate),
       quantity: "1",
       applyPromotion: false,
+      sessionId: ticket.sessionId ?? "",
       menuSelectionByGroup,
     });
   };

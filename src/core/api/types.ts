@@ -502,6 +502,38 @@ export interface EventTicketMenuGroup {
   options: EventTicketMenuOption[];
 }
 
+export interface EventSessionAllocation {
+  id: string;
+  sessionId: string;
+  ticketTypeId: string;
+  quantity: number;
+}
+
+export interface EventSession {
+  id: string;
+  eventId: string;
+  date: string;
+  startTime: string;
+  endTime: string | null;
+  capacity: number;
+  allocations: EventSessionAllocation[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EventSessionAllocationPayload {
+  ticketTypeIndex: number;
+  quantity: number;
+}
+
+export interface EventSessionPayload {
+  date: string;
+  startTime: string;
+  endTime?: string;
+  capacity: number;
+  allocations?: EventSessionAllocationPayload[];
+}
+
 export interface EventTicketMenuTemplate {
   groups: EventTicketMenuGroup[];
 }
@@ -544,7 +576,9 @@ export interface VenueEvent {
   totalTickets: number;
   soldTickets: number;
   isFreeEntry: boolean;
+  hasSessions: boolean;
   ticketTypes: EventTicketType[];
+  sessions: EventSession[];
   createdAt: string;
   updatedAt: string;
 }
@@ -559,6 +593,7 @@ export interface EventTicket {
   attendanceDate: string;
   price: number;
   includesDetails: string | null;
+  sessionId: string | null;
   menuSelection: EventTicketMenuSelection | null;
   menuSelectionSnapshot: {
     groups: Array<{
@@ -605,7 +640,9 @@ export interface CreateVenueEventPayload {
   officialImageUrl?: string;
   status?: EventStatus;
   isFreeEntry?: boolean;
+  hasSessions?: boolean;
   ticketTypes: EventTicketTypePayload[];
+  sessions?: EventSessionPayload[];
 }
 
 export interface UpdateVenueEventPayload {
@@ -616,7 +653,9 @@ export interface UpdateVenueEventPayload {
   officialImageUrl?: string;
   status?: EventStatus;
   isFreeEntry?: boolean;
+  hasSessions?: boolean;
   ticketTypes?: EventTicketTypePayload[];
+  sessions?: EventSessionPayload[];
 }
 
 export interface UpdateEventStatusPayload {
@@ -634,11 +673,12 @@ export interface CreateEventTicketPayload {
   ticketTypeId: string;
   attendeeFirstName: string;
   attendeeLastName: string;
-  attendanceDate: string;
+  attendanceDate?: string;
   quantity?: number;
   applyPromotion?: boolean;
   price?: number;
   includesDetails?: string;
+  sessionId?: string;
   menuSelection?: EventTicketMenuSelection;
 }
 
@@ -649,6 +689,7 @@ export interface UpdateEventTicketPayload {
   attendanceDate?: string;
   price?: number;
   includesDetails?: string;
+  sessionId?: string;
   menuSelection?: EventTicketMenuSelection;
   status?: EventTicketStatus;
 }
