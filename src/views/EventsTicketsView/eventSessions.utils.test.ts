@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   buildOccurrenceKey,
   buildSessionsPayload,
-  createEmptySessionDraft,
   expandSessionOccurrences,
   mapEventSessionsToState,
   syncSessionsByDate,
