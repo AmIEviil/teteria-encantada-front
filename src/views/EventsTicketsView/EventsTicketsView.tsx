@@ -253,10 +253,19 @@ const createDefaultMenuTemplateDraft = (): TicketMenuTemplateDraft => ({
 const summarizeEventDailyCapacity = (eventItem: VenueEvent): Array<[string, number]> => {
   const dailyMap = new Map<string, number>();
 
-  for (const ticketType of eventItem.ticketTypes) {
-    for (const dailyStock of ticketType.dailyStocks) {
-      const currentQuantity = dailyMap.get(dailyStock.date) ?? 0;
-      dailyMap.set(dailyStock.date, currentQuantity + dailyStock.quantity);
+  if (eventItem.hasSessions) {
+    for (const session of eventItem.sessions ?? []) {
+      dailyMap.set(
+        session.date,
+        (dailyMap.get(session.date) ?? 0) + session.capacity,
+      );
+    }
+  } else {
+    for (const ticketType of eventItem.ticketTypes) {
+      for (const dailyStock of ticketType.dailyStocks) {
+        const currentQuantity = dailyMap.get(dailyStock.date) ?? 0;
+        dailyMap.set(dailyStock.date, currentQuantity + dailyStock.quantity);
+      }
     }
   }
 
@@ -2062,7 +2071,9 @@ export const EventsTicketsView = () => {
                     </p>
                     <p>Precio: {ticketType.price || "0"}</p>
                     <p>Cupo total: {ticketType.totalStock.trim() || "No definido"}</p>
-                    <p>Cupos por dia: {ticketType.dailyStocks.length}</p>
+                    {!eventForm.hasSessions && (
+                      <p>Cupos por dia: {ticketType.dailyStocks.length}</p>
+                    )}
                     <p>
                       Menu: {ticketType.menuMode === "CUSTOMIZABLE" ? "Personalizable" : "Fijo"}
                     </p>
@@ -2082,6 +2093,22 @@ export const EventsTicketsView = () => {
               </>
             )}
           </article>
+
+          {!eventForm.isFreeEntry && eventForm.hasSessions && (
+            <article className="event-summary-card">
+              <h3>Jornadas</h3>
+              {expandSessionOccurrences(
+                eventForm,
+                eventFormAvailableDates ?? [],
+              ).map((occurrence) => (
+                <p key={occurrence.key}>
+                  {formatDateKeyLabel(occurrence.date)} {occurrence.startTime}
+                  {occurrence.endTime ? ` - ${occurrence.endTime}` : ""} |
+                  Capacidad: {occurrence.capacity || "0"}
+                </p>
+              ))}
+            </article>
+          )}
         </div>
       </Stack>
     );
@@ -2191,7 +2218,7 @@ export const EventsTicketsView = () => {
 
                         {dailyCapacityPreview.length > 0 && (
                           <Typography variant="body2">
-                            Cupos por dia:{" "}
+                            {eventItem.hasSessions ? "Capacidad por dia:" : "Cupos por dia:"}{" "}
                             {dailyCapacityPreview
                               .map(
                                 ([date, quantity]) =>
