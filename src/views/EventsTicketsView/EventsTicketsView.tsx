@@ -34,6 +34,7 @@ import {
 } from "../../core/api/events.hooks";
 import type {
   CreateVenueEventPayload,
+  EventSessionPayload,
   EventTicketMenuMode,
   EventTicketMenuSelection,
   EventTicketMenuTemplate,
@@ -66,9 +67,13 @@ import type {
 } from "../../service/events/events.interface";
 import { TicketTypeEditorCard } from "./TicketTypeEditorCard/TicketTypeEditorCard";
 import { SessionsEditor } from "./SessionsEditor/SessionsEditor";
+import { SessionAllocationsEditor } from "./SessionAllocationsEditor/SessionAllocationsEditor";
 import {
   TIME_OPTIONS,
+  buildSessionsPayload,
   createEmptySessionDraft,
+  expandSessionOccurrences,
+  mapEventSessionsToState,
   syncSessionsByDate,
 } from "./eventSessions.utils";
 import "./EventsTicketsView.css";
@@ -618,6 +623,7 @@ const parseTicketTypePayload = (
   index: number,
   eventStartsAtDate: string,
   eventEndsAtDate: string,
+  hasSessions: boolean,
 ): { payload?: EventTicketTypePayload; error?: string } => {
   const typeNumber = index + 1;
   const name = ticketType.name.trim();
@@ -651,40 +657,40 @@ const parseTicketTypePayload = (
     totalStock = parsedTotalStock;
   }
 
-  const dailyStocks = ticketType.dailyStocks
-    .map((dailyStock) => {
-      const quantity = Number(dailyStock.quantity);
+  const dailyStocks = hasSessions
+    ? []
+    : ticketType.dailyStocks
+        .map((dailyStock) => ({
+          date: dailyStock.date,
+          quantity: Number(dailyStock.quantity),
+        }))
+        .filter(
+          (dailyStock) =>
+            dailyStock.date.trim().length > 0 &&
+            Number.isInteger(dailyStock.quantity) &&
+            dailyStock.quantity >= 1,
+        );
 
-      return {
-        date: dailyStock.date,
-        quantity,
-      };
-    })
-    .filter(
-      (dailyStock) =>
-        dailyStock.date.trim().length > 0 &&
-        Number.isInteger(dailyStock.quantity) &&
-        dailyStock.quantity >= 1,
-    );
-
-  if (!totalStock && dailyStocks.length === 0) {
+  if (!hasSessions && !totalStock && dailyStocks.length === 0) {
     return {
       error: `El ticket ${typeNumber} debe tener cupo total o al menos un cupo por dia`,
     };
   }
 
-  const dailyStockValidationError = validateDailyStocks(
-    dailyStocks,
-    typeNumber,
-    eventStartsAtDate,
-    eventEndsAtDate,
-    totalStock,
-  );
+  if (!hasSessions) {
+    const dailyStockValidationError = validateDailyStocks(
+      dailyStocks,
+      typeNumber,
+      eventStartsAtDate,
+      eventEndsAtDate,
+      totalStock,
+    );
 
-  if (dailyStockValidationError) {
-    return {
-      error: dailyStockValidationError,
-    };
+    if (dailyStockValidationError) {
+      return {
+        error: dailyStockValidationError,
+      };
+    }
   }
 
   const promotion = parsePromotionDraft(ticketType, typeNumber, price);
@@ -1409,6 +1415,23 @@ export const EventsTicketsView = () => {
     }));
   };
 
+  const handleAllocationChange = (
+    occurrenceKey: string,
+    ticketTypeId: string,
+    value: string,
+  ) => {
+    setEventForm((previous) => ({
+      ...previous,
+      sessionAllocations: {
+        ...previous.sessionAllocations,
+        [occurrenceKey]: {
+          ...(previous.sessionAllocations[occurrenceKey] ?? {}),
+          [ticketTypeId]: value,
+        },
+      },
+    }));
+  };
+
   useEffect(() => {
     if (!eventForm.hasSessions || eventForm.sameSessionsEveryDay) {
       return;
@@ -1460,6 +1483,7 @@ export const EventsTicketsView = () => {
           index,
           eventForm.startsAtDate,
           eventForm.endsAtDate,
+          eventForm.hasSessions,
         );
 
         if (parsed.error) {
@@ -1478,6 +1502,22 @@ export const EventsTicketsView = () => {
       }
     }
 
+    let sessionsPayload: EventSessionPayload[] | undefined;
+
+    if (!eventForm.isFreeEntry && eventForm.hasSessions) {
+      const sessionsResult = buildSessionsPayload(
+        eventForm,
+        eventFormAvailableDates ?? [],
+      );
+
+      if (sessionsResult.error) {
+        openSnackbar(sessionsResult.error, "error");
+        return null;
+      }
+
+      sessionsPayload = sessionsResult.payload;
+    }
+
     return {
       title,
       description: eventForm.description.trim() || undefined,
@@ -1486,6 +1526,8 @@ export const EventsTicketsView = () => {
       officialImageUrl: eventForm.officialImageUrl.trim() || undefined,
       status: eventForm.status,
       isFreeEntry: eventForm.isFreeEntry,
+      hasSessions: !eventForm.isFreeEntry && eventForm.hasSessions,
+      sessions: sessionsPayload,
       ticketTypes,
     };
   };
@@ -1514,6 +1556,24 @@ export const EventsTicketsView = () => {
     const startsAt = toDateAndTime(eventItem.startsAt);
     const endsAt = toDateAndTime(eventItem.endsAt);
 
+    const ticketTypeDrafts =
+      eventItem.ticketTypes.length > 0
+        ? eventItem.ticketTypes.map((ticketType) =>
+            mapEventTicketTypeToDraft(ticketType, startsAt.date || getTodayDate()),
+          )
+        : [createEmptyTicketType()];
+
+    const ticketTypeIdToDraftId: Record<string, string> = {};
+
+    eventItem.ticketTypes.forEach((ticketType, index) => {
+      ticketTypeIdToDraftId[ticketType.id] = ticketTypeDrafts[index].id;
+    });
+
+    const sessionState = mapEventSessionsToState(
+      eventItem.sessions ?? [],
+      ticketTypeIdToDraftId,
+    );
+
     setEditingEventId(eventItem.id);
     setWizardStep(0);
     setEventForm({
@@ -1526,17 +1586,12 @@ export const EventsTicketsView = () => {
       officialImageUrl: eventItem.officialImageUrl ?? "",
       status: eventItem.status,
       isFreeEntry: eventItem.isFreeEntry,
-      hasSessions: false,
-      sameSessionsEveryDay: true,
-      baseSessions: [],
-      sessionsByDate: {},
-      sessionAllocations: {},
-      ticketTypes:
-        eventItem.ticketTypes.length > 0
-          ? eventItem.ticketTypes.map((ticketType) =>
-              mapEventTicketTypeToDraft(ticketType, startsAt.date || getTodayDate()),
-            )
-          : [createEmptyTicketType()],
+      hasSessions: eventItem.hasSessions,
+      sameSessionsEveryDay: false,
+      baseSessions: [createEmptySessionDraft()],
+      sessionsByDate: sessionState.sessionsByDate,
+      sessionAllocations: sessionState.sessionAllocations,
+      ticketTypes: ticketTypeDrafts,
     });
     setIsEventModalOpen(true);
   };
@@ -1926,6 +1981,7 @@ export const EventsTicketsView = () => {
               ticketType={ticketType}
               index={index}
               availableDateKeys={eventFormAvailableDates}
+              hideDailyStocks={eventForm.hasSessions}
               onRemoveTicketType={handleRemoveTicketType}
               onTicketTypeFieldChange={handleTicketTypeFieldChange}
               onAddDailyStock={handleAddDailyStock}
@@ -1939,6 +1995,19 @@ export const EventsTicketsView = () => {
               onMenuOptionFieldChange={handleMenuOptionFieldChange}
             />
           ))}
+
+          {eventForm.hasSessions && (
+            <SessionAllocationsEditor
+              occurrences={expandSessionOccurrences(
+                eventForm,
+                eventFormAvailableDates ?? [],
+              )}
+              ticketTypes={eventForm.ticketTypes}
+              sessionAllocations={eventForm.sessionAllocations}
+              formatDateLabel={formatDateKeyLabel}
+              onAllocationChange={handleAllocationChange}
+            />
+          )}
         </Stack>
       );
     }

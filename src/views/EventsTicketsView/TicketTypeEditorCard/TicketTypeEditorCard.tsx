@@ -23,6 +23,7 @@ export const TicketTypeEditorCard = ({
   ticketType,
   index,
   availableDateKeys,
+  hideDailyStocks,
   onRemoveTicketType,
   onTicketTypeFieldChange,
   onAddDailyStock,
@@ -386,67 +387,71 @@ export const TicketTypeEditorCard = ({
           </Stack>
         )}
 
-        <Divider />
+        {!hideDailyStocks && (
+          <>
+            <Divider />
 
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography fontWeight={700}>Cupos por dia</Typography>
-          <Button
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={() => onAddDailyStock(ticketType.id)}
-          >
-            Agregar dia
-          </Button>
-        </Stack>
-
-        <Stack spacing={1}>
-          {ticketType.dailyStocks.map((dailyStock, dailyStockIndex) => (
-            <Stack
-              key={dailyStock.id}
-              direction={{ xs: "column", md: "row" }}
-              spacing={1}
-              alignItems={{ md: "center" }}
-            >
-              <CustomCalendarV2
-                label={`Dia ${dailyStockIndex + 1}`}
-                placeholder="Selecciona fecha"
-                initialDate={parseLocalDateString(dailyStock.date) ?? undefined}
-                availableDates={availableDateKeys}
-                onSave={(date) => {
-                  onDailyStockFieldChange(
-                    ticketType.id,
-                    dailyStock.id,
-                    "date",
-                    date ? toLocalDateString(date) : "",
-                  );
-                }}
-              />
-
-              <TextField
-                label="Cantidad"
-                type="number"
-                value={dailyStock.quantity}
-                onChange={(event) =>
-                  onDailyStockFieldChange(
-                    ticketType.id,
-                    dailyStock.id,
-                    "quantity",
-                    event.target.value,
-                  )
-                }
-                slotProps={{ htmlInput: { min: 1, step: 1 } }}
-                sx={{ minWidth: 160 }}
-              />
-
-              <IconButton
-                onClick={() => onRemoveDailyStock(ticketType.id, dailyStock.id)}
-                aria-label={`Eliminar cupo del dia ${dailyStockIndex + 1}`}
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Typography fontWeight={700}>Cupos por dia</Typography>
+              <Button
+                size="small"
+                startIcon={<AddIcon />}
+                onClick={() => onAddDailyStock(ticketType.id)}
               >
-                <DeleteIcon />
-              </IconButton>
+                Agregar dia
+              </Button>
             </Stack>
-          ))}
-        </Stack>
+
+            <Stack spacing={1}>
+              {ticketType.dailyStocks.map((dailyStock, dailyStockIndex) => (
+                <Stack
+                  key={dailyStock.id}
+                  direction={{ xs: "column", md: "row" }}
+                  spacing={1}
+                  alignItems={{ md: "center" }}
+                >
+                  <CustomCalendarV2
+                    label={`Dia ${dailyStockIndex + 1}`}
+                    placeholder="Selecciona fecha"
+                    initialDate={parseLocalDateString(dailyStock.date) ?? undefined}
+                    availableDates={availableDateKeys}
+                    onSave={(date) => {
+                      onDailyStockFieldChange(
+                        ticketType.id,
+                        dailyStock.id,
+                        "date",
+                        date ? toLocalDateString(date) : "",
+                      );
+                    }}
+                  />
+
+                  <TextField
+                    label="Cantidad"
+                    type="number"
+                    value={dailyStock.quantity}
+                    onChange={(event) =>
+                      onDailyStockFieldChange(
+                        ticketType.id,
+                        dailyStock.id,
+                        "quantity",
+                        event.target.value,
+                      )
+                    }
+                    slotProps={{ htmlInput: { min: 1, step: 1 } }}
+                    sx={{ minWidth: 160 }}
+                  />
+
+                  <IconButton
+                    onClick={() => onRemoveDailyStock(ticketType.id, dailyStock.id)}
+                    aria-label={`Eliminar cupo del dia ${dailyStockIndex + 1}`}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Stack>
+              ))}
+            </Stack>
+          </>
+        )}
       </Stack>
     </Paper>
   );
