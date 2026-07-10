@@ -62,8 +62,15 @@ import type {
   TicketTypeDraft,
   EventFormState,
   TicketFormState,
+  SessionDraft,
 } from "../../service/events/events.interface";
 import { TicketTypeEditorCard } from "./TicketTypeEditorCard/TicketTypeEditorCard";
+import { SessionsEditor } from "./SessionsEditor/SessionsEditor";
+import {
+  TIME_OPTIONS,
+  createEmptySessionDraft,
+  syncSessionsByDate,
+} from "./eventSessions.utils";
 import "./EventsTicketsView.css";
 
 const MENU_GROUP_PRESETS: Array<{ key: string; label: string }> = [
@@ -102,17 +109,6 @@ const WIZARD_STEPS: Array<{ value: EventWizardStep; label: string }> = [
   { value: 1, label: "Tickets y cupos" },
   { value: 2, label: "Confirmacion" },
 ];
-
-const TIME_OPTIONS = Array.from({ length: 48 }, (_, index) => {
-  const hours = String(Math.floor(index / 2)).padStart(2, "0");
-  const minutes = index % 2 === 0 ? "00" : "30";
-  const value = `${hours}:${minutes}`;
-
-  return {
-    value,
-    label: value,
-  };
-});
 
 const getTodayDate = (): string => toLocalDateString(new Date());
 
@@ -334,7 +330,7 @@ const createInitialEventForm = (): EventFormState => {
     isFreeEntry: false,
     hasSessions: false,
     sameSessionsEveryDay: true,
-    baseSessions: [],
+    baseSessions: [createEmptySessionDraft()],
     sessionsByDate: {},
     sessionAllocations: {},
     ticketTypes: [createEmptyTicketType()],
@@ -1377,6 +1373,58 @@ export const EventsTicketsView = () => {
     });
   };
 
+  const handleToggleHasSessions = (checked: boolean) => {
+    setEventForm((previous) => ({
+      ...previous,
+      hasSessions: checked,
+      baseSessions:
+        previous.baseSessions.length > 0
+          ? previous.baseSessions
+          : [createEmptySessionDraft()],
+    }));
+  };
+
+  const handleToggleSameEveryDay = (checked: boolean) => {
+    setEventForm((previous) => ({
+      ...previous,
+      sameSessionsEveryDay: checked,
+      sessionsByDate: checked
+        ? previous.sessionsByDate
+        : syncSessionsByDate(
+            previous.sessionsByDate,
+            eventFormAvailableDates ?? [],
+            previous.baseSessions,
+          ),
+    }));
+  };
+
+  const handleBaseSessionsChange = (sessions: SessionDraft[]) => {
+    setEventForm((previous) => ({ ...previous, baseSessions: sessions }));
+  };
+
+  const handleDaySessionsChange = (date: string, sessions: SessionDraft[]) => {
+    setEventForm((previous) => ({
+      ...previous,
+      sessionsByDate: { ...previous.sessionsByDate, [date]: sessions },
+    }));
+  };
+
+  useEffect(() => {
+    if (!eventForm.hasSessions || eventForm.sameSessionsEveryDay) {
+      return;
+    }
+
+    setEventForm((previous) => ({
+      ...previous,
+      sessionsByDate: syncSessionsByDate(
+        previous.sessionsByDate,
+        eventFormAvailableDates ?? [],
+        previous.baseSessions,
+      ),
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventFormAvailableDates]);
+
   const buildEventPayload = (): CreateVenueEventPayload | null => {
     const title = eventForm.title.trim();
 
@@ -1678,6 +1726,7 @@ export const EventsTicketsView = () => {
                   setEventForm((previous) => ({
                     ...previous,
                     isFreeEntry: event.target.checked,
+                    hasSessions: event.target.checked ? false : previous.hasSessions,
                   }))
                 }
               />
@@ -1689,6 +1738,18 @@ export const EventsTicketsView = () => {
             <Typography variant="body2" color="text.secondary">
               Este evento no considerara tipos de ticket ni cupos por dia.
             </Typography>
+          )}
+
+          {!eventForm.isFreeEntry && (
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={eventForm.hasSessions}
+                  onChange={(event) => handleToggleHasSessions(event.target.checked)}
+                />
+              }
+              label="Jornadas por dia (multiples horarios)"
+            />
           )}
 
           <TextField
@@ -1818,6 +1879,19 @@ export const EventsTicketsView = () => {
               ))}
             </TextField>
           </Stack>
+
+          {!eventForm.isFreeEntry && eventForm.hasSessions && (
+            <SessionsEditor
+              sameSessionsEveryDay={eventForm.sameSessionsEveryDay}
+              baseSessions={eventForm.baseSessions}
+              sessionsByDate={eventForm.sessionsByDate}
+              dateKeys={eventFormAvailableDates ?? []}
+              formatDateLabel={formatDateKeyLabel}
+              onToggleSameEveryDay={handleToggleSameEveryDay}
+              onBaseSessionsChange={handleBaseSessionsChange}
+              onDaySessionsChange={handleDaySessionsChange}
+            />
+          )}
         </Stack>
       );
     }
