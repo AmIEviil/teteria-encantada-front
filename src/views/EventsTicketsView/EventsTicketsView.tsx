@@ -367,12 +367,14 @@ const createInitialTicketForm = (selectedEvent: VenueEvent | null): TicketFormSt
 
   return {
     ticketTypeId: defaultTicketType?.id ?? "",
+    sessionId: selectedEvent?.hasSessions
+      ? (selectedEvent.sessions[0]?.id ?? "")
+      : "",
     attendeeFirstName: "",
     attendeeLastName: "",
     attendanceDate: defaultDate,
     quantity: "1",
     applyPromotion: false,
-    sessionId: "",
     menuSelectionByGroup,
   };
 };
@@ -1684,7 +1686,12 @@ export const EventsTicketsView = () => {
       return;
     }
 
-    if (!ticketForm.attendanceDate) {
+    if (ticketsModalEvent.hasSessions) {
+      if (!ticketForm.sessionId) {
+        openSnackbar("Debes seleccionar una jornada", "error");
+        return;
+      }
+    } else if (!ticketForm.attendanceDate) {
       openSnackbar("Debes indicar fecha de asistencia", "error");
       return;
     }
@@ -1693,7 +1700,9 @@ export const EventsTicketsView = () => {
       ticketTypeId: ticketForm.ticketTypeId,
       attendeeFirstName,
       attendeeLastName,
-      attendanceDate: `${ticketForm.attendanceDate}T00:00:00`,
+      ...(ticketsModalEvent.hasSessions
+        ? { sessionId: ticketForm.sessionId }
+        : { attendanceDate: `${ticketForm.attendanceDate}T00:00:00` }),
     };
 
     const menuSelectionPayload = buildTicketMenuSelectionPayload(
@@ -1734,7 +1743,8 @@ export const EventsTicketsView = () => {
           ticketTypeId: basePayload.ticketTypeId ?? "",
           attendeeFirstName: basePayload.attendeeFirstName ?? "",
           attendeeLastName: basePayload.attendeeLastName ?? "",
-          attendanceDate: basePayload.attendanceDate ?? "",
+          attendanceDate: basePayload.attendanceDate,
+          sessionId: basePayload.sessionId,
           quantity: promotionPayload.quantity,
           applyPromotion: promotionPayload.applyPromotion,
           menuSelection: basePayload.menuSelection,
@@ -2387,18 +2397,44 @@ export const EventsTicketsView = () => {
                     ))}
                   </TextField>
 
-                  <CustomCalendarV2
-                    label="Fecha asistencia"
-                    placeholder="Selecciona fecha"
-                    initialDate={parseLocalDateString(ticketForm.attendanceDate) ?? undefined}
-                    availableDates={ticketsModalEventAvailableDates}
-                    onSave={(date) =>
-                      setTicketForm((previous) => ({
-                        ...previous,
-                        attendanceDate: date ? toLocalDateString(date) : "",
-                      }))
-                    }
-                  />
+                  {ticketsModalEvent.hasSessions ? (
+                    <TextField
+                      select
+                      label="Jornada"
+                      value={ticketForm.sessionId}
+                      onChange={(event) =>
+                        setTicketForm((previous) => ({
+                          ...previous,
+                          sessionId: event.target.value,
+                        }))
+                      }
+                      fullWidth
+                    >
+                      <MenuItem value="">Seleccionar</MenuItem>
+                      {ticketsModalEvent.sessions.map((session) => (
+                        <MenuItem key={session.id} value={session.id}>
+                          {formatDateKeyLabel(session.date)} {session.startTime}
+                          {session.endTime ? ` - ${session.endTime}` : ""} (cap.{" "}
+                          {session.capacity})
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  ) : (
+                    <CustomCalendarV2
+                      label="Fecha asistencia"
+                      placeholder="Selecciona fecha"
+                      initialDate={
+                        parseLocalDateString(ticketForm.attendanceDate) ?? undefined
+                      }
+                      availableDates={ticketsModalEventAvailableDates}
+                      onSave={(date) =>
+                        setTicketForm((previous) => ({
+                          ...previous,
+                          attendanceDate: date ? toLocalDateString(date) : "",
+                        }))
+                      }
+                    />
+                  )}
                 </Stack>
 
                 <Stack direction={{ xs: "column", md: "row" }} spacing={1.25}>
@@ -2640,6 +2676,11 @@ export const EventsTicketsView = () => {
                 <div className="event-ticket-grid">
                   {tickets.map((ticket) => {
                     const ticketTypeName = ticket.ticketType?.name || "Sin tipo";
+                    const ticketSession = ticket.sessionId
+                      ? ticketsModalEvent.sessions.find(
+                          (session) => session.id === ticket.sessionId,
+                        )
+                      : undefined;
 
                     return (
                       <article key={ticket.id} className="event-ticket-card">
@@ -2651,6 +2692,7 @@ export const EventsTicketsView = () => {
                         </p>
                         <p>
                           <strong>Fecha:</strong> {toDateOnlyKey(ticket.attendanceDate)}
+                          {ticketSession ? ` ${ticketSession.startTime}` : ""}
                         </p>
                         <p>
                           <strong>Precio:</strong> {formatCurrency(ticket.price)}
