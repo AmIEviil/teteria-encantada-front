@@ -4,6 +4,7 @@ import {
   buildSessionsPayload,
   expandSessionOccurrences,
   mapEventSessionsToState,
+  seedSessionsByDate,
   syncSessionsByDate,
 } from "./eventSessions.utils";
 import type {
@@ -73,20 +74,32 @@ describe("expandSessionOccurrences", () => {
 });
 
 describe("syncSessionsByDate", () => {
-  it("mantiene dias existentes, agrega nuevos desde base y descarta fuera de rango", () => {
+  it("mantiene dias existentes, rellena con arreglo vacio los dias nuevos y descarta fuera de rango", () => {
     const existing = baseSession({ startTime: "18:00" });
-    const base = baseSession({ startTime: "12:00" });
 
     const next = syncSessionsByDate(
       { "2026-07-09": [existing], "2026-07-01": [baseSession()] },
       ["2026-07-09", "2026-07-10"],
-      [base],
     );
 
     expect(next["2026-07-09"][0].startTime).toBe("18:00");
-    expect(next["2026-07-10"][0].startTime).toBe("12:00");
-    expect(next["2026-07-10"][0].id).not.toBe(base.id);
+    expect(next["2026-07-10"]).toEqual([]);
     expect(next["2026-07-01"]).toBeUndefined();
+  });
+});
+
+describe("seedSessionsByDate", () => {
+  it("rellena cada fecha con clones de las jornadas base con ids nuevos", () => {
+    const base = baseSession({ startTime: "12:00" });
+
+    const next = seedSessionsByDate(["2026-07-09", "2026-07-10"], [base]);
+
+    expect(next["2026-07-09"]).toHaveLength(1);
+    expect(next["2026-07-10"]).toHaveLength(1);
+    expect(next["2026-07-09"][0].startTime).toBe("12:00");
+    expect(next["2026-07-09"][0].id).not.toBe(base.id);
+    expect(next["2026-07-10"][0].id).not.toBe(base.id);
+    expect(next["2026-07-09"][0].id).not.toBe(next["2026-07-10"][0].id);
   });
 });
 
@@ -186,5 +199,85 @@ describe("mapEventSessionsToState", () => {
     expect(
       state.sessionAllocations[buildOccurrenceKey("2026-07-09", draft.id)],
     ).toEqual({ "draft-a": "5" });
+  });
+});
+
+describe("regresion: dias sin jornadas al editar un evento", () => {
+  it("no agrega jornadas fantasma en dias sin sesiones y reproduce las sesiones originales", () => {
+    const sessions: EventSession[] = [
+      {
+        id: "ss-1",
+        eventId: "ev-1",
+        date: "2026-07-09",
+        startTime: "12:00",
+        endTime: "15:00",
+        capacity: 30,
+        allocations: [
+          {
+            id: "al-1",
+            sessionId: "ss-1",
+            ticketTypeId: "tt-real",
+            quantity: 5,
+          },
+        ],
+        createdAt: "",
+        updatedAt: "",
+      },
+      {
+        id: "ss-2",
+        eventId: "ev-1",
+        date: "2026-07-10",
+        startTime: "18:00",
+        endTime: null,
+        capacity: 10,
+        allocations: [],
+        createdAt: "",
+        updatedAt: "",
+      },
+    ];
+
+    const ticketTypeIdToDraftId = { "tt-real": "draft-a" };
+    const state = mapEventSessionsToState(sessions, ticketTypeIdToDraftId);
+
+    // Incluye una fecha del evento sin ninguna sesion guardada (dia 3).
+    const dateKeys = ["2026-07-09", "2026-07-10", "2026-07-11"];
+
+    // Simula el useEffect de auto-sync que corre al abrir el modal de edicion.
+    const syncedSessionsByDate = syncSessionsByDate(
+      state.sessionsByDate,
+      dateKeys,
+    );
+
+    expect(syncedSessionsByDate["2026-07-11"]).toEqual([]);
+
+    const form = baseForm({
+      sameSessionsEveryDay: false,
+      baseSessions: [],
+      sessionsByDate: syncedSessionsByDate,
+      sessionAllocations: state.sessionAllocations,
+      ticketTypes: [
+        { id: "draft-a" } as EventFormState["ticketTypes"][number],
+      ],
+    });
+
+    const result = buildSessionsPayload(form, dateKeys);
+
+    expect(result.error).toBeUndefined();
+    expect(result.payload).toEqual([
+      {
+        date: "2026-07-09",
+        startTime: "12:00",
+        endTime: "15:00",
+        capacity: 30,
+        allocations: [{ ticketTypeIndex: 0, quantity: 5 }],
+      },
+      {
+        date: "2026-07-10",
+        startTime: "18:00",
+        endTime: undefined,
+        capacity: 10,
+        allocations: undefined,
+      },
+    ]);
   });
 });

@@ -74,6 +74,7 @@ import {
   createEmptySessionDraft,
   expandSessionOccurrences,
   mapEventSessionsToState,
+  seedSessionsByDate,
   syncSessionsByDate,
 } from "./eventSessions.utils";
 import "./EventsTicketsView.css";
@@ -1402,17 +1403,35 @@ export const EventsTicketsView = () => {
   };
 
   const handleToggleSameEveryDay = (checked: boolean) => {
-    setEventForm((previous) => ({
-      ...previous,
-      sameSessionsEveryDay: checked,
-      sessionsByDate: checked
-        ? previous.sessionsByDate
-        : syncSessionsByDate(
-            previous.sessionsByDate,
-            eventFormAvailableDates ?? [],
-            previous.baseSessions,
-          ),
-    }));
+    setEventForm((previous) => {
+      if (checked) {
+        const firstNonEmptyDate = Object.keys(previous.sessionsByDate)
+          .sort()
+          .find((date) => (previous.sessionsByDate[date] ?? []).length > 0);
+
+        const baseSessions = firstNonEmptyDate
+          ? previous.sessionsByDate[firstNonEmptyDate].map((session) => ({
+              ...session,
+              id: crypto.randomUUID(),
+            }))
+          : previous.baseSessions;
+
+        return {
+          ...previous,
+          sameSessionsEveryDay: checked,
+          baseSessions,
+        };
+      }
+
+      return {
+        ...previous,
+        sameSessionsEveryDay: checked,
+        sessionsByDate: seedSessionsByDate(
+          eventFormAvailableDates ?? [],
+          previous.baseSessions,
+        ),
+      };
+    });
   };
 
   const handleBaseSessionsChange = (sessions: SessionDraft[]) => {
@@ -1453,7 +1472,6 @@ export const EventsTicketsView = () => {
       sessionsByDate: syncSessionsByDate(
         previous.sessionsByDate,
         eventFormAvailableDates ?? [],
-        previous.baseSessions,
       ),
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps

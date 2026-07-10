@@ -64,17 +64,27 @@ export const expandSessionOccurrences = (
 export const syncSessionsByDate = (
   previous: Record<string, SessionDraft[]>,
   dateKeys: string[],
+): Record<string, SessionDraft[]> => {
+  const next: Record<string, SessionDraft[]> = {};
+
+  for (const date of dateKeys) {
+    next[date] = previous[date] ?? [];
+  }
+
+  return next;
+};
+
+export const seedSessionsByDate = (
+  dateKeys: string[],
   baseSessions: SessionDraft[],
 ): Record<string, SessionDraft[]> => {
   const next: Record<string, SessionDraft[]> = {};
 
   for (const date of dateKeys) {
-    next[date] =
-      previous[date] ??
-      baseSessions.map((session) => ({
-        ...session,
-        id: crypto.randomUUID(),
-      }));
+    next[date] = baseSessions.map((session) => ({
+      ...session,
+      id: crypto.randomUUID(),
+    }));
   }
 
   return next;
