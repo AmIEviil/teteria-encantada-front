@@ -44,7 +44,6 @@ const PRODUCT_VIEW_MODAL_KEY = "product-view-modal";
 const PRODUCT_DELETE_MODAL_KEY = "product-delete-modal";
 
 interface ProductFormState {
-  code: string;
   name: string;
   description: string;
   image: { id: string; url: string } | null;
@@ -56,7 +55,6 @@ interface ProductFormState {
 }
 
 const emptyProductForm: ProductFormState = {
-  code: "",
   name: "",
   description: "",
   image: null,
@@ -68,7 +66,6 @@ const emptyProductForm: ProductFormState = {
 };
 
 const mapProductToForm = (product: Product): ProductFormState => ({
-  code: product.code,
   name: product.name,
   description: product.description ?? "",
   image:
@@ -190,7 +187,7 @@ export const BodyInventory = () => {
     return allProducts.filter((product) => {
       const matchesSearch =
         normalizedSearch.length === 0 ||
-        `${product.code} ${product.name} ${product.description ?? ""}`
+        `${product.name} ${product.description ?? ""}`
           .toLowerCase()
           .includes(normalizedSearch);
 
@@ -253,8 +250,8 @@ export const BodyInventory = () => {
   };
 
   const validateForm = (): boolean => {
-    if (!formState.code.trim() || !formState.name.trim()) {
-      setValidationError("Codigo y nombre son obligatorios");
+    if (!formState.name.trim()) {
+      setValidationError("El nombre es obligatorio");
       return false;
     }
 
@@ -284,7 +281,6 @@ export const BodyInventory = () => {
     }
 
     const basePayload = {
-      code: formState.code.trim(),
       name: formState.name.trim(),
       description: formState.description.trim() || undefined,
       price: parsePositiveNumber(formState.price),
@@ -387,7 +383,7 @@ export const BodyInventory = () => {
             label="Buscar producto"
             value={searchValue}
             onChange={(event) => setSearchValue(event.target.value)}
-            placeholder="Codigo, nombre o descripcion"
+            placeholder="Nombre o descripcion"
             fullWidth
           />
           <TextField
@@ -512,9 +508,6 @@ export const BodyInventory = () => {
                     </TableCell>
                     <TableCell>
                       <Typography fontWeight={700}>{product.name}</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Codigo: {product.code}
-                      </Typography>
                       {product.description ? (
                         <Typography variant="caption" display="block" color="text.secondary">
                           {product.description}
@@ -591,12 +584,6 @@ export const BodyInventory = () => {
         </DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1}>
-            <TextField
-              label="Codigo"
-              value={formState.code}
-              onChange={(event) => handleFieldChange("code", event.target.value)}
-              fullWidth
-            />
             <TextField
               label="Nombre"
               value={formState.name}
@@ -744,9 +731,6 @@ export const BodyInventory = () => {
                 <Stack spacing={0.75} minWidth={0}>
                   <Typography variant="h6" className="inventoryDetailName">
                     {productForView.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Codigo: {productForView.code}
                   </Typography>
                   <Stack direction="row" spacing={1} flexWrap="wrap">
                     <Chip

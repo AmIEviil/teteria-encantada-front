@@ -1,5 +1,13 @@
 import { roles } from "../utils/role.utils";
 
+interface IRoute {
+  name: string;
+  path: string;
+  icon: string;
+  canAccess: string[];
+  onClick?: () => void;
+}
+
 export const PAGE_ROUTES = {
   Login: "/login",
   PublicLogin: "/acceso",
@@ -19,11 +27,12 @@ export const PAGE_ROUTES = {
   Fidelizacion: "/fidelizacion",
   MisPuntos: "/mis-puntos",
   PublicReservas: "/publico/reservas",
+  PublicEvents: "/publico/eventos",
   PublicCarta: "/publico/carta",
   PublicMisPuntos: "/publico/mis-puntos",
 };
 
-export const topbarOptions = [
+export const topbarOptions: IRoute[] = [
   {
     name: "Inicio",
     path: "/",
@@ -72,22 +81,61 @@ export const topbarOptions = [
     canAccess: [roles.SUPER_ADMIN],
     icon: "migration",
   },
-  {
-    name: "Fidelización",
-    path: PAGE_ROUTES.Fidelizacion,
-    canAccess: [roles.SUPER_ADMIN, roles.ADMIN],
-    icon: "loyalty",
-  },
-  {
-    name: "Mis puntos",
-    path: PAGE_ROUTES.MisPuntos,
-    canAccess: [roles.SUPER_ADMIN, roles.ADMIN],
-    icon: "loyalty",
-  },
+  // {
+  //   name: "Fidelización",
+  //   path: PAGE_ROUTES.Fidelizacion,
+  //   canAccess: [roles.SUPER_ADMIN, roles.ADMIN],
+  //   icon: "loyalty",
+  // },
+  // {
+  //   name: "Mis puntos",
+  //   path: PAGE_ROUTES.MisPuntos,
+  //   canAccess: [roles.SUPER_ADMIN, roles.ADMIN],
+  //   icon: "loyalty",
+  // },
   {
     name: "Cerrar Sesión",
     path: PAGE_ROUTES.Login,
     canAccess: [roles.SUPER_ADMIN, roles.ADMIN, roles.TEC],
     icon: "logout",
+  },
+];
+
+export const publicTopbarOptions: IRoute[] = [
+  {
+    name: "Salon de eventos",
+    path: PAGE_ROUTES.PublicReservas,
+    canAccess: [],
+    icon: "reservations",
+  },
+  {
+    name: "Calendario Actividades",
+    path: PAGE_ROUTES.PublicEvents,
+    canAccess: [],
+    icon: "events",
+  },
+  {
+    name: "Instagram",
+    path: PAGE_ROUTES.PublicCarta,
+    onClick: () => {
+      window.open("https://www.instagram.com/clubdearteyte/", "_blank");
+    },
+    canAccess: [],
+    icon: "instagram",
+  },
+  {
+    name: "Tiktok",
+    path: PAGE_ROUTES.PublicMisPuntos,
+    onClick: () => {
+      window.open("https://www.tiktok.com/@clubdearteyte", "_blank");
+    },
+    canAccess: [],
+    icon: "tiktok",
+  },
+  {
+    name: "Galeria Fotos",
+    path: PAGE_ROUTES.PublicMisPuntos,
+    canAccess: [],
+    icon: "gallery",
   },
 ];

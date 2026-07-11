@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import { TeaRoomView } from "./TeaRoomView";
 
 const reservationsQuery = vi.hoisted(() => ({ fn: vi.fn() }));
 const updateMutation = vi.hoisted(() => ({
@@ -20,7 +21,6 @@ vi.mock("../components/teaRoom/components/OrderTaker/OrderTaker", () => ({
   OrderTaker: () => <div>order-taker</div>,
 }));
 
-import { TeaRoomView } from "./TeaRoomView";
 
 beforeEach(() => {
   vi.clearAllMocks();

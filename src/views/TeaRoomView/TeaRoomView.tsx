@@ -16,13 +16,13 @@ import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import ViewSidebarIcon from "@mui/icons-material/ViewSidebar";
 import CloseIcon from "@mui/icons-material/Close";
 import PointOfSaleIcon from "@mui/icons-material/PointOfSale";
-import { FloorPlan } from "../components/teaRoom/FloorPlan/FloorPlan";
-import { OrderTaker } from "../components/teaRoom/components/OrderTaker/OrderTaker";
+import { FloorPlan } from "../../components/teaRoom/FloorPlan/FloorPlan";
+import { OrderTaker } from "../../components/teaRoom/components/OrderTaker/OrderTaker";
 import {
   useReservationsQuery,
   useUpdateReservationMutation,
-} from "../core/api/reservations.hooks";
-import type { Reservation } from "../core/api/types";
+} from "../../core/api/reservations.hooks";
+import type { Reservation } from "../../core/api/types";
 import "./TeaRoomView.css";
 
 const DEFAULT_WAITING_WINDOW_MS = 15 * 60 * 1000;

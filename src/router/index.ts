@@ -13,19 +13,19 @@ const BodyLayout = lazy(() =>
 
 // Views
 const TeaRoomView = lazy(() =>
-  import("../views/TeaRoomView.tsx").then((module) => ({
+  import("../views/TeaRoomView/TeaRoomView.tsx").then((module) => ({
     default: module.TeaRoomView,
   })),
 );
 
 const InventoryView = lazy(() =>
-  import("../views/InventoryView.tsx").then((module) => ({
+  import("../views/admin/EmployeesView/InventoryView.tsx").then((module) => ({
     default: module.InventoryView,
   })),
 );
 
 const ReservationsView = lazy(() =>
-  import("../views/ReservationsView.tsx").then((module) => ({
+  import("../views/ReservationsView/ReservationsView.tsx").then((module) => ({
     default: module.ReservationsView,
   })),
 );
@@ -37,13 +37,13 @@ const EventsTicketsView = lazy(() =>
 );
 
 const SalesReportView = lazy(() =>
-  import("../views/SalesReportView.tsx").then((module) => ({
+  import("../views/SalesView/SalesReportView.tsx").then((module) => ({
     default: module.SalesReportView,
   })),
 );
 
 const EmpleadosView = lazy(() =>
-  import("../views/EmpleadosView.tsx").then((module) => ({
+  import("../views/admin/EmployeesView/EmpleadosView.tsx").then((module) => ({
     default: module.EmpleadosView,
   })),
 );
@@ -109,20 +109,28 @@ const ForbiddenView = lazy(() =>
 );
 
 const PublicReservationsView = lazy(() =>
-  import("../views/PublicReservationsView.tsx").then((module) => ({
-    default: module.PublicReservationsView,
-  })),
+  import("../views/public/reservations/PublicReservationsView.tsx").then(
+    (module) => ({
+      default: module.PublicReservationsView,
+    }),
+  ),
 );
 
 const PublicMenuView = lazy(() =>
-  import("../views/PublicMenuView.tsx").then((module) => ({
+  import("../views/public/menu/PublicMenuView.tsx").then((module) => ({
     default: module.PublicMenuView,
   })),
 );
 
 const PublicLoyaltyView = lazy(() =>
-  import("../views/PublicLoyaltyView.tsx").then((module) => ({
+  import("../views/public/loyalty/PublicLoyaltyView.tsx").then((module) => ({
     default: module.PublicLoyaltyView,
+  })),
+);
+
+const PublicEventsView = lazy(() =>
+  import("../views/public/events/PublicEventsView.tsx").then((module) => ({
+    default: module.PublicEventsView,
   })),
 );
 
@@ -147,6 +155,12 @@ const AuthenticatedLayout = () =>
     { allowedRoles: [], redirectPath: PAGE_ROUTES.Login },
     createElement(BodyLayout),
   );
+
+const PublicLayout = lazy(() =>
+  import("../components/layout/PublicLayout.tsx").then((module) => ({
+    default: module.PublicLayout,
+  })),
+);
 
 const TeaRoomProtected = withRoles(TeaRoomView, [
   roles.SUPER_ADMIN,
@@ -183,7 +197,9 @@ const LoyaltyProtected = withRoles(LoyaltyView, [
   roles.ADMIN,
 ]);
 
-const DefaultRedirect = () => createElement(Navigate, { to: "/", replace: true });
+const DefaultRedirect = () =>
+  createElement(Navigate, { to: "/", replace: true });
+
 const PublicRedirect = () =>
   createElement(Navigate, { to: PAGE_ROUTES.PublicReservas, replace: true });
 
@@ -219,23 +235,33 @@ export const router = createBrowserRouter(
     },
     {
       path: "/publico",
-      Component: PublicRedirect,
-    },
-    {
-      path: PAGE_ROUTES.PublicReservas,
-      Component: PublicReservationsView,
-    },
-    {
-      path: PAGE_ROUTES.PublicCarta,
-      Component: PublicMenuView,
-    },
-    {
-      path: PAGE_ROUTES.PublicMisPuntos,
-      Component: withRoles(
-        PublicLoyaltyView,
-        [roles.CLIENT],
-        PAGE_ROUTES.PublicLogin,
-      ),
+      Component: PublicLayout,
+      children: [
+        {
+          index: true,
+          Component: PublicRedirect,
+        },
+        {
+          path: PAGE_ROUTES.PublicReservas,
+          Component: PublicReservationsView,
+        },
+        {
+          path: PAGE_ROUTES.PublicCarta,
+          Component: PublicMenuView,
+        },
+        {
+          path: PAGE_ROUTES.PublicEvents,
+          Component: PublicEventsView,
+        },
+        {
+          path: PAGE_ROUTES.PublicMisPuntos,
+          Component: withRoles(
+            PublicLoyaltyView,
+            [roles.CLIENT],
+            PAGE_ROUTES.PublicLogin,
+          ),
+        },
+      ],
     },
     {
       path: "/",

@@ -5,7 +5,9 @@ import { StorageUtils } from "../../utils/StorageUtils";
 import { roles } from "../../utils/role.utils";
 
 const getLinkClassName = ({ isActive }: { isActive: boolean }) => {
-  return isActive ? "publicHeaderLink publicHeaderLink--active" : "publicHeaderLink";
+  return isActive
+    ? "publicHeaderLink publicHeaderLink--active"
+    : "publicHeaderLink";
 };
 
 export const PublicHeader = () => {
@@ -36,9 +38,15 @@ export const PublicHeader = () => {
         <NavLink to={PAGE_ROUTES.PublicCarta} className={getLinkClassName}>
           Carta
         </NavLink>
+        <NavLink to={PAGE_ROUTES.PublicEvents} className={getLinkClassName}>
+          Events
+        </NavLink>
         {isClient ? (
           <>
-            <NavLink to={PAGE_ROUTES.PublicMisPuntos} className={getLinkClassName}>
+            <NavLink
+              to={PAGE_ROUTES.PublicMisPuntos}
+              className={getLinkClassName}
+            >
               Mis puntos
             </NavLink>
             <button

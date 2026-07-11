@@ -4,6 +4,7 @@ import type { CreateReservationPayload, FindPublicReservationsFilters } from "./
 
 const PUBLIC_MENU_QUERY_KEY = ["public-menu"] as const;
 const PUBLIC_TABLES_QUERY_KEY = ["public-tables"] as const;
+const PUBLIC_EVENTS_QUERY_KEY = ["public-events"] as const;
 const PUBLIC_RESERVATIONS_QUERY_KEY = ["public-reservations"] as const;
 const PUBLIC_RESERVATIONS_SCHEDULE_QUERY_KEY = ["public-reservations-schedule"] as const;
 
@@ -18,6 +19,13 @@ export const usePublicTablesQuery = () => {
   return useQuery({
     queryKey: PUBLIC_TABLES_QUERY_KEY,
     queryFn: publicService.findTables,
+  });
+};
+
+export const usePublicEventsQuery = () => {
+  return useQuery({
+    queryKey: PUBLIC_EVENTS_QUERY_KEY,
+    queryFn: publicService.findEvents,
   });
 };
 

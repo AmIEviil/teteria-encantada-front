@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { PAGE_ROUTES } from "../../constant/routes";
 import { useBoundStore } from "../../store/BoundedStore";
 
 interface ProtectedRouteProps {
@@ -29,7 +28,7 @@ export const ProtectedRoute = ({
   if (!isAuthenticated) {
     return (
       <Navigate
-        to={PAGE_ROUTES.Login}
+        to={redirectPath}
         state={{ from: location }}
         replace
       />

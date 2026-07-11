@@ -27,6 +27,78 @@ export const createEmptySessionDraft = (startTime = "12:00"): SessionDraft => ({
   capacity: "1",
 });
 
+const hasValidTimeWindow = (minTime: string, maxTime: string): boolean =>
+  Boolean(minTime && maxTime && minTime < maxTime);
+
+const isWithinTimeWindow = (
+  value: string,
+  minTime: string,
+  maxTime: string,
+): boolean =>
+  !hasValidTimeWindow(minTime, maxTime) ||
+  (value >= minTime && value <= maxTime);
+
+// Una jornada sin termino solo bloquea su hora exacta de inicio.
+const isTimeTakenByOthers = (
+  value: string,
+  others: SessionDraft[],
+): boolean =>
+  others.some((other) =>
+    other.endTime
+      ? value >= other.startTime && value < other.endTime
+      : value === other.startTime,
+  );
+
+export const getStartTimeOptions = (
+  session: SessionDraft,
+  sessions: SessionDraft[],
+  minTime: string,
+  maxTime: string,
+): typeof TIME_OPTIONS => {
+  const others = sessions.filter((other) => other.id !== session.id);
+
+  return TIME_OPTIONS.filter(
+    (option) =>
+      option.value === session.startTime ||
+      (isWithinTimeWindow(option.value, minTime, maxTime) &&
+        !isTimeTakenByOthers(option.value, others)),
+  );
+};
+
+export const getEndTimeOptions = (
+  session: SessionDraft,
+  sessions: SessionDraft[],
+  minTime: string,
+  maxTime: string,
+): typeof TIME_OPTIONS => {
+  const nextStart = sessions
+    .filter(
+      (other) =>
+        other.id !== session.id && other.startTime > session.startTime,
+    )
+    .map((other) => other.startTime)
+    .sort()[0];
+
+  return TIME_OPTIONS.filter(
+    (option) =>
+      option.value === session.endTime ||
+      (isWithinTimeWindow(option.value, minTime, maxTime) &&
+        option.value > session.startTime &&
+        (!nextStart || option.value <= nextStart)),
+  );
+};
+
+export const getNextFreeStartTime = (
+  sessions: SessionDraft[],
+  minTime: string,
+  maxTime: string,
+): string =>
+  TIME_OPTIONS.find(
+    (option) =>
+      isWithinTimeWindow(option.value, minTime, maxTime) &&
+      !isTimeTakenByOthers(option.value, sessions),
+  )?.value ?? "12:00";
+
 export const buildOccurrenceKey = (
   date: string,
   sessionDraftId: string,

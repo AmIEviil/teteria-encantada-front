@@ -20,9 +20,9 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import GridViewIcon from "@mui/icons-material/GridView";
-import { CustomCalendarV2 } from "../components/ui/calendar/CustomCalendarV2";
-import { ImageUploadField } from "../components/ui/imageUpload/ImageUploadField";
-import type { UploadedImage } from "../core/api/images.service";
+import { CustomCalendarV2 } from "../../components/ui/calendar/CustomCalendarV2";
+import { ImageUploadField } from "../../components/ui/imageUpload/ImageUploadField";
+import type { UploadedImage } from "../../core/api/images.service";
 import {
   useCreateReservationMutation,
   useDeleteReservationMutation,
@@ -30,22 +30,22 @@ import {
   useReservationsQuery,
   useUpdateReservationScheduleMutation,
   useUpdateReservationMutation,
-} from "../core/api/reservations.hooks";
-import { FloorPlan } from "../components/teaRoom/FloorPlan/FloorPlan";
-import { useLayoutsQuery } from "../core/api/layouts.hooks";
-import { useTablesQuery } from "../core/api/tables.hooks";
+} from "../../core/api/reservations.hooks";
+import { FloorPlan } from "../../components/teaRoom/FloorPlan/FloorPlan";
+import { useLayoutsQuery } from "../../core/api/layouts.hooks";
+import { useTablesQuery } from "../../core/api/tables.hooks";
 import type {
   ReservationScheduleDay,
   ReservationStatus,
   RestaurantTable,
-} from "../core/api/types";
+} from "../../core/api/types";
 import {
   buildAllTimeOptions,
   buildAvailableDateKeys,
   buildTimeSlotsForDate,
   normalizeScheduleDays,
   WEEK_DAY_OPTIONS,
-} from "../utils/reservationSchedule.utils";
+} from "../../utils/reservationSchedule.utils";
 import "./ReservationsView.css";
 
 type ReservationFilterStatus = ReservationStatus | "ALL";

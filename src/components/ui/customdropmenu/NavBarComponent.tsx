@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import style from "./CustomDropmenu.module.css";
 import { useNavigate } from "react-router-dom";
 
-import { topbarOptions } from "../../../constant/routes";
+import { publicTopbarOptions, topbarOptions } from "../../../constant/routes";
 import { toUpperCaseFirstLetter } from "../../../utils/formatText.utils";
 import { BarsIcon } from "../icons/BarsIcon";
 import HomeIcon from "@mui/icons-material/Home";
@@ -12,12 +12,18 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import EventSeatIcon from "@mui/icons-material/EventSeat";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import LoyaltyIcon from "@mui/icons-material/Loyalty";
+import InstagramIcon from "@mui/icons-material/Instagram";
+import PhotoSizeSelectActualIcon from '@mui/icons-material/PhotoSizeSelectActual';
 import LogoutIcon from "../icons/LogoutIcon";
 import MigrationsIcon from "../icons/MigrationsIcon";
 import { useBoundStore } from "../../../store/BoundedStore";
 import { StorageUtils } from "../../../utils/StorageUtils";
 
-const CustomDropmenu = () => {
+interface CustomDropmenuProps {
+  isAuthenticated: boolean;
+}
+
+const CustomDropmenu = ({ isAuthenticated }: CustomDropmenuProps) => {
   const navigate = useNavigate();
   const userRole = useBoundStore((state) => state.userData?.role.name ?? null);
   const logOutUser = useBoundStore((state) => state.logOutUser);
@@ -26,6 +32,8 @@ const CustomDropmenu = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const actualRoute = location.pathname.replace("/", "") || "Inicio";
+
+  const optionsTouse = isAuthenticated ? topbarOptions : publicTopbarOptions;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -65,6 +73,11 @@ const CustomDropmenu = () => {
         return <MigrationsIcon />;
       case "loyalty":
         return <LoyaltyIcon />;
+      case "instagram":
+      case "tiktok":
+        return <InstagramIcon />;
+      case "gallery":
+        return <PhotoSizeSelectActualIcon />;
       case "logout":
         return <LogoutIcon />;
       default:
@@ -78,7 +91,7 @@ const CustomDropmenu = () => {
     navigate("/login");
   };
 
-  const availableOptions = topbarOptions.filter((option) => {
+  const availableOptions = optionsTouse.filter((option) => {
     if (!option.canAccess || option.canAccess.length === 0) {
       return true;
     }
@@ -113,6 +126,11 @@ const CustomDropmenu = () => {
             onClick={() => {
               if (option.path === "/login") {
                 handleLogout();
+                setIsOpen(false);
+                return;
+              }
+              if (option.onClick) {
+                option.onClick();
                 setIsOpen(false);
                 return;
               }

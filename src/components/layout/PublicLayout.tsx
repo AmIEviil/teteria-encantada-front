@@ -3,10 +3,10 @@ import { Outlet } from "react-router-dom";
 import { TopBar } from "../topBar/TopBar";
 import SnackBar from "../ui/snackBar/SnackBar";
 
-export const BodyLayout = () => {
+export const PublicLayout = () => {
   return (
     <div className="mainLayoutContainer">
-      <TopBar isAuthenticated={true} />
+      <TopBar isAuthenticated={false} />
       <div className="main-content">
         <Outlet />
       </div>

@@ -1,0 +1,98 @@
+.cardContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  background-color: white;
+  border-radius: 8px 0px 0px 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+}
+
+.cardContent img {
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.cardTitle {
+  margin: 8px 0 4px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.cardText {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.cardSubtitle {
+  font-size: 0.85rem;
+  color: #7a5c3b;
+}
+
+.cardAvailable {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.cardSoldOut {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #c62828;
+}
+
+.cardButton {
+  flex: 0 0 auto;
+  align-self: stretch;
+  padding: 0 20px;
+  border: none;
+  cursor: pointer;
+  background-color: #7a5c3b;
+  color: white;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  /* radius swapped left<->right to counter the 180deg rotation below */
+  border-radius: 8px 0px 0px 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+
+  /* vertical text so a full-height narrow button reads well */
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+}
+
+.cardButton:hover {
+  background-color: #5f472d;
+}
+
+@media (max-width: 480px) {
+  .cardContainer {
+    cursor: pointer;
+  }
+}

@@ -2,6 +2,7 @@ import apiClient from "../client/client";
 import type {
   CreateReservationPayload,
   FindPublicReservationsFilters,
+  PublicEvent,
   PublicMenuItem,
   PublicReservation,
   ReservationScheduleDay,
@@ -37,6 +38,11 @@ export const publicService = {
   findTables: async (): Promise<PublicTable[]> => {
     const response = await apiClient.get<PublicTable[]>("/public/tables");
     return normalizeArrayPayload<PublicTable>(response.data);
+  },
+
+  findEvents: async (): Promise<PublicEvent[]> => {
+    const response = await apiClient.get<PublicEvent[]>("/public/events");
+    return normalizeArrayPayload<PublicEvent>(response.data);
   },
 
   findReservations: async (

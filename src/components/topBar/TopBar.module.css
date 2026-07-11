@@ -16,7 +16,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.22);
   backdrop-filter: blur(6px);
   z-index: 1000;
-  font-family: var(--font-display);
+  font-family: var(--font-bree-serif);
 }
 
 .headerModuleContainer {

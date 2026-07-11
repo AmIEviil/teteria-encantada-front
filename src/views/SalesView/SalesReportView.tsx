@@ -11,17 +11,17 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import TableGeneric from "../components/ui/table/Table";
-import CustomPagination from "../components/ui/pagination/Pagination";
-import { CustomCalendarV2 } from "../components/ui/calendar/CustomCalendarV2";
-import { useOrdersReportQuery } from "../core/api/orders.hooks";
-import { useTablesQuery } from "../core/api/tables.hooks";
+import TableGeneric from "../../components/ui/table/Table";
+import CustomPagination from "../../components/ui/pagination/Pagination";
+import { CustomCalendarV2 } from "../../components/ui/calendar/CustomCalendarV2";
+import { useOrdersReportQuery } from "../../core/api/orders.hooks";
+import { useTablesQuery } from "../../core/api/tables.hooks";
 import type {
   Order,
   OrderReportOrderDirection,
   OrderReportSortBy,
   OrderStatus,
-} from "../core/api/types";
+} from "../../core/api/types";
 import "./SalesReportView.css";
 
 type StatusFilter = OrderStatus | "ALL";

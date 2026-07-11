@@ -129,16 +129,16 @@ vi.mock("./core/api/migrations.hooks", () => ({
 }));
 
 import { MigrationsView } from "./views/MigrationsView/MigrationsView";
-import { SalesReportView } from "./views/SalesReportView";
-import { PublicReservationsView } from "./views/PublicReservationsView";
-import { ReservationsView } from "./views/ReservationsView";
+import { SalesReportView } from "./views/SalesView/SalesReportView";
+import { ReservationsView } from "./views/ReservationsView/ReservationsView";
 import { BodyInventory } from "./components/inventory/BodyInventory";
 import { BodyEmpleados } from "./components/empleados/BodyEmpleados";
 import { OrderTaker } from "./components/teaRoom/components/OrderTaker/OrderTaker";
 import { EventsTicketsView } from "./views/EventsTicketsView/EventsTicketsView";
-import { EmpleadosView } from "./views/EmpleadosView";
-import { InventoryView } from "./views/InventoryView";
+import { InventoryView } from "./views/admin/EmployeesView/InventoryView";
 import { ForbiddenView } from "./views/auth/ForbiddenView";
+import { EmpleadosView } from "./views/admin/EmployeesView/EmpleadosView";
+import { PublicReservationsView } from "./views/public/reservations/PublicReservationsView";
 
 const renderView = (ui: React.ReactElement) => {
   const qc = new QueryClient({

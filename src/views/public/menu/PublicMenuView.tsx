@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { PublicHeader } from "../components/public/PublicHeader";
-import { usePublicMenuQuery } from "../core/api/public.hooks";
+import { PublicHeader } from "../../../components/public/PublicHeader";
+import { usePublicMenuQuery } from "../../../core/api/public.hooks";
 import "./PublicViews.css";
 
 const formatCurrency = (value: number): string => {
@@ -23,7 +23,7 @@ export const PublicMenuView = () => {
     }
 
     return menuItems.filter((item) => {
-      const haystack = `${item.code} ${item.name} ${item.description ?? ""}`.toLowerCase();
+      const haystack = `${item.name} ${item.description ?? ""}`.toLowerCase();
       return haystack.includes(normalizedSearch);
     });
   }, [menuItems, search]);
@@ -45,7 +45,7 @@ export const PublicMenuView = () => {
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Buscar por nombre, codigo o descripcion"
+              placeholder="Buscar por nombre o descripcion"
               aria-label="Buscar productos en la carta"
             />
 
@@ -55,15 +55,18 @@ export const PublicMenuView = () => {
           {isLoading ? <p className="publicMuted">Cargando carta...</p> : null}
 
           {!isLoading && filteredItems.length === 0 ? (
-            <p className="publicMuted">No hay productos para el filtro seleccionado.</p>
+            <p className="publicMuted">
+              No hay productos para el filtro seleccionado.
+            </p>
           ) : null}
 
           <div className="publicMenuGrid">
             {filteredItems.map((item) => (
               <article className="publicMenuCard" key={item.id}>
-                <p className="publicMenuCode">{item.code}</p>
                 <h3 className="publicMenuName">{item.name}</h3>
-                <p className="publicMenuDescription">{item.description || "Sin descripcion"}</p>
+                <p className="publicMenuDescription">
+                  {item.description || "Sin descripcion"}
+                </p>
                 <p className="publicMenuPrice">{formatCurrency(item.price)}</p>
               </article>
             ))}

@@ -10,7 +10,8 @@ module.exports = {
       fontFamily: {
         // La clave "brookshire" generará la clase "font-brookshire"
         brookshire: ["var(--font-brookshire)"],
-
+        breeSerif: ["var(--font-bree-serif)"],
+        andirla: ["var(--font-andirla)"],
         // Alternativamente, si no usaras la variable CSS en el :root, sería así:
         // brookshire: ['"EFCO Brookshire"', 'sans-serif'],
       },

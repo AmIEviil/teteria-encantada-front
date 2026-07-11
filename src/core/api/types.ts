@@ -39,7 +39,6 @@ export interface LoyaltySummary {
 
 export interface Product {
   id: string;
-  code: string;
   name: string;
   description: string | null;
   imageId?: string | null;
@@ -64,7 +63,6 @@ export interface ProductPriceHistoryEntry {
 }
 
 export interface CreateProductPayload {
-  code: string;
   name: string;
   description?: string;
   imageId?: string | null;
@@ -76,7 +74,6 @@ export interface CreateProductPayload {
 }
 
 export interface UpdateProductPayload {
-  code?: string;
   name?: string;
   description?: string;
   imageId?: string | null;
@@ -439,7 +436,6 @@ export interface UpdateReservationSchedulePayload {
 
 export interface PublicMenuItem {
   id: string;
-  code: string;
   name: string;
   description: string | null;
   price: number;
@@ -451,6 +447,22 @@ export interface PublicTable {
   label: string | null;
   capacity: number;
   status: TableStatus;
+}
+
+export interface PublicEventSchedule {
+  date: string;
+  startTime: string;
+  endTime: string | null;
+}
+
+export interface PublicEvent {
+  id: string;
+  title: string;
+  description: string | null;
+  startsAt: string;
+  endsAt: string;
+  schedules: PublicEventSchedule[];
+  ticketsAvailable: boolean;
 }
 
 export interface PublicReservation {

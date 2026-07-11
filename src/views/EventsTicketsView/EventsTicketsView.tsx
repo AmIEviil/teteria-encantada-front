@@ -1978,6 +1978,8 @@ export const EventsTicketsView = () => {
               baseSessions={eventForm.baseSessions}
               sessionsByDate={eventForm.sessionsByDate}
               dateKeys={eventFormAvailableDates ?? []}
+              minTime={eventForm.startsAtTime}
+              maxTime={eventForm.endsAtTime}
               formatDateLabel={formatDateKeyLabel}
               onToggleSameEveryDay={handleToggleSameEveryDay}
               onBaseSessionsChange={handleBaseSessionsChange}

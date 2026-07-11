@@ -12,13 +12,20 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import type { SessionDraft } from "../../../service/events/events.interface";
-import { createEmptySessionDraft, TIME_OPTIONS } from "../eventSessions.utils";
+import {
+  createEmptySessionDraft,
+  getEndTimeOptions,
+  getNextFreeStartTime,
+  getStartTimeOptions,
+} from "../eventSessions.utils";
 
 interface SessionsEditorProps {
   sameSessionsEveryDay: boolean;
   baseSessions: SessionDraft[];
   sessionsByDate: Record<string, SessionDraft[]>;
   dateKeys: string[];
+  minTime: string;
+  maxTime: string;
   formatDateLabel: (dateKey: string) => string;
   onToggleSameEveryDay: (checked: boolean) => void;
   onBaseSessionsChange: (sessions: SessionDraft[]) => void;
@@ -46,9 +53,13 @@ const removeSession = (
 
 const SessionRows = ({
   sessions,
+  minTime,
+  maxTime,
   onChange,
 }: {
   sessions: SessionDraft[];
+  minTime: string;
+  maxTime: string;
   onChange: (sessions: SessionDraft[]) => void;
 }) => (
   <Stack spacing={1}>
@@ -63,18 +74,33 @@ const SessionRows = ({
           select
           label={`Jornada ${index + 1} - inicio`}
           value={session.startTime}
-          onChange={(event) =>
+          onChange={(event) => {
+            const nextStartTime = event.target.value;
+
             onChange(
-              updateSession(sessions, session.id, "startTime", event.target.value),
-            )
-          }
+              sessions.map((current) =>
+                current.id === session.id
+                  ? {
+                      ...current,
+                      startTime: nextStartTime,
+                      endTime:
+                        current.endTime && current.endTime > nextStartTime
+                          ? current.endTime
+                          : "",
+                    }
+                  : current,
+              ),
+            );
+          }}
           sx={{ minWidth: 170 }}
         >
-          {TIME_OPTIONS.map((timeOption) => (
-            <MenuItem key={timeOption.value} value={timeOption.value}>
-              {timeOption.label}
-            </MenuItem>
-          ))}
+          {getStartTimeOptions(session, sessions, minTime, maxTime).map(
+            (timeOption) => (
+              <MenuItem key={timeOption.value} value={timeOption.value}>
+                {timeOption.label}
+              </MenuItem>
+            ),
+          )}
         </TextField>
 
         <TextField
@@ -89,11 +115,13 @@ const SessionRows = ({
           sx={{ minWidth: 170 }}
         >
           <MenuItem value="">Sin definir</MenuItem>
-          {TIME_OPTIONS.map((timeOption) => (
-            <MenuItem key={timeOption.value} value={timeOption.value}>
-              {timeOption.label}
-            </MenuItem>
-          ))}
+          {getEndTimeOptions(session, sessions, minTime, maxTime).map(
+            (timeOption) => (
+              <MenuItem key={timeOption.value} value={timeOption.value}>
+                {timeOption.label}
+              </MenuItem>
+            ),
+          )}
         </TextField>
 
         <TextField
@@ -121,7 +149,14 @@ const SessionRows = ({
     <Button
       size="small"
       startIcon={<AddIcon />}
-      onClick={() => onChange([...sessions, createEmptySessionDraft()])}
+      onClick={() =>
+        onChange([
+          ...sessions,
+          createEmptySessionDraft(
+            getNextFreeStartTime(sessions, minTime, maxTime),
+          ),
+        ])
+      }
       sx={{ alignSelf: "flex-start" }}
     >
       Agregar jornada
@@ -134,6 +169,8 @@ export const SessionsEditor = ({
   baseSessions,
   sessionsByDate,
   dateKeys,
+  minTime,
+  maxTime,
   formatDateLabel,
   onToggleSameEveryDay,
   onBaseSessionsChange,
@@ -161,7 +198,12 @@ export const SessionsEditor = ({
         )}
 
         {sameSessionsEveryDay ? (
-          <SessionRows sessions={baseSessions} onChange={onBaseSessionsChange} />
+          <SessionRows
+            sessions={baseSessions}
+            minTime={minTime}
+            maxTime={maxTime}
+            onChange={onBaseSessionsChange}
+          />
         ) : (
           <Stack spacing={1.25}>
             {dateKeys.map((date) => (
@@ -170,6 +212,8 @@ export const SessionsEditor = ({
                   <Typography fontWeight={600}>{formatDateLabel(date)}</Typography>
                   <SessionRows
                     sessions={sessionsByDate[date] ?? []}
+                    minTime={minTime}
+                    maxTime={maxTime}
                     onChange={(sessions) => onDaySessionsChange(date, sessions)}
                   />
                 </Stack>

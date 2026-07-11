@@ -5,10 +5,10 @@ import { MemoryRouter } from "react-router-dom";
 const publicHooks = vi.hoisted(() => ({
   usePublicMenuQuery: vi.fn(),
 }));
-vi.mock("../core/api/public.hooks", () => publicHooks);
+vi.mock("../../core/api/public.hooks", () => publicHooks);
 
-import { PublicMenuView } from "./PublicMenuView";
-import { PublicHeader } from "../components/public/PublicHeader";
+import { PublicMenuView } from "./menu/PublicMenuView";
+import { PublicHeader } from "../../components/public/PublicHeader";
 
 const wrap = (ui: React.ReactElement) =>
   render(<MemoryRouter>{ui}</MemoryRouter>);
@@ -25,8 +25,8 @@ describe("PublicMenuView", () => {
   it("muestra productos y filtra", () => {
     publicHooks.usePublicMenuQuery.mockReturnValue({
       data: [
-        { id: "1", code: "C1", name: "Te Verde", description: "rico", price: 2500 },
-        { id: "2", code: "C2", name: "Cafe", description: null, price: 1500 },
+        { id: "1", name: "Te Verde", description: "rico", price: 2500 },
+        { id: "2", name: "Cafe", description: null, price: 1500 },
       ],
       isLoading: false,
     });

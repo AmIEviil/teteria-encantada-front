@@ -3,6 +3,9 @@ import {
   buildOccurrenceKey,
   buildSessionsPayload,
   expandSessionOccurrences,
+  getEndTimeOptions,
+  getNextFreeStartTime,
+  getStartTimeOptions,
   mapEventSessionsToState,
   seedSessionsByDate,
   syncSessionsByDate,
@@ -165,6 +168,106 @@ describe("buildSessionsPayload", () => {
     const form = baseForm({ baseSessions: [] });
 
     expect(buildSessionsPayload(form, ["2026-07-09"]).error).toBeTruthy();
+  });
+});
+
+describe("getStartTimeOptions", () => {
+  it("limita las horas al rango del evento", () => {
+    const session = baseSession({ startTime: "12:00" });
+
+    const values = getStartTimeOptions(session, [session], "10:00", "20:00").map(
+      (option) => option.value,
+    );
+
+    expect(values[0]).toBe("10:00");
+    expect(values[values.length - 1]).toBe("20:00");
+  });
+
+  it("excluye las horas ocupadas por otras jornadas", () => {
+    const sessionA = baseSession({ startTime: "10:00", endTime: "12:00" });
+    const sessionB = baseSession({ startTime: "13:00" });
+
+    const values = getStartTimeOptions(
+      sessionB,
+      [sessionA, sessionB],
+      "10:00",
+      "20:00",
+    ).map((option) => option.value);
+
+    expect(values).not.toContain("10:00");
+    expect(values).not.toContain("11:30");
+    // Termino exclusivo: una jornada puede partir justo cuando termina la otra.
+    expect(values).toContain("12:00");
+  });
+
+  it("una jornada sin termino solo bloquea su hora de inicio", () => {
+    const sessionA = baseSession({ startTime: "15:00", endTime: "" });
+    const sessionB = baseSession({ startTime: "10:00" });
+
+    const values = getStartTimeOptions(
+      sessionB,
+      [sessionA, sessionB],
+      "10:00",
+      "20:00",
+    ).map((option) => option.value);
+
+    expect(values).not.toContain("15:00");
+    expect(values).toContain("15:30");
+  });
+
+  it("mantiene la hora actual aunque quede fuera del rango", () => {
+    const session = baseSession({ startTime: "08:00" });
+
+    const values = getStartTimeOptions(session, [session], "10:00", "20:00").map(
+      (option) => option.value,
+    );
+
+    expect(values).toContain("08:00");
+  });
+
+  it("ofrece todas las horas cuando el rango del evento es invalido", () => {
+    const session = baseSession();
+
+    expect(getStartTimeOptions(session, [session], "", "")).toHaveLength(48);
+  });
+});
+
+describe("getEndTimeOptions", () => {
+  it("solo ofrece horas posteriores al inicio, hasta la siguiente jornada", () => {
+    const sessionA = baseSession({ startTime: "10:00" });
+    const sessionB = baseSession({ startTime: "14:00", endTime: "16:00" });
+
+    const values = getEndTimeOptions(
+      sessionA,
+      [sessionA, sessionB],
+      "10:00",
+      "20:00",
+    ).map((option) => option.value);
+
+    expect(values[0]).toBe("10:30");
+    expect(values[values.length - 1]).toBe("14:00");
+  });
+
+  it("sin otras jornadas llega hasta el termino del evento", () => {
+    const session = baseSession({ startTime: "18:00" });
+
+    const values = getEndTimeOptions(session, [session], "10:00", "20:00").map(
+      (option) => option.value,
+    );
+
+    expect(values[values.length - 1]).toBe("20:00");
+  });
+});
+
+describe("getNextFreeStartTime", () => {
+  it("retorna la primera hora libre dentro del rango", () => {
+    const sessionA = baseSession({ startTime: "10:00", endTime: "12:00" });
+
+    expect(getNextFreeStartTime([sessionA], "10:00", "20:00")).toBe("12:00");
+  });
+
+  it("sin rango ni jornadas retorna la primera hora disponible", () => {
+    expect(getNextFreeStartTime([], "", "")).toBe("00:00");
   });
 });
 

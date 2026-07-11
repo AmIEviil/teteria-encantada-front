@@ -1,21 +1,21 @@
 import { useMemo, useState } from "react";
-import { CustomCalendarV2 } from "../components/ui/calendar/CustomCalendarV2";
-import { PublicHeader } from "../components/public/PublicHeader";
+import { CustomCalendarV2 } from "../../../components/ui/calendar/CustomCalendarV2";
+import { PublicHeader } from "../../../components/public/PublicHeader";
 import {
   usePublicCreateReservationMutation,
   usePublicReservationScheduleQuery,
   usePublicReservationsQuery,
   usePublicTablesQuery,
-} from "../core/api/public.hooks";
-import type { ReservationStatus } from "../core/api/types";
+} from "../../../core/api/public.hooks";
+import type { ReservationStatus } from "../../../core/api/types";
 import {
   buildAvailableDateKeys,
   buildTimeSlotsForDate,
   isValidLookupInput,
   normalizePhoneValue,
   resolveLookupFilter,
-} from "../utils/reservationSchedule.utils";
-import "./PublicViews.css";
+} from "../../../utils/reservationSchedule.utils";
+import "../PublicViews.css";
 
 type StatusFilter = ReservationStatus | "ALL";
 
@@ -78,7 +78,8 @@ const initialDate = formatInputDate(now);
 
 export const PublicReservationsView = () => {
   const { data: tables = [] } = usePublicTablesQuery();
-  const { data: reservationSchedule = [] } = usePublicReservationScheduleQuery();
+  const { data: reservationSchedule = [] } =
+    usePublicReservationScheduleQuery();
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("ALL");
   const [lookupInput, setLookupInput] = useState("");
@@ -90,9 +91,10 @@ export const PublicReservationsView = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
-  const [feedback, setFeedback] = useState<{ type: "error" | "success"; text: string } | null>(
-    null,
-  );
+  const [feedback, setFeedback] = useState<{
+    type: "error" | "success";
+    text: string;
+  } | null>(null);
 
   const createReservationMutation = usePublicCreateReservationMutation();
 
@@ -131,10 +133,8 @@ export const PublicReservationsView = () => {
     [normalizedLookupInput, statusFilter],
   );
 
-  const { data: reservations = [], isLoading: loadingReservations } = usePublicReservationsQuery(
-    reservationFilters,
-    canQueryReservations,
-  );
+  const { data: reservations = [], isLoading: loadingReservations } =
+    usePublicReservationsQuery(reservationFilters, canQueryReservations);
 
   const normalizedEmail = email.trim().toLowerCase();
   const canSubmit =
@@ -158,7 +158,10 @@ export const PublicReservationsView = () => {
 
     const holder = holderName.trim();
     if (holder.length > 0 && holder.length < 2) {
-      setFeedback({ type: "error", text: "El nombre titular debe tener al menos 2 caracteres." });
+      setFeedback({
+        type: "error",
+        text: "El nombre titular debe tener al menos 2 caracteres.",
+      });
       return;
     }
 
@@ -200,7 +203,8 @@ export const PublicReservationsView = () => {
           <article className="publicPanel">
             <h2>Generar reserva</h2>
             <p className="publicMuted">
-              Completa el formulario y tu reserva quedara registrada en el sistema.
+              Completa el formulario y tu reserva quedara registrada en el
+              sistema.
             </p>
 
             <form
@@ -221,7 +225,8 @@ export const PublicReservationsView = () => {
                     <option value="">Selecciona una mesa</option>
                     {tables.map((table) => (
                       <option key={table.id} value={table.id}>
-                        {normalizeTableName(table.label, table.code)} | Capacidad {table.capacity}
+                        {normalizeTableName(table.label, table.code)} |
+                        Capacidad {table.capacity}
                       </option>
                     ))}
                   </select>
@@ -250,7 +255,9 @@ export const PublicReservationsView = () => {
                       step={1}
                       value={sanitizeInteger(peopleCount, 1)}
                       onChange={(event) =>
-                        setPeopleCount(sanitizeInteger(Number(event.target.value || 1), 1))
+                        setPeopleCount(
+                          sanitizeInteger(Number(event.target.value || 1), 1),
+                        )
                       }
                       required
                     />
@@ -276,7 +283,9 @@ export const PublicReservationsView = () => {
                     showLabel={false}
                     initialDate={parseInputDate(date) ?? undefined}
                     availableDates={availableDateKeys}
-                    onSave={(value) => setDate(value ? formatInputDate(value) : "")}
+                    onSave={(value) =>
+                      setDate(value ? formatInputDate(value) : "")
+                    }
                   />
                 </label>
 
@@ -352,8 +361,14 @@ export const PublicReservationsView = () => {
               </label>
 
               <div className="publicFormActions">
-                <button className="publicButton" type="submit" disabled={createReservationMutation.isPending}>
-                  {createReservationMutation.isPending ? "Guardando..." : "Reservar"}
+                <button
+                  className="publicButton"
+                  type="submit"
+                  disabled={createReservationMutation.isPending}
+                >
+                  {createReservationMutation.isPending
+                    ? "Guardando..."
+                    : "Reservar"}
                 </button>
 
                 {feedback ? (
@@ -390,7 +405,9 @@ export const PublicReservationsView = () => {
               <select
                 className="publicSelect"
                 value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+                onChange={(event) =>
+                  setStatusFilter(event.target.value as StatusFilter)
+                }
               >
                 <option value="ALL">Todas</option>
                 <option value="ACTIVE">Activas</option>
@@ -402,7 +419,8 @@ export const PublicReservationsView = () => {
             <div className="publicReservationsList">
               {canQueryReservations ? null : (
                 <p className="publicMuted">
-                  Ingresa un correo o telefono valido para consultar tus reservas.
+                  Ingresa un correo o telefono valido para consultar tus
+                  reservas.
                 </p>
               )}
 
@@ -410,30 +428,45 @@ export const PublicReservationsView = () => {
                 <p className="publicMuted">Cargando reservas...</p>
               ) : null}
 
-              {canQueryReservations && !loadingReservations && reservations.length === 0 ? (
+              {canQueryReservations &&
+              !loadingReservations &&
+              reservations.length === 0 ? (
                 <p className="publicMuted">Aun no hay reservas para mostrar.</p>
               ) : null}
 
               {canQueryReservations &&
                 reservations.map((reservation) => (
-                  <article className="publicReservationCard" key={reservation.id}>
+                  <article
+                    className="publicReservationCard"
+                    key={reservation.id}
+                  >
                     <div>
-                      <strong>{normalizeTableName(reservation.tableLabel, reservation.tableCode)}</strong>
+                      <strong>
+                        {normalizeTableName(
+                          reservation.tableLabel,
+                          reservation.tableCode,
+                        )}
+                      </strong>
                       <span className={STATUS_CLASS_NAME[reservation.status]}>
                         {STATUS_LABEL[reservation.status]}
                       </span>
                     </div>
                     <p className="publicReservationMeta">
-                      Fecha: {formatDateTime(reservation.reservedFor)} | Personas: {reservation.peopleCount}
+                      Fecha: {formatDateTime(reservation.reservedFor)} |
+                      Personas: {reservation.peopleCount}
                     </p>
                     <p className="publicReservationMeta">
-                      Titular: {reservation.holderName?.trim() || "No informado"}
+                      Titular:{" "}
+                      {reservation.holderName?.trim() || "No informado"}
                     </p>
                     <p className="publicReservationMeta">
-                      Contacto: {reservation.email || reservation.phone || "No informado"}
+                      Contacto:{" "}
+                      {reservation.email || reservation.phone || "No informado"}
                     </p>
                     {reservation.notes ? (
-                      <p className="publicReservationMeta">Notas: {reservation.notes}</p>
+                      <p className="publicReservationMeta">
+                        Notas: {reservation.notes}
+                      </p>
                     ) : null}
                   </article>
                 ))}

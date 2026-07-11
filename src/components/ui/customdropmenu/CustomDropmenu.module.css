@@ -15,7 +15,11 @@
   border: 1px solid var(--surface-border);
   box-shadow: 0 18px 40px rgba(44, 31, 20, 0.28);
   background:
-    radial-gradient(circle at top right, rgba(141, 78, 115, 0.18), transparent 45%),
+    radial-gradient(
+      circle at top right,
+      rgba(141, 78, 115, 0.18),
+      transparent 45%
+    ),
     linear-gradient(170deg, var(--surface-0), var(--surface-1));
   z-index: 99999;
   display: flex;
@@ -39,7 +43,11 @@
   border: 1px solid var(--surface-border);
   box-shadow: 0 18px 40px rgba(44, 31, 20, 0.28);
   background:
-    radial-gradient(circle at top right, rgba(141, 78, 115, 0.18), transparent 45%),
+    radial-gradient(
+      circle at top right,
+      rgba(141, 78, 115, 0.18),
+      transparent 45%
+    ),
     linear-gradient(170deg, var(--surface-0), var(--surface-1));
   z-index: 100000;
   display: flex;
@@ -143,4 +151,11 @@
 
 .ghost:hover {
   background: rgba(141, 155, 109, 0.18);
+}
+
+@media (max-width: 768px) {
+  .optionLabelNav {
+    font-size: 0.85rem;
+    padding: 0.45rem 0.65rem;
+  }
 }
