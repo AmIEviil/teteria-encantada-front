@@ -298,3 +298,20 @@
     grid-template-columns: 1fr;
   }
 }
+
+.publicJornadaList { display: flex; flex-direction: column; gap: 0.75rem; }
+.publicJornadaCard {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 1rem; padding: 1rem; border: 1px solid #e0d8cc; border-radius: 12px;
+}
+.publicJornadaInfo { flex: 1; }
+.publicJornadaDate { font-weight: 600; text-transform: capitalize; margin: 0; }
+.publicJornadaDivider { border: none; border-top: 1px solid #e0d8cc; margin: 0.4rem 0; }
+.publicJornadaSchedule { margin: 0; color: #6b6257; }
+.publicJornadaButton {
+  padding: 0.6rem 1.1rem; border-radius: 999px; border: none;
+  background: #7a5c3e; color: #fff; font-weight: 600; cursor: pointer;
+}
+.publicJornadaButton:disabled { background: #c4bdb2; cursor: not-allowed; }
+.publicEventHero { margin-bottom: 1.5rem; }
+.publicEventHeroImage { width: 100%; max-height: 320px; object-fit: cover; border-radius: 16px; }
