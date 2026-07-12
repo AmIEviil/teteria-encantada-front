@@ -9,9 +9,13 @@ import {
 } from "@mui/material";
 import type { Order } from "../../../../../core/api/types";
 import { formatDateTime } from "../../../../../utils/formatText.utils";
-import type { OrderHistorySectionProps } from "../../../../../service/teaRoom/orderTaker.interface";
+import type {
+  OrderHistorySectionProps,
+  OrderPaymentSelection,
+} from "../../../../../service/teaRoom/orderTaker.interface";
 import CustomPagination from "../../../../ui/pagination/Pagination";
 import CaretIcon from "../../../../ui/icons/CaretIcon";
+import { MarkOrderPaidModal } from "./MarkOrderPaidModal/MarkOrderPaidModal";
 
 const ORDER_STATUS_LABELS: Record<Order["status"], string> = {
   OPEN: "Abierta",
@@ -112,6 +116,7 @@ export const OrderHistorySection = ({
 }: OrderHistorySectionProps) => {
   const [isDayOrdersExpanded, setIsDayOrdersExpanded] = useState(false);
   const [dayOrdersPage, setDayOrdersPage] = useState(1);
+  const [orderPendingPayment, setOrderPendingPayment] = useState<Order | null>(null);
 
   const sortedVisibleOrders = useMemo(() => {
     return [...visibleOrders].sort(
@@ -226,7 +231,7 @@ export const OrderHistorySection = ({
               <Button
                 variant="outlined"
                 className="orderTakerPaidButton"
-                onClick={() => onMarkOrderAsPaid(order.id)}
+                onClick={() => setOrderPendingPayment(order)}
               >
                 Marcar Pagada
               </Button>
@@ -310,6 +315,19 @@ export const OrderHistorySection = ({
           )}
         </Stack>
       )}
+
+      <MarkOrderPaidModal
+        order={orderPendingPayment}
+        isSubmitting={isSubmitting}
+        formatCurrency={formatCurrency}
+        onClose={() => setOrderPendingPayment(null)}
+        onConfirm={(payment: OrderPaymentSelection) => {
+          if (orderPendingPayment) {
+            onMarkOrderAsPaid(orderPendingPayment.id, payment);
+          }
+          setOrderPendingPayment(null);
+        }}
+      />
     </Box>
   );
 };

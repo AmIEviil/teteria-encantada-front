@@ -27,6 +27,7 @@ import { formatDateTime, sanitizeInteger } from "../../../../utils/formatText.ut
 import type {
   OrderItemDraft,
   OrderOrigin,
+  OrderPaymentSelection,
   OrderTakerProps,
 } from "../../../../service/teaRoom/orderTaker.interface";
 import { NumericStepper } from "./NumericStepper/NumericStepper";
@@ -393,11 +394,16 @@ export const OrderTaker = ({
     setInternalSelectedTableId(tableId);
   };
 
-  const handleMarkOrderAsPaid = async (orderId: string) => {
+  const handleMarkOrderAsPaid = async (
+    orderId: string,
+    payment: OrderPaymentSelection,
+  ) => {
     await updateOrderMutation.mutateAsync({
       id: orderId,
       payload: {
         status: "PAID",
+        tipAmount: payment.tipAmount,
+        paymentMethod: payment.paymentMethod,
       },
     });
   };
@@ -629,8 +635,8 @@ export const OrderTaker = ({
           visibleOrders={visibleOrders}
           nowMs={nowMs}
           formatCurrency={formatCurrency}
-          onMarkOrderAsPaid={(orderId) => {
-            void handleMarkOrderAsPaid(orderId);
+          onMarkOrderAsPaid={(orderId, payment) => {
+            void handleMarkOrderAsPaid(orderId, payment);
           }}
         />
       </Stack>

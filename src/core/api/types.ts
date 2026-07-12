@@ -723,6 +723,8 @@ export interface OrderItem {
   notes: string | null;
 }
 
+export type OrderPaymentMethod = "CASH" | "CARD";
+
 export interface Order {
   id: string;
   tableId: string | null;
@@ -733,6 +735,8 @@ export interface Order {
   notes: string | null;
   peopleCount: number;
   total: number;
+  tipAmount: number | null;
+  paymentMethod: OrderPaymentMethod | null;
   items: OrderItem[];
   closedAt: string | null;
   createdAt: string;
@@ -758,6 +762,8 @@ export interface UpdateOrderPayload {
   reservationId?: string;
   peopleCount?: number;
   notes?: string;
+  tipAmount?: number;
+  paymentMethod?: OrderPaymentMethod;
   items?: CreateOrderItemPayload[];
 }
 

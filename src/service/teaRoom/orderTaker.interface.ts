@@ -1,4 +1,4 @@
-import type { Order } from "../../core/api/types";
+import type { Order, OrderPaymentMethod } from "../../core/api/types";
 
 export type OrderOrigin = "DIRECT" | "RESERVATION";
 
@@ -31,5 +31,18 @@ export interface OrderHistorySectionProps {
   visibleOrders: Order[];
   nowMs: number;
   formatCurrency: (amount: number) => string;
-  onMarkOrderAsPaid: (orderId: string) => void;
+  onMarkOrderAsPaid: (orderId: string, payment: OrderPaymentSelection) => void;
+}
+
+export interface OrderPaymentSelection {
+  tipAmount: number;
+  paymentMethod: OrderPaymentMethod;
+}
+
+export interface MarkOrderPaidModalProps {
+  order: Order | null;
+  isSubmitting: boolean;
+  formatCurrency: (amount: number) => string;
+  onClose: () => void;
+  onConfirm: (payment: OrderPaymentSelection) => void;
 }
