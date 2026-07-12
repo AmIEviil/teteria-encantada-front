@@ -74,7 +74,7 @@ export const LoginView = () => {
   return (
     <section className="auth-page">
       <div className="auth-card">
-        <h1 className="auth-title">Acceso a Portal D'Encanto</h1>
+        <h1 className="auth-title">D'encanto</h1>
         <p className="auth-subtitle">
           Inicia sesión con tu perfil para entrar al panel.
         </p>
