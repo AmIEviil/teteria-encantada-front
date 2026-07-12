@@ -117,6 +117,23 @@ const formatMonthLabel = (month: string): string => {
   return label.charAt(0).toUpperCase() + label.slice(1);
 };
 
+const PAYMENT_METHOD_LABEL: Record<string, string> = {
+  CASH: "Efectivo",
+  CARD: "Tarjeta",
+};
+
+const formatTipLabel = (order: Order): string => {
+  if (order.tipAmount === null) {
+    return "—";
+  }
+
+  return order.tipAmount > 0 ? `Sí (${formatCurrency(order.tipAmount)})` : "No";
+};
+
+const formatPaymentMethodLabel = (order: Order): string => {
+  return order.paymentMethod ? PAYMENT_METHOD_LABEL[order.paymentMethod] : "—";
+};
+
 const ROWS_PER_PAGE_OPTIONS = [10, 20, 50];
 
 const tableTitles = [
@@ -127,6 +144,8 @@ const tableTitles = [
   { label: "Personas", key: "peopleCount", showOrder: true },
   { label: "Items", key: "items" },
   { label: "Total", key: "total", showOrder: true },
+  { label: "Propina", key: "tipAmount" },
+  { label: "Pago", key: "paymentMethod" },
   { label: "Accion", key: "action" },
 ];
 
@@ -309,7 +328,12 @@ export const SalesReportView = () => {
         <Stack spacing={1.5}>
           <Typography variant="h6">Resumen del periodo</Typography>
 
-          <Stack direction={{ xs: "column", md: "row" }} spacing={1.25}>
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            spacing={1.25}
+            useFlexGap
+            flexWrap="wrap"
+          >
             <Box className="sales-kpi-card">
               <span>Total ordenes</span>
               <strong>{totals?.totalOrders ?? 0}</strong>
@@ -325,6 +349,20 @@ export const SalesReportView = () => {
             <Box className="sales-kpi-card">
               <span>Venta pagada</span>
               <strong>{formatCurrency(totals?.paidSales ?? 0)}</strong>
+            </Box>
+            <Box className="sales-kpi-card">
+              <span>Pagos con propina</span>
+              <strong>{totals?.paidWithTip ?? 0}</strong>
+            </Box>
+            <Box className="sales-kpi-card">
+              <span>Pagos sin propina</span>
+              <strong>{totals?.paidWithoutTip ?? 0}</strong>
+            </Box>
+            <Box className="sales-kpi-card">
+              <span>Efectivo vs Tarjeta</span>
+              <strong>
+                {totals?.paidCash ?? 0} / {totals?.paidCard ?? 0}
+              </strong>
             </Box>
           </Stack>
 
@@ -385,6 +423,8 @@ export const SalesReportView = () => {
                   <td>{order.peopleCount}</td>
                   <td>{totalItems}</td>
                   <td>{formatCurrency(order.total)}</td>
+                  <td>{formatTipLabel(order)}</td>
+                  <td>{formatPaymentMethodLabel(order)}</td>
                   <td>
                     <button
                       className="secondary"
@@ -440,6 +480,13 @@ export const SalesReportView = () => {
               </Typography>
               <Typography>
                 <strong>Total:</strong> {formatCurrency(selectedOrder.total)}
+              </Typography>
+              <Typography>
+                <strong>Propina:</strong> {formatTipLabel(selectedOrder)}
+              </Typography>
+              <Typography>
+                <strong>Medio de pago:</strong>{" "}
+                {formatPaymentMethodLabel(selectedOrder)}
               </Typography>
               <Typography>
                 <strong>Notas:</strong> {selectedOrder.notes || "-"}

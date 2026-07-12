@@ -811,6 +811,10 @@ export interface OrdersReportTotals {
   cancelledOrders: number;
   totalSales: number;
   paidSales: number;
+  paidWithTip: number;
+  paidWithoutTip: number;
+  paidCash: number;
+  paidCard: number;
 }
 
 export interface OrdersReportResponse {
