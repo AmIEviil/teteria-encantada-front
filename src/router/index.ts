@@ -13,50 +13,68 @@ const BodyLayout = lazy(() =>
 
 // Views
 const TeaRoomView = lazy(() =>
-  import("../views/TeaRoomView.tsx").then((module) => ({
+  import("../views/TeaRoomView/TeaRoomView.tsx").then((module) => ({
     default: module.TeaRoomView,
   })),
 );
 
 const InventoryView = lazy(() =>
-  import("../views/InventoryView.tsx").then((module) => ({
+  import("../views/admin/EmployeesView/InventoryView.tsx").then((module) => ({
     default: module.InventoryView,
   })),
 );
 
 const ReservationsView = lazy(() =>
-  import("../views/ReservationsView.tsx").then((module) => ({
+  import("../views/ReservationsView/ReservationsView.tsx").then((module) => ({
     default: module.ReservationsView,
   })),
 );
 
 const EventsTicketsView = lazy(() =>
-  import("../views/EventsTicketsView.tsx").then((module) => ({
+  import("../views/EventsTicketsView/EventsTicketsView.tsx").then((module) => ({
     default: module.EventsTicketsView,
   })),
 );
 
 const SalesReportView = lazy(() =>
-  import("../views/SalesReportView.tsx").then((module) => ({
+  import("../views/SalesView/SalesReportView.tsx").then((module) => ({
     default: module.SalesReportView,
   })),
 );
 
 const EmpleadosView = lazy(() =>
-  import("../views/EmpleadosView.tsx").then((module) => ({
+  import("../views/admin/EmployeesView/EmpleadosView.tsx").then((module) => ({
     default: module.EmpleadosView,
   })),
 );
 
 const MigrationsView = lazy(() =>
-  import("../views/MigrationsView.tsx").then((module) => ({
+  import("../views/MigrationsView/MigrationsView.tsx").then((module) => ({
     default: module.MigrationsView,
+  })),
+);
+
+const LoyaltyAdminView = lazy(() =>
+  import("../views/LoyaltyAdminView/LoyaltyAdminView.tsx").then((module) => ({
+    default: module.LoyaltyAdminView,
+  })),
+);
+
+const LoyaltyView = lazy(() =>
+  import("../views/LoyaltyView/LoyaltyView.tsx").then((module) => ({
+    default: module.LoyaltyView,
   })),
 );
 
 const LoginView = lazy(() =>
   import("../views/auth/LoginView.tsx").then((module) => ({
     default: module.LoginView,
+  })),
+);
+
+const PublicLoginView = lazy(() =>
+  import("../views/auth/PublicLoginView.tsx").then((module) => ({
+    default: module.PublicLoginView,
   })),
 );
 
@@ -78,6 +96,12 @@ const ResetPasswordView = lazy(() =>
   })),
 );
 
+const GoogleCallbackView = lazy(() =>
+  import("../views/auth/GoogleCallbackView.tsx").then((module) => ({
+    default: module.GoogleCallbackView,
+  })),
+);
+
 const ForbiddenView = lazy(() =>
   import("../views/auth/ForbiddenView.tsx").then((module) => ({
     default: module.ForbiddenView,
@@ -85,14 +109,49 @@ const ForbiddenView = lazy(() =>
 );
 
 const PublicReservationsView = lazy(() =>
-  import("../views/PublicReservationsView.tsx").then((module) => ({
-    default: module.PublicReservationsView,
-  })),
+  import("../views/public/reservations/PublicReservationsView.tsx").then(
+    (module) => ({
+      default: module.PublicReservationsView,
+    }),
+  ),
 );
 
 const PublicMenuView = lazy(() =>
-  import("../views/PublicMenuView.tsx").then((module) => ({
+  import("../views/public/menu/PublicMenuView.tsx").then((module) => ({
     default: module.PublicMenuView,
+  })),
+);
+
+const PublicLoyaltyView = lazy(() =>
+  import("../views/public/loyalty/PublicLoyaltyView.tsx").then((module) => ({
+    default: module.PublicLoyaltyView,
+  })),
+);
+
+const PublicEventsView = lazy(() =>
+  import("../views/public/events/PublicEventsView.tsx").then((module) => ({
+    default: module.PublicEventsView,
+  })),
+);
+
+const PublicEventDetailView = lazy(() =>
+  import("../views/public/events/PublicEventDetailView.tsx").then((m) => ({
+    default: m.PublicEventDetailView,
+  })),
+);
+const PublicEventSessionView = lazy(() =>
+  import("../views/public/events/PublicEventSessionView.tsx").then((m) => ({
+    default: m.PublicEventSessionView,
+  })),
+);
+const PublicEventReservaView = lazy(() =>
+  import("../views/public/events/PublicEventReservaView.tsx").then((m) => ({
+    default: m.PublicEventReservaView,
+  })),
+);
+const PublicEventPagoView = lazy(() =>
+  import("../views/public/events/PublicEventPagoView.tsx").then((m) => ({
+    default: m.PublicEventPagoView,
   })),
 );
 
@@ -117,6 +176,12 @@ const AuthenticatedLayout = () =>
     { allowedRoles: [], redirectPath: PAGE_ROUTES.Login },
     createElement(BodyLayout),
   );
+
+const PublicLayout = lazy(() =>
+  import("../components/layout/PublicLayout.tsx").then((module) => ({
+    default: module.PublicLayout,
+  })),
+);
 
 const TeaRoomProtected = withRoles(TeaRoomView, [
   roles.SUPER_ADMIN,
@@ -143,8 +208,19 @@ const SalesReportProtected = withRoles(SalesReportView, [
 ]);
 const EmpleadosProtected = withRoles(EmpleadosView, [roles.SUPER_ADMIN]);
 const MigrationsProtected = withRoles(MigrationsView, [roles.SUPER_ADMIN]);
+const LoyaltyAdminProtected = withRoles(LoyaltyAdminView, [
+  roles.SUPER_ADMIN,
+  roles.ADMIN,
+]);
+const LoyaltyProtected = withRoles(LoyaltyView, [
+  roles.CLIENT,
+  roles.SUPER_ADMIN,
+  roles.ADMIN,
+]);
 
-const DefaultRedirect = () => createElement(Navigate, { to: "/", replace: true });
+const DefaultRedirect = () =>
+  createElement(Navigate, { to: "/", replace: true });
+
 const PublicRedirect = () =>
   createElement(Navigate, { to: PAGE_ROUTES.PublicReservas, replace: true });
 
@@ -153,6 +229,10 @@ export const router = createBrowserRouter(
     {
       path: PAGE_ROUTES.Login,
       Component: LoginView,
+    },
+    {
+      path: PAGE_ROUTES.PublicLogin,
+      Component: PublicLoginView,
     },
     {
       path: PAGE_ROUTES.Register,
@@ -167,20 +247,58 @@ export const router = createBrowserRouter(
       Component: ResetPasswordView,
     },
     {
+      path: PAGE_ROUTES.GoogleCallback,
+      Component: GoogleCallbackView,
+    },
+    {
       path: PAGE_ROUTES.Forbidden,
       Component: ForbiddenView,
     },
     {
       path: "/publico",
-      Component: PublicRedirect,
-    },
-    {
-      path: PAGE_ROUTES.PublicReservas,
-      Component: PublicReservationsView,
-    },
-    {
-      path: PAGE_ROUTES.PublicCarta,
-      Component: PublicMenuView,
+      Component: PublicLayout,
+      children: [
+        {
+          index: true,
+          Component: PublicRedirect,
+        },
+        {
+          path: PAGE_ROUTES.PublicReservas,
+          Component: PublicReservationsView,
+        },
+        {
+          path: PAGE_ROUTES.PublicCarta,
+          Component: PublicMenuView,
+        },
+        {
+          path: PAGE_ROUTES.PublicEvents,
+          Component: PublicEventsView,
+        },
+        {
+          path: PAGE_ROUTES.PublicEventDetail,
+          Component: PublicEventDetailView,
+        },
+        {
+          path: PAGE_ROUTES.PublicEventSession,
+          Component: PublicEventSessionView,
+        },
+        {
+          path: PAGE_ROUTES.PublicEventReserva,
+          Component: PublicEventReservaView,
+        },
+        {
+          path: PAGE_ROUTES.PublicEventPago,
+          Component: PublicEventPagoView,
+        },
+        {
+          path: PAGE_ROUTES.PublicMisPuntos,
+          Component: withRoles(
+            PublicLoyaltyView,
+            [roles.CLIENT],
+            PAGE_ROUTES.PublicLogin,
+          ),
+        },
+      ],
     },
     {
       path: "/",
@@ -213,6 +331,14 @@ export const router = createBrowserRouter(
         {
           path: PAGE_ROUTES.Migraciones,
           Component: MigrationsProtected,
+        },
+        {
+          path: PAGE_ROUTES.Fidelizacion,
+          Component: LoyaltyAdminProtected,
+        },
+        {
+          path: PAGE_ROUTES.MisPuntos,
+          Component: LoyaltyProtected,
         },
       ],
     },

@@ -2,7 +2,7 @@ import Draggable from "react-draggable";
 import s from "./Table.module.css";
 import { useRef } from "react";
 import CustomDropmenuV2 from "../../../ui/customdropmenu/CustomDropmenuV2";
-import type { TableStatus } from "../../../../core/api/types";
+import type { ReservationConfirmationStatus, TableStatus } from "../../../../core/api/types";
 
 type BasicTableRef = {
   id?: string;
@@ -16,11 +16,14 @@ export interface TableProps {
   label?: string;
   numberOfSeats?: number;
   type?: "small" | "large";
+  cellSize?: number;
+  scale?: number;
   position?: { x: number; y: number };
   isRotated?: boolean; // Propiedad para saber si está rotada
   isSelected?: boolean;
   hasOpenOrder?: boolean;
   status?: TableStatus;
+  confirmationStatus?: ReservationConfirmationStatus;
   onlyView?: boolean;
   usePositionInView?: boolean;
   showOptions?: boolean;
@@ -33,6 +36,17 @@ export interface TableProps {
   allTables?: BasicTableRef[];
   menuAreaElement?: HTMLElement | null;
 }
+
+const CONFIRMATION_BADGE: Record<
+  ReservationConfirmationStatus,
+  { color: string; label: string } | null
+> = {
+  NOT_SENT: null,
+  PENDING: { color: "#facc15", label: "Esperando confirmación" },
+  CONFIRMED: { color: "#22c55e", label: "Confirmado WA" },
+  DECLINED: null,
+  NO_RESPONSE: { color: "#f97316", label: "Sin respuesta" },
+};
 
 const getTableTypeClass = (
   type: TableProps["type"],
@@ -64,11 +78,14 @@ export const Table = ({
   label,
   numberOfSeats,
   type,
+  cellSize = 80,
+  scale = 1,
   position,
   isRotated,
   isSelected = false,
   hasOpenOrder = false,
   status = "AVAILABLE",
+  confirmationStatus,
   onlyView = false,
   usePositionInView = false,
   showOptions = true,
@@ -111,6 +128,7 @@ export const Table = ({
 
   const tableTypeClass = getTableTypeClass(type, isRotated);
   const swapNameOptions = buildSwapNameOptions(id, allTables, onSwapLabels);
+  const badge = confirmationStatus ? CONFIRMATION_BADGE[confirmationStatus] : null;
 
   const options = [
     {
@@ -147,13 +165,29 @@ export const Table = ({
           ref={nodeRef}
           onClick={handleSelectTable}
           className={`${s.onlyView} ${tableTypeClass} ${openOrderClass} ${reservedClass} ${outOfServiceClass} ${selectedClass}`}
-          style={onlyViewPositionStyle}
+          style={onlyViewPositionStyle ?? { position: "relative" }}
           disabled={isOutOfService}
         >
           <div className={s.headerTable}>
             <p>{tableName}</p>
             {numberOfSeats !== undefined && <p>{numberOfSeats} asientos</p>}
           </div>
+          {badge && (
+            <span
+              title={badge.label}
+              style={{
+                position: "absolute",
+                top: 4,
+                right: 4,
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                backgroundColor: badge.color,
+                border: "2px solid white",
+                zIndex: 2,
+              }}
+            />
+          )}
         </button>
       );
     }
@@ -162,12 +196,28 @@ export const Table = ({
       <div
         ref={nodeRef}
         className={`${s.onlyView} ${tableTypeClass} ${openOrderClass} ${reservedClass} ${outOfServiceClass} ${selectedClass}`}
-        style={onlyViewPositionStyle}
+        style={{ ...onlyViewPositionStyle, position: "relative" }}
       >
         <div className={s.headerTable}>
           <p>{tableName}</p>
           {numberOfSeats !== undefined && <p>{numberOfSeats} asientos</p>}
         </div>
+        {badge && (
+          <span
+            title={badge.label}
+            style={{
+              position: "absolute",
+              top: 4,
+              right: 4,
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              backgroundColor: badge.color,
+              border: "2px solid white",
+              zIndex: 2,
+            }}
+          />
+        )}
       </div>
     );
   }
@@ -177,7 +227,8 @@ export const Table = ({
       nodeRef={nodeRef}
       position={position}
       bounds="parent"
-      grid={[80, 80]} // ¡ESTO ES LA MAGIA! Hace que se mueva de a 80px
+      scale={scale} // Compensa el transform: scale() del workspace; sin esto el drag se desfasa
+      grid={[cellSize, cellSize]} // Snap igual al CELL_SIZE del fondo de la grilla
       onStop={(_, data) => onDragStop?.(id || "", data.x, data.y)}
       disabled={!isDraggable}
     >
@@ -193,6 +244,22 @@ export const Table = ({
             <p>{tableName}</p>
             {numberOfSeats !== undefined && <p>{numberOfSeats} asientos</p>}
           </div>
+          {badge && (
+            <span
+              title={badge.label}
+              style={{
+                position: "absolute",
+                top: 4,
+                right: 4,
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                backgroundColor: badge.color,
+                border: "2px solid white",
+                zIndex: 2,
+              }}
+            />
+          )}
         </button>
       ) : (
         <div
@@ -212,6 +279,22 @@ export const Table = ({
                 menuAreaElement={menuAreaElement}
               />
             </div>
+          )}
+          {badge && (
+            <span
+              title={badge.label}
+              style={{
+                position: "absolute",
+                top: 4,
+                right: 4,
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                backgroundColor: badge.color,
+                border: "2px solid white",
+                zIndex: 2,
+              }}
+            />
           )}
         </div>
       )}

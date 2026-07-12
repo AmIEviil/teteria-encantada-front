@@ -107,6 +107,10 @@ export const ordersService = {
         cancelledOrders: 0,
         totalSales: 0,
         paidSales: 0,
+        paidWithTip: 0,
+        paidWithoutTip: 0,
+        paidCash: 0,
+        paidCard: 0,
       },
     };
   },

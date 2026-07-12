@@ -2,40 +2,11 @@ import {
   GaugeContainer,
   GaugeValueArc,
   GaugeReferenceArc,
-  useGaugeState,
 } from "@mui/x-charts/Gauge";
 import style from "./GaugeChart.module.css";
 import { Tooltip } from "@mui/material";
-
-interface CustomGaugeChartProps {
-  title?: string;
-  minValue: number;
-  maxValue: number;
-  actualValue: number;
-}
-
-function GaugePointer() {
-  const { valueAngle, outerRadius, cx, cy } = useGaugeState();
-
-  if (valueAngle === null) {
-    return null;
-  }
-
-  const target = {
-    x: cx + outerRadius * Math.sin(valueAngle),
-    y: cy - outerRadius * Math.cos(valueAngle),
-  };
-  return (
-    <g>
-      <circle cx={cx} cy={cy} r={5} fill="white" />
-      <path
-        d={`M ${cx} ${cy} L ${target.x} ${target.y}`}
-        stroke="white"
-        strokeWidth={2}
-      />
-    </g>
-  );
-}
+import type { CustomGaugeChartProps } from "../../../../service/charts/gaugeChart.interface";
+import { GaugePointer } from "./GaugePointer/GaugePointer";
 
 const GaugeChart = ({
   title,

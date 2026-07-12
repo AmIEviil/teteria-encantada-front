@@ -8,6 +8,22 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "BreeSerif-Regular";
+  src: url("./assets/fonts/BreeSerif-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Andirla";
+  src: url("./assets/fonts/Andirla.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   font-family: "Trebuchet MS", "Palatino Linotype", Georgia, serif;
   line-height: 1.5;
@@ -23,8 +39,10 @@
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
 
+  --font-bree-serif: "BreeSerif-Regular", serif;
+  --font-andirla: "Andirla", sans-serif;
   --font-brookshire: "EFCO Brookshire", sans-serif;
-  --font-display: "EFCO Brookshire", "Times New Roman", serif;
+  --font-display: "Andirla", "Times New Roman", serif;
   --font-body: "Trebuchet MS", "Palatino Linotype", Georgia, serif;
 
   --background-color-primary: #ead2b3;

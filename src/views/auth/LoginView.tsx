@@ -5,6 +5,7 @@ import { getApiErrorMessage } from "../../core/api/apiError";
 import { authService } from "../../core/api/auth.service";
 import { useBoundStore } from "../../store/BoundedStore";
 import { AuthInput } from "../../components/ui/form/AuthInput";
+import { GoogleLoginButton } from "../../components/ui/auth/GoogleLoginButton";
 import "./AuthView.css";
 
 interface LoginRedirectState {
@@ -73,7 +74,7 @@ export const LoginView = () => {
   return (
     <section className="auth-page">
       <div className="auth-card">
-        <h1 className="auth-title">Acceso a Portal D'Encanto</h1>
+        <h1 className="auth-title">D'encanto</h1>
         <p className="auth-subtitle">
           Inicia sesión con tu perfil para entrar al panel.
         </p>
@@ -134,6 +135,8 @@ export const LoginView = () => {
             {isSubmitting ? "Ingresando..." : "Iniciar sesión"}
           </button>
         </form>
+
+        <GoogleLoginButton />
 
         <div className="auth-meta">
           <Link to={PAGE_ROUTES.ForgotPassword} className="auth-link">

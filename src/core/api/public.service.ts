@@ -2,11 +2,17 @@ import apiClient from "../client/client";
 import type {
   CreateReservationPayload,
   FindPublicReservationsFilters,
+  PublicEvent,
   PublicMenuItem,
   PublicReservation,
   ReservationScheduleDay,
   PublicTable,
 } from "./types";
+import type {
+  PublicEventDetail,
+  PublicPurchasePayload,
+  PublicPurchaseResult,
+} from "./publicEvents.types";
 
 const normalizeArrayPayload = <T>(payload: unknown): T[] => {
   if (Array.isArray(payload)) {
@@ -39,6 +45,11 @@ export const publicService = {
     return normalizeArrayPayload<PublicTable>(response.data);
   },
 
+  findEvents: async (): Promise<PublicEvent[]> => {
+    const response = await apiClient.get<PublicEvent[]>("/public/events");
+    return normalizeArrayPayload<PublicEvent>(response.data);
+  },
+
   findReservations: async (
     filters?: FindPublicReservationsFilters,
   ): Promise<PublicReservation[]> => {
@@ -69,5 +80,21 @@ export const publicService = {
     );
 
     return normalizeArrayPayload<ReservationScheduleDay>(response.data);
+  },
+
+  findEventDetail: async (id: string): Promise<PublicEventDetail> => {
+    const response = await apiClient.get<PublicEventDetail>(`/public/events/${id}`);
+    return response.data;
+  },
+
+  purchaseEventTickets: async (
+    id: string,
+    payload: PublicPurchasePayload,
+  ): Promise<PublicPurchaseResult> => {
+    const response = await apiClient.post<PublicPurchaseResult>(
+      `/public/events/${id}/tickets`,
+      payload,
+    );
+    return response.data;
   },
 };

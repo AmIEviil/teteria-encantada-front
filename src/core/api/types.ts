@@ -1,10 +1,48 @@
+export interface UploadedImage {
+  id: string;
+  url: string;
+}
+
+export interface LoyaltyConfig {
+  id: string;
+  attendancePointsEnabled: boolean;
+  purchasePointsEnabled: boolean;
+  purchasePointsRate: number;
+}
+
+export type LoyaltyRewardType = "DISCOUNT_CODE" | "FREE_WORKSHOP";
+
+export interface LoyaltyReward {
+  id: string;
+  levelId: string;
+  type: LoyaltyRewardType;
+  description: string;
+  cost: number;
+  params: Record<string, unknown> | null;
+  isActive: boolean;
+}
+
+export interface LoyaltyLevel {
+  id: string;
+  name: string;
+  threshold: number;
+  sortOrder: number;
+  rewards?: LoyaltyReward[];
+}
+
+export interface LoyaltySummary {
+  points: number;
+  currentLevel: LoyaltyLevel | null;
+  nextLevel: LoyaltyLevel | null;
+  rewards: LoyaltyReward[];
+}
+
 export interface Product {
   id: string;
-  code: string;
   name: string;
   description: string | null;
-  imageId: string | null;
-  imageBase64: string | null;
+  imageId?: string | null;
+  imageUrl?: string | null;
   price: number;
   minimumQuantity: number;
   currentQuantity: number;
@@ -25,10 +63,9 @@ export interface ProductPriceHistoryEntry {
 }
 
 export interface CreateProductPayload {
-  code: string;
   name: string;
   description?: string;
-  imageBase64?: string;
+  imageId?: string | null;
   price: number;
   minimumQuantity: number;
   currentQuantity: number;
@@ -37,10 +74,9 @@ export interface CreateProductPayload {
 }
 
 export interface UpdateProductPayload {
-  code?: string;
   name?: string;
   description?: string;
-  imageBase64?: string | null;
+  imageId?: string | null;
   price?: number;
   minimumQuantity?: number;
   currentQuantity?: number;
@@ -212,6 +248,13 @@ export type TableStatus =
 
 export type ReservationStatus = "ACTIVE" | "CANCELLED" | "COMPLETED";
 
+export type ReservationConfirmationStatus =
+  | "NOT_SENT"
+  | "PENDING"
+  | "CONFIRMED"
+  | "DECLINED"
+  | "NO_RESPONSE";
+
 export type EventStatus =
   | "ENABLED"
   | "CANCELLED"
@@ -332,6 +375,9 @@ export interface Reservation {
   notes: string | null;
   waitingUntil?: string | null;
   status: ReservationStatus;
+  confirmationStatus: ReservationConfirmationStatus;
+  comprobanteImageId?: string | null;
+  comprobanteImage?: { id: string; url: string } | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -345,6 +391,7 @@ export interface CreateReservationPayload {
   phone?: string;
   guestNames?: string[];
   notes?: string;
+  comprobanteImageId?: string;
 }
 
 export interface UpdateReservationPayload {
@@ -389,7 +436,6 @@ export interface UpdateReservationSchedulePayload {
 
 export interface PublicMenuItem {
   id: string;
-  code: string;
   name: string;
   description: string | null;
   price: number;
@@ -401,6 +447,22 @@ export interface PublicTable {
   label: string | null;
   capacity: number;
   status: TableStatus;
+}
+
+export interface PublicEventSchedule {
+  date: string;
+  startTime: string;
+  endTime: string | null;
+}
+
+export interface PublicEvent {
+  id: string;
+  title: string;
+  description: string | null;
+  startsAt: string;
+  endsAt: string;
+  schedules: PublicEventSchedule[];
+  ticketsAvailable: boolean;
 }
 
 export interface PublicReservation {
@@ -452,6 +514,40 @@ export interface EventTicketMenuGroup {
   options: EventTicketMenuOption[];
 }
 
+export interface EventSessionAllocation {
+  id: string;
+  sessionId: string;
+  ticketTypeId: string;
+  quantity: number;
+}
+
+export interface EventSession {
+  id: string;
+  eventId: string;
+  date: string;
+  startTime: string;
+  endTime: string | null;
+  capacity: number;
+  name: string | null;
+  allocations: EventSessionAllocation[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EventSessionAllocationPayload {
+  ticketTypeIndex: number;
+  quantity: number;
+}
+
+export interface EventSessionPayload {
+  date: string;
+  startTime: string;
+  endTime?: string;
+  capacity: number;
+  name?: string;
+  allocations?: EventSessionAllocationPayload[];
+}
+
 export interface EventTicketMenuTemplate {
   groups: EventTicketMenuGroup[];
 }
@@ -494,7 +590,9 @@ export interface VenueEvent {
   totalTickets: number;
   soldTickets: number;
   isFreeEntry: boolean;
+  hasSessions: boolean;
   ticketTypes: EventTicketType[];
+  sessions: EventSession[];
   createdAt: string;
   updatedAt: string;
 }
@@ -509,6 +607,7 @@ export interface EventTicket {
   attendanceDate: string;
   price: number;
   includesDetails: string | null;
+  sessionId: string | null;
   menuSelection: EventTicketMenuSelection | null;
   menuSelectionSnapshot: {
     groups: Array<{
@@ -555,7 +654,9 @@ export interface CreateVenueEventPayload {
   officialImageUrl?: string;
   status?: EventStatus;
   isFreeEntry?: boolean;
+  hasSessions?: boolean;
   ticketTypes: EventTicketTypePayload[];
+  sessions?: EventSessionPayload[];
 }
 
 export interface UpdateVenueEventPayload {
@@ -566,7 +667,9 @@ export interface UpdateVenueEventPayload {
   officialImageUrl?: string;
   status?: EventStatus;
   isFreeEntry?: boolean;
+  hasSessions?: boolean;
   ticketTypes?: EventTicketTypePayload[];
+  sessions?: EventSessionPayload[];
 }
 
 export interface UpdateEventStatusPayload {
@@ -584,11 +687,12 @@ export interface CreateEventTicketPayload {
   ticketTypeId: string;
   attendeeFirstName: string;
   attendeeLastName: string;
-  attendanceDate: string;
+  attendanceDate?: string;
   quantity?: number;
   applyPromotion?: boolean;
   price?: number;
   includesDetails?: string;
+  sessionId?: string;
   menuSelection?: EventTicketMenuSelection;
 }
 
@@ -599,6 +703,7 @@ export interface UpdateEventTicketPayload {
   attendanceDate?: string;
   price?: number;
   includesDetails?: string;
+  sessionId?: string;
   menuSelection?: EventTicketMenuSelection;
   status?: EventTicketStatus;
 }
@@ -620,6 +725,8 @@ export interface OrderItem {
   notes: string | null;
 }
 
+export type OrderPaymentMethod = "CASH" | "CARD";
+
 export interface Order {
   id: string;
   tableId: string | null;
@@ -630,6 +737,8 @@ export interface Order {
   notes: string | null;
   peopleCount: number;
   total: number;
+  tipAmount: number | null;
+  paymentMethod: OrderPaymentMethod | null;
   items: OrderItem[];
   closedAt: string | null;
   createdAt: string;
@@ -655,6 +764,8 @@ export interface UpdateOrderPayload {
   reservationId?: string;
   peopleCount?: number;
   notes?: string;
+  tipAmount?: number;
+  paymentMethod?: OrderPaymentMethod;
   items?: CreateOrderItemPayload[];
 }
 
@@ -702,6 +813,10 @@ export interface OrdersReportTotals {
   cancelledOrders: number;
   totalSales: number;
   paidSales: number;
+  paidWithTip: number;
+  paidWithoutTip: number;
+  paidCash: number;
+  paidCard: number;
 }
 
 export interface OrdersReportResponse {

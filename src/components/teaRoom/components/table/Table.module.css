@@ -33,6 +33,8 @@
 .smallTable {
   width: 70px;
   height: 70px;
+  /* ponytail: centra los 70px dentro de la celda de 80px (slack 10px -> 5px por lado) */
+  margin: 5px 0 0 5px;
   border-radius: 10%; /* Puedes quitar esto si quieres que sea cuadrada */
 }
 
@@ -40,6 +42,8 @@
 .largeTable {
   width: 150px;
   height: 70px;
+  /* ponytail: 150x70 dentro de 160x80 -> 5px arriba/izquierda para centrar */
+  margin: 1px 0 0 5px;
   border-radius: 8px;
 }
 

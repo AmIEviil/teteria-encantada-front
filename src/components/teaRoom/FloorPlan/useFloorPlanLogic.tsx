@@ -1,15 +1,18 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { TableProps } from "../components/table/Table";
 import { initial_floor_plan } from "./initialFloorPlan";
 import type { ChairProps } from "../components/chair/Chair";
 import { useLayoutsQuery } from "../../../core/api/layouts.hooks";
 import { useOrdersQuery } from "../../../core/api/orders.hooks";
+import { useReservationsQuery } from "../../../core/api/reservations.hooks";
 import { getApiErrorMessage } from "../../../core/api/apiError";
 import { layoutsService } from "../../../core/api/layouts.service";
 import { useTablesQuery } from "../../../core/api/tables.hooks";
 import { useSnackBarResponseStore } from "../../../store/snackBarStore";
+import { useRealtimeReservations } from "../../../core/realtime/useRealtimeReservations";
 import type {
+  ReservationConfirmationStatus,
   RestaurantTable,
   SaveLayoutSnapshotPayload,
   TableStatus,
@@ -163,6 +166,71 @@ const isPersistedTableId = (id: string | undefined): id is string => {
   return UUID_REGEX.test(id);
 };
 
+interface CellFootprint {
+  cols: number;
+  rows: number;
+}
+
+// Celdas que ocupa una figura: chica 1x1, grande horizontal 2x1, grande vertical 1x2.
+export const getTableFootprint = (
+  type: TableProps["type"],
+  isRotated: boolean | undefined,
+): CellFootprint => {
+  if (type !== "large") {
+    return { cols: 1, rows: 1 };
+  }
+
+  return isRotated ? { cols: 1, rows: 2 } : { cols: 2, rows: 1 };
+};
+
+// Primera celda libre recorriendo columna por columna (baja las filas, luego
+// salta a la siguiente columna). Devuelve píxeles. Si la grilla está llena -> (0,0).
+export const findFreeCell = (args: {
+  tables: TableProps[];
+  chairs: ChairProps[];
+  gridSize: { rows: number; cols: number };
+  cellSize: number;
+  footprint: CellFootprint;
+}): { x: number; y: number } => {
+  const { tables, chairs, gridSize, cellSize, footprint } = args;
+  const occupied = new Set<string>();
+  const mark = (col: number, row: number) => occupied.add(`${col},${row}`);
+
+  for (const table of tables) {
+    if (!table.position) continue;
+    const col = Math.round(table.position.x / cellSize);
+    const row = Math.round(table.position.y / cellSize);
+    const fp = getTableFootprint(table.type, table.isRotated);
+    for (let dc = 0; dc < fp.cols; dc += 1) {
+      for (let dr = 0; dr < fp.rows; dr += 1) {
+        mark(col + dc, row + dr);
+      }
+    }
+  }
+  for (const chair of chairs) {
+    if (!chair.position) continue;
+    mark(Math.round(chair.position.x / cellSize), Math.round(chair.position.y / cellSize));
+  }
+
+  for (let col = 0; col + footprint.cols <= gridSize.cols; col += 1) {
+    for (let row = 0; row + footprint.rows <= gridSize.rows; row += 1) {
+      let fits = true;
+      for (let dc = 0; dc < footprint.cols && fits; dc += 1) {
+        for (let dr = 0; dr < footprint.rows && fits; dr += 1) {
+          if (occupied.has(`${col + dc},${row + dr}`)) {
+            fits = false;
+          }
+        }
+      }
+      if (fits) {
+        return { x: col * cellSize, y: row * cellSize };
+      }
+    }
+  }
+
+  return { x: 0, y: 0 };
+};
+
 export const useFloorPlanLogic = () => {
   const queryClient = useQueryClient();
   const { data: layouts = EMPTY_LAYOUTS } = useLayoutsQuery();
@@ -277,19 +345,26 @@ export const useFloorPlanLogic = () => {
     return ids;
   }, [openOrders]);
 
-  // Sincroniza el layout persistido hacia el estado editable durante el render
-  // (convergente: solo recalcula cuando cambian activeLayout o persistedTables).
-  const [syncedSource, setSyncedSource] = useState<{
-    layout: NonNullable<typeof activeLayout>;
-    tables: typeof persistedTables;
-  } | null>(null);
+  useRealtimeReservations();
 
-  if (
-    activeLayout &&
-    !isEditing &&
-    (syncedSource?.layout !== activeLayout || syncedSource?.tables !== persistedTables)
-  ) {
-    setSyncedSource({ layout: activeLayout, tables: persistedTables });
+  const { data: activeReservations = [] } = useReservationsQuery({
+    status: "ACTIVE",
+  });
+
+  const confirmationByTableId = useMemo(() => {
+    const map = new Map<string, ReservationConfirmationStatus>();
+    for (const reservation of activeReservations) {
+      if (reservation.tableId) {
+        map.set(reservation.tableId, reservation.confirmationStatus);
+      }
+    }
+    return map;
+  }, [activeReservations]);
+
+  useEffect(() => {
+    if (!activeLayout || isEditing) {
+      return;
+    }
 
     const parsedMetadata = parseLayoutMetadata(activeLayout.description);
     const nextGridSize = parsedMetadata?.gridSize ?? DEFAULT_GRID_SIZE;
@@ -304,6 +379,7 @@ export const useFloorPlanLogic = () => {
       },
       isRotated: inferTableRotation(table),
       status: table.status,
+      confirmationStatus: confirmationByTableId.get(table.id),
       onDragStop: handleDragStop,
       onRotate: handleRotate,
       onChangeStatus: handleChangeTableStatus,
@@ -314,6 +390,10 @@ export const useFloorPlanLogic = () => {
       onRotate: handleRotate,
     }));
 
+    // Sincroniza el estado editable local con los datos del servidor cuando
+    // cambia el layout activo y no se está editando. Es una sincronización
+    // externa legítima (query → estado local), por eso se desactiva la regla.
+    /* eslint-disable react-hooks/set-state-in-effect */
     setGridSize(nextGridSize);
     setTables(nextTables);
     setChairs(nextChairs);
@@ -322,17 +402,25 @@ export const useFloorPlanLogic = () => {
       gridSize: nextGridSize,
       tables: nextTables,
     });
-  }
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [activeLayout, isEditing, persistedTables, confirmationByTableId]);
 
   const handleAddTable = (type: "small" | "large") => {
     const id = createTempId();
     const mesaLabel = normalizeMesaLabel(undefined, tables.length);
+    const position = findFreeCell({
+      tables,
+      chairs,
+      gridSize,
+      cellSize: CELL_SIZE,
+      footprint: getTableFootprint(type, false),
+    });
     const newTable: TableProps = {
       id,
       code: mesaLabel,
       label: mesaLabel,
       type,
-      position: { x: 0, y: 0 },
+      position,
       isRotated: false,
       status: "AVAILABLE",
       onDragStop: handleDragStop,
@@ -344,9 +432,16 @@ export const useFloorPlanLogic = () => {
 
   const handleAddChair = () => {
     const id = createTempId();
+    const position = findFreeCell({
+      tables,
+      chairs,
+      gridSize,
+      cellSize: CELL_SIZE,
+      footprint: { cols: 1, rows: 1 },
+    });
     const newChair: ChairProps = {
       id,
-      position: { x: 0, y: 0 },
+      position,
       rotation: 0, // AHORA ES UN NÚMERO (grados)
       onDragStop: handleDragStop,
       onRotate: handleRotate,
@@ -611,5 +706,6 @@ export const useFloorPlanLogic = () => {
     handleEdit,
     handleCancelEdit,
     openOrderTableIds,
+    confirmationByTableId,
   };
 };

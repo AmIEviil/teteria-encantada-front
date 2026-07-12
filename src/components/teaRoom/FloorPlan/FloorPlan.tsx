@@ -170,9 +170,12 @@ export const FloorPlan = ({
                 code={table.code}
                 label={table.label}
                 type={table.type}
+                cellSize={CELL_SIZE}
+                scale={workspaceScale}
                 position={table.position}
                 isRotated={table.isRotated}
                 status={table.status}
+                confirmationStatus={table.confirmationStatus}
                 isSelected={Boolean(selectedTableId && table.id === selectedTableId)}
                 hasOpenOrder={table.id ? openOrderTableIds.has(table.id) : false}
                 onSelectTable={isEditing ? undefined : onSelectTable}
@@ -192,6 +195,8 @@ export const FloorPlan = ({
               <Chair
                 key={chair.id}
                 id={chair.id}
+                cellSize={CELL_SIZE}
+                scale={workspaceScale}
                 position={chair.position}
                 rotation={chair.rotation}
                 onDragStop={handleDragStop}
@@ -204,7 +209,7 @@ export const FloorPlan = ({
             ))}
           </div>
         </div>
-        {!previewOnly && <div className={s.editAction}>
+        {!previewOnly && viewportSize.width >= 768 && <div className={s.editAction}>
           {isEditing && (
             <Tooltip title="Cancelar edicion" arrow>
               <button className={s.buttonCancel} onClick={handleCancelEdit}>

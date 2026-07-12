@@ -5,6 +5,8 @@ import CustomDropmenuV2 from "../../../ui/customdropmenu/CustomDropmenuV2";
 
 export interface ChairProps {
   id?: string;
+  cellSize?: number;
+  scale?: number;
   position?: { x: number; y: number };
   rotation?: number; // Cuidado de actualizar esto a número
   onlyView?: boolean;
@@ -17,6 +19,8 @@ export interface ChairProps {
 
 export const Chair = ({
   id,
+  cellSize = 80,
+  scale = 1,
   position,
   rotation = 0,
   onlyView = false,
@@ -81,7 +85,8 @@ export const Chair = ({
       nodeRef={nodeRef}
       position={position}
       bounds="parent"
-      grid={[80, 80]}
+      scale={scale} // Compensa el transform: scale() del workspace
+      grid={[cellSize, cellSize]}
       onStop={(_, data) => onDragStop?.(id || "", data.x, data.y)}
       disabled={!isDraggable}
     >

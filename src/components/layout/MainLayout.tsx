@@ -6,7 +6,7 @@ import SnackBar from "../ui/snackBar/SnackBar";
 export const BodyLayout = () => {
   return (
     <div className="mainLayoutContainer">
-      <TopBar />
+      <TopBar isAuthenticated={true} />
       <div className="main-content">
         <Outlet />
       </div>
