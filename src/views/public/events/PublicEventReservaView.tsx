@@ -13,12 +13,23 @@ import { formatMoneyNumber } from "../../../utils/formatText.utils";
 import { useSnackBarResponseStore } from "../../../store/snackBarStore";
 import "../PublicViews.css";
 
+const newId = (): string =>
+  typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `id-${Date.now()}-${Math.random()}`;
+
 const newDraft = (ticketTypeId: string): AttendeeDraft => ({
-  id: crypto.randomUUID(),
+  id: newId(),
   firstName: "",
   lastName: "",
   ticketTypeId,
   menuByGroup: {},
+});
+
+const sessionDateFormatter = new Intl.DateTimeFormat("es-CL", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
 });
 
 export const PublicEventReservaView = () => {
@@ -78,7 +89,7 @@ export const PublicEventReservaView = () => {
   };
 
   const scheduleLabel = session
-    ? `${session.date} · ${session.startTime}${session.name ? ` · ${session.name}` : ""}`
+    ? `${sessionDateFormatter.format(new Date(`${session.date}T00:00:00`))} · ${session.startTime}${session.name ? ` · ${session.name}` : ""}`
     : new Intl.DateTimeFormat("es-CL", { dateStyle: "long" }).format(new Date(event!.startsAt));
 
   return (

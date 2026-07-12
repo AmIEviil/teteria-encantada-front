@@ -16,7 +16,7 @@ export const JornadaCard = ({ session, onReserve }: JornadaCardProps) => {
   const scheduleLabel = session.endTime
     ? `${session.startTime} - ${session.endTime}`
     : session.startTime;
-  const activity = session.name ?? scheduleLabel;
+  const activity = session.name?.trim();
 
   return (
     <article className="publicJornadaCard">
@@ -26,7 +26,8 @@ export const JornadaCard = ({ session, onReserve }: JornadaCardProps) => {
         </p>
         <hr className="publicJornadaDivider" />
         <p className="publicJornadaSchedule">
-          <span>{scheduleLabel}</span> · <span>{activity}</span>
+          <span>{scheduleLabel}</span>
+          {activity && <> · <span>{activity}</span></>}
         </p>
       </div>
       <button

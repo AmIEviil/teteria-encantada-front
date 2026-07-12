@@ -11,6 +11,12 @@ import "../PublicViews.css";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const sessionDateFormatter = new Intl.DateTimeFormat("es-CL", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+
 export const PublicEventPagoView = () => {
   const { id = "" } = useParams();
   const navigate = useNavigate();
@@ -66,7 +72,7 @@ export const PublicEventPagoView = () => {
   }
 
   const scheduleLabel = session
-    ? `${session.date} · ${session.startTime}${session.name ? ` · ${session.name}` : ""}`
+    ? `${sessionDateFormatter.format(new Date(`${session.date}T00:00:00`))} · ${session.startTime}${session.name ? ` · ${session.name}` : ""}`
     : event
       ? new Intl.DateTimeFormat("es-CL", { dateStyle: "long" }).format(new Date(event.startsAt))
       : "";

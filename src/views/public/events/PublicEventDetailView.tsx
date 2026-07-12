@@ -102,10 +102,14 @@ export const PublicEventDetailView = () => {
             <button
               type="button"
               className="publicJornadaButton"
+              disabled={event.ticketTypes.every((t) => !t.available)}
               onClick={goToReservaNoSession}
             >
               Reservar ahora
             </button>
+            {event.ticketTypes.every((t) => !t.available) && (
+              <p className="publicMuted">Sin tickets disponibles</p>
+            )}
           </section>
         )}
       </div>

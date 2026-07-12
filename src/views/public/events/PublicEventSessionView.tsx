@@ -22,7 +22,7 @@ export const PublicEventSessionView = () => {
 
   // Hard-refresh fallback: store vacío → refetch y rehidratar.
   const needsFetch = !event || event.id !== id || session?.id !== sessionId;
-  const { data: fetched } = usePublicEventDetailQuery(id, needsFetch);
+  const { data: fetched, isError } = usePublicEventDetailQuery(id, needsFetch);
 
   useEffect(() => {
     if (needsFetch && fetched) {
@@ -39,6 +39,16 @@ export const PublicEventSessionView = () => {
       : activeEvent?.sessions.find((s) => s.id === sessionId) ?? null;
 
   if (!activeEvent || !activeSession) {
+    if (isError) {
+      return (
+        <main className="publicPage">
+          <div className="publicPageContainer">
+            <PublicHeader />
+            <p className="publicMuted">No se pudo cargar la jornada.</p>
+          </div>
+        </main>
+      );
+    }
     return (
       <main className="publicPage">
         <div className="publicPageContainer">
