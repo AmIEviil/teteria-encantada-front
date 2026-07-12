@@ -4,8 +4,10 @@ import { PublicHeader } from "../../../components/public/PublicHeader";
 import { AttendeeForm } from "../../../components/public/events/AttendeeForm/AttendeeForm";
 import {
   buildCartItem,
+  checkAvailability,
   isAttendeeDraftValid,
   type AttendeeDraft,
+  type AvailabilityCtx,
 } from "../../../components/public/events/AttendeeForm/attendee.utils";
 import { usePurchaseStore } from "../../../store/purchaseStore";
 import { publicEventPaths } from "../../../constant/routes";
@@ -53,6 +55,18 @@ export const PublicEventReservaView = () => {
       : event!.ticketTypes.filter((t) => t.available)
     : [];
 
+  const availabilityCtx: AvailabilityCtx = {
+    remainingByType: Object.fromEntries(
+      availableTypes.map((t) => [
+        t.id,
+        session
+          ? session.ticketTypes.find((st) => st.ticketTypeId === t.id)?.remaining ?? null
+          : t.remaining,
+      ]),
+    ),
+    seatsRemaining: session ? session.seatsRemaining : event?.seatsRemaining ?? null,
+  };
+
   const [drafts, setDrafts] = useState<AttendeeDraft[]>(() => [
     newDraft(availableTypes[0]?.id ?? ""),
   ]);
@@ -73,6 +87,13 @@ export const PublicEventReservaView = () => {
   const addPerson = () =>
     setDrafts((prev) => [...prev, newDraft(availableTypes[0]?.id ?? "")]);
 
+  // ¿cabe una persona más? probamos con un borrador extra del primer tipo disponible.
+  const canAddPerson = checkAvailability(
+    items,
+    [...drafts, newDraft(availableTypes[0]?.id ?? "")],
+    availabilityCtx,
+  ).ok;
+
   const removeDraft = (draftId: string) =>
     setDrafts((prev) => prev.filter((d) => d.id !== draftId));
 
@@ -81,6 +102,11 @@ export const PublicEventReservaView = () => {
     const allValid = drafts.every((d) => isAttendeeDraftValid(d, typeOf(d.ticketTypeId)));
     if (!allValid) {
       openSnackbar("Completa nombre, apellido y menú de cada persona", "error");
+      return;
+    }
+    const avail = checkAvailability(items, drafts, availabilityCtx);
+    if (!avail.ok) {
+      openSnackbar(avail.message ?? "No hay cupos disponibles", "error");
       return;
     }
     addItems(drafts.map((d) => buildCartItem(d, typeOf(d.ticketTypeId)!)));
@@ -115,7 +141,12 @@ export const PublicEventReservaView = () => {
             />
           ))}
 
-          <button type="button" className="publicLinkButton" onClick={addPerson}>
+          <button
+            type="button"
+            className="publicLinkButton"
+            disabled={!canAddPerson}
+            onClick={addPerson}
+          >
             + Agregar otra persona
           </button>
         </section>

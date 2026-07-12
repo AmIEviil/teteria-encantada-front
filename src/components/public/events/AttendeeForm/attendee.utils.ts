@@ -63,6 +63,39 @@ const newId = (): string =>
     ? crypto.randomUUID()
     : `id-${Date.now()}-${Math.random()}`;
 
+export interface AvailabilityCtx {
+  remainingByType: Record<string, number | null>; // por tipo; null = ilimitado
+  seatsRemaining: number | null; // cupo agregado jornada/evento; null = ilimitado
+}
+
+// ponytail: valida carrito + borradores contra el cupo por tipo y el agregado.
+// null en cualquiera = sin límite. Front espeja lo que el backend re-valida al pagar.
+export const checkAvailability = (
+  cart: CartItem[],
+  drafts: AttendeeDraft[],
+  ctx: AvailabilityCtx,
+): { ok: boolean; message?: string } => {
+  const typeIds = [
+    ...cart.map((c) => c.ticketTypeId),
+    ...drafts.map((d) => d.ticketTypeId),
+  ];
+
+  if (ctx.seatsRemaining !== null && typeIds.length > ctx.seatsRemaining) {
+    return { ok: false, message: `Solo quedan ${ctx.seatsRemaining} cupos disponibles` };
+  }
+
+  const countByType: Record<string, number> = {};
+  for (const tid of typeIds) countByType[tid] = (countByType[tid] ?? 0) + 1;
+  for (const [tid, count] of Object.entries(countByType)) {
+    const rem = ctx.remainingByType[tid];
+    if (rem != null && count > rem) {
+      return { ok: false, message: "No hay suficientes cupos para uno de los tickets" };
+    }
+  }
+
+  return { ok: true };
+};
+
 export const buildCartItem = (
   draft: AttendeeDraft,
   ticketType: PublicEventDetailTicketType,

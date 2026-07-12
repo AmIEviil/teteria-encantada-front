@@ -10,7 +10,8 @@ const event = {
   id: "e1", title: "Cata", description: null, startsAt: "2026-08-01T10:00:00Z",
   endsAt: "2026-08-01T12:00:00Z", officialImageUrl: null, isFreeEntry: false, hasSessions: true,
   ticketTypes: [{ id: "t1", name: "General", description: null, price: 5000, includesDetails: "Incluye té", menuMode: "FIXED", menuTemplate: null, available: true, remaining: 5 }],
-  sessions: [{ id: "s1", date: "2026-08-01", startTime: "10:00", endTime: "11:00", name: "Mañana", available: true, remaining: 5, ticketTypes: [{ ticketTypeId: "t1", available: true, remaining: 5 }] }],
+  seatsRemaining: null,
+  sessions: [{ id: "s1", date: "2026-08-01", startTime: "10:00", endTime: "11:00", name: "Mañana", available: true, remaining: 5, seatsRemaining: 5, ticketTypes: [{ ticketTypeId: "t1", available: true, remaining: 5 }] }],
 } as unknown as PublicEventDetail;
 
 describe("PublicEventSessionView", () => {

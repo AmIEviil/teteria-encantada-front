@@ -1,10 +1,12 @@
 import { describe, it, expect } from "vitest";
 import {
   buildCartItem,
+  checkAvailability,
   isAttendeeDraftValid,
   menuExtraForDraft,
   type AttendeeDraft,
 } from "./attendee.utils";
+import type { CartItem } from "../../../../store/purchaseStore";
 import type { PublicEventDetailTicketType } from "../../../../core/api/publicEvents.types";
 
 const fixedType: PublicEventDetailTicketType = {
@@ -59,5 +61,45 @@ describe("attendee.utils", () => {
     expect(item.menuExtraPrice).toBe(1000);
     expect(item.ticketTypeName).toBe("Con menú");
     expect(item.menuSelection).toEqual({ groups: [{ groupKey: "plato", optionIds: ["o1"] }] });
+  });
+});
+
+const cartItem = (ticketTypeId: string): CartItem => ({
+  id: `c-${Math.random()}`, ticketTypeId, ticketTypeName: "X",
+  attendeeFirstName: "A", attendeeLastName: "B", unitPrice: 5000, menuExtraPrice: 0,
+});
+
+describe("checkAvailability", () => {
+  it("passes when everything is unlimited", () => {
+    const r = checkAvailability([cartItem("t1")], [draft(), draft()], {
+      remainingByType: { t1: null }, seatsRemaining: null,
+    });
+    expect(r.ok).toBe(true);
+  });
+
+  it("blocks when aggregate seats exceeded", () => {
+    const r = checkAvailability([cartItem("t1")], [draft(), draft()], {
+      remainingByType: { t1: null }, seatsRemaining: 2,
+    });
+    expect(r.ok).toBe(false);
+    expect(r.message).toContain("2");
+  });
+
+  it("blocks when a per-type cap is exceeded", () => {
+    const r = checkAvailability([], [draft(), draft()], {
+      remainingByType: { t1: 1 }, seatsRemaining: null,
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  it("counts cart + drafts together against the type cap", () => {
+    const r = checkAvailability([cartItem("t1")], [draft()], {
+      remainingByType: { t1: 2 }, seatsRemaining: null,
+    });
+    expect(r.ok).toBe(true);
+    const over = checkAvailability([cartItem("t1"), cartItem("t1")], [draft()], {
+      remainingByType: { t1: 2 }, seatsRemaining: null,
+    });
+    expect(over.ok).toBe(false);
   });
 });

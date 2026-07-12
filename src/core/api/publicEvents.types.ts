@@ -30,6 +30,7 @@ export interface PublicEventDetailSession {
   name: string | null;
   available: boolean;
   remaining: number | null;
+  seatsRemaining: number;
   ticketTypes: PublicEventDetailSessionTicketType[];
 }
 
@@ -42,6 +43,7 @@ export interface PublicEventDetail {
   officialImageUrl: string | null;
   isFreeEntry: boolean;
   hasSessions: boolean;
+  seatsRemaining: number | null;
   ticketTypes: PublicEventDetailTicketType[];
   sessions: PublicEventDetailSession[];
 }
