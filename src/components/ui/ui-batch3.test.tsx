@@ -110,7 +110,7 @@ describe("NavBarComponent", () => {
     });
     render(
       <MemoryRouter>
-        <NavBarComponent />
+        <NavBarComponent isAuthenticated />
       </MemoryRouter>,
     );
     fireEvent.click(screen.getByRole("button"));

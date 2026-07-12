@@ -13,7 +13,7 @@ const wrap = (ui: React.ReactElement, route = "/inventory") =>
 describe("TopBar", () => {
   it("renderiza titulo y menu", () => {
     useBoundStore.setState({ userData: { role: { name: "Admin" } } as never });
-    wrap(<TopBar />);
+    wrap(<TopBar isAuthenticated />);
     expect(screen.getByText("Portal D'Encanto")).toBeInTheDocument();
   });
 });
