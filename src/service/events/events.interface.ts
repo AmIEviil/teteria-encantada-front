@@ -13,6 +13,7 @@ export interface SessionDraft {
   startTime: string;
   endTime: string;
   capacity: string;
+  name?: string;
 }
 
 export interface SessionOccurrence {
@@ -21,6 +22,7 @@ export interface SessionOccurrence {
   startTime: string;
   endTime: string;
   capacity: string;
+  name?: string;
 }
 
 export interface TicketDailyStockDraft {

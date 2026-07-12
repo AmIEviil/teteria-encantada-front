@@ -129,6 +129,7 @@ export const expandSessionOccurrences = (
       startTime: session.startTime,
       endTime: session.endTime,
       capacity: session.capacity,
+      name: session.name,
     })),
   );
 };
@@ -238,6 +239,7 @@ export const buildSessionsPayload = (
       startTime: occurrence.startTime,
       endTime: occurrence.endTime || undefined,
       capacity,
+      name: occurrence.name?.trim() || undefined,
       allocations: allocations.length > 0 ? allocations : undefined,
     });
   }
@@ -261,6 +263,7 @@ export const mapEventSessionsToState = (
       startTime: session.startTime,
       endTime: session.endTime ?? "",
       capacity: String(session.capacity),
+      name: session.name ?? undefined,
     };
 
     sessionsByDate[session.date] = [

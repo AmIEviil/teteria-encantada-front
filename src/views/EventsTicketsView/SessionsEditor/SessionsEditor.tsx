@@ -137,6 +137,17 @@ const SessionRows = ({
           sx={{ minWidth: 140 }}
         />
 
+        <TextField
+          label="Nombre / actividad (opcional)"
+          value={session.name ?? ""}
+          onChange={(event) =>
+            onChange(
+              updateSession(sessions, session.id, "name", event.target.value),
+            )
+          }
+          sx={{ minWidth: 200 }}
+        />
+
         <IconButton
           onClick={() => onChange(removeSession(sessions, session.id))}
           aria-label={`Eliminar jornada ${index + 1}`}

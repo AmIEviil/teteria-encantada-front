@@ -131,9 +131,20 @@ describe("buildSessionsPayload", () => {
         startTime: "12:00",
         endTime: undefined,
         capacity: 30,
+        name: undefined,
         allocations: [{ ticketTypeIndex: 1, quantity: 5 }],
       },
     ]);
+  });
+
+  it("incluye el nombre de la jornada, recortado, en el payload", () => {
+    const session = baseSession({ capacity: "5", name: "  Taller de te  " });
+    const form = baseForm({ baseSessions: [session], ticketTypes: [] });
+
+    const result = buildSessionsPayload(form, ["2026-07-09"]);
+
+    expect(result.error).toBeUndefined();
+    expect(result.payload?.[0].name).toBe("Taller de te");
   });
 
   it("rechaza suma de cupos mayor a capacidad", () => {
@@ -281,6 +292,7 @@ describe("mapEventSessionsToState", () => {
         startTime: "12:00",
         endTime: "15:00",
         capacity: 30,
+        name: "Taller de te",
         allocations: [
           {
             id: "al-1",
@@ -299,9 +311,32 @@ describe("mapEventSessionsToState", () => {
 
     expect(draft.capacity).toBe("30");
     expect(draft.endTime).toBe("15:00");
+    expect(draft.name).toBe("Taller de te");
     expect(
       state.sessionAllocations[buildOccurrenceKey("2026-07-09", draft.id)],
     ).toEqual({ "draft-a": "5" });
+  });
+
+  it("mapea sesiones sin nombre a name undefined", () => {
+    const sessions: EventSession[] = [
+      {
+        id: "ss-1",
+        eventId: "ev-1",
+        date: "2026-07-09",
+        startTime: "12:00",
+        endTime: null,
+        capacity: 10,
+        name: null,
+        allocations: [],
+        createdAt: "",
+        updatedAt: "",
+      },
+    ];
+
+    const state = mapEventSessionsToState(sessions, {});
+    const draft = state.sessionsByDate["2026-07-09"][0];
+
+    expect(draft.name).toBeUndefined();
   });
 });
 
@@ -315,6 +350,7 @@ describe("regresion: dias sin jornadas al editar un evento", () => {
         startTime: "12:00",
         endTime: "15:00",
         capacity: 30,
+        name: null,
         allocations: [
           {
             id: "al-1",
@@ -333,6 +369,7 @@ describe("regresion: dias sin jornadas al editar un evento", () => {
         startTime: "18:00",
         endTime: null,
         capacity: 10,
+        name: null,
         allocations: [],
         createdAt: "",
         updatedAt: "",

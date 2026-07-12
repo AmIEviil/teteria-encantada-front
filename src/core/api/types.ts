@@ -528,6 +528,7 @@ export interface EventSession {
   startTime: string;
   endTime: string | null;
   capacity: number;
+  name: string | null;
   allocations: EventSessionAllocation[];
   createdAt: string;
   updatedAt: string;
@@ -543,6 +544,7 @@ export interface EventSessionPayload {
   startTime: string;
   endTime?: string;
   capacity: number;
+  name?: string;
   allocations?: EventSessionAllocationPayload[];
 }
 
