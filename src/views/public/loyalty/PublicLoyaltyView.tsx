@@ -1,6 +1,6 @@
 import { PublicHeader } from "../../../components/public/PublicHeader";
 import { LoyaltyView } from "../../LoyaltyView/LoyaltyView";
-import "./PublicViews.css";
+import "../PublicViews.css";
 
 export const PublicLoyaltyView = () => {
   return (

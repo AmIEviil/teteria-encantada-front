@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { PublicHeader } from "../../../components/public/PublicHeader";
 import { usePublicMenuQuery } from "../../../core/api/public.hooks";
-import "./PublicViews.css";
+import "../PublicViews.css";
 
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat("es-CL", {
