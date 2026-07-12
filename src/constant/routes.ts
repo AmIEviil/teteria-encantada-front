@@ -30,6 +30,10 @@ export const PAGE_ROUTES = {
   PublicEvents: "/publico/eventos",
   PublicCarta: "/publico/carta",
   PublicMisPuntos: "/publico/mis-puntos",
+  PublicEventDetail: "/publico/eventos/:id",
+  PublicEventSession: "/publico/eventos/:id/jornada/:sessionId",
+  PublicEventReserva: "/publico/eventos/:id/reserva",
+  PublicEventPago: "/publico/eventos/:id/pago",
 };
 
 export const topbarOptions: IRoute[] = [
@@ -139,3 +143,11 @@ export const publicTopbarOptions: IRoute[] = [
     icon: "gallery",
   },
 ];
+
+export const publicEventPaths = {
+  detail: (id: string) => `/publico/eventos/${id}`,
+  session: (id: string, sessionId: string) =>
+    `/publico/eventos/${id}/jornada/${sessionId}`,
+  reserva: (id: string) => `/publico/eventos/${id}/reserva`,
+  pago: (id: string) => `/publico/eventos/${id}/pago`,
+};

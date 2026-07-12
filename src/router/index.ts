@@ -134,6 +134,27 @@ const PublicEventsView = lazy(() =>
   })),
 );
 
+const PublicEventDetailView = lazy(() =>
+  import("../views/public/events/PublicEventDetailView.tsx").then((m) => ({
+    default: m.PublicEventDetailView,
+  })),
+);
+const PublicEventSessionView = lazy(() =>
+  import("../views/public/events/PublicEventSessionView.tsx").then((m) => ({
+    default: m.PublicEventSessionView,
+  })),
+);
+const PublicEventReservaView = lazy(() =>
+  import("../views/public/events/PublicEventReservaView.tsx").then((m) => ({
+    default: m.PublicEventReservaView,
+  })),
+);
+const PublicEventPagoView = lazy(() =>
+  import("../views/public/events/PublicEventPagoView.tsx").then((m) => ({
+    default: m.PublicEventPagoView,
+  })),
+);
+
 const withRoles = (
   View: ComponentType,
   allowedRoles: string[],
@@ -252,6 +273,22 @@ export const router = createBrowserRouter(
         {
           path: PAGE_ROUTES.PublicEvents,
           Component: PublicEventsView,
+        },
+        {
+          path: PAGE_ROUTES.PublicEventDetail,
+          Component: PublicEventDetailView,
+        },
+        {
+          path: PAGE_ROUTES.PublicEventSession,
+          Component: PublicEventSessionView,
+        },
+        {
+          path: PAGE_ROUTES.PublicEventReserva,
+          Component: PublicEventReservaView,
+        },
+        {
+          path: PAGE_ROUTES.PublicEventPago,
+          Component: PublicEventPagoView,
         },
         {
           path: PAGE_ROUTES.PublicMisPuntos,

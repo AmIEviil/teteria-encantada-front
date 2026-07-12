@@ -1,7 +1,9 @@
 import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "../../ui/card/Card";
 import { usePublicEventsQuery } from "../../../core/api/public.hooks";
 import type { PublicEvent } from "../../../core/api/types";
+import { publicEventPaths } from "../../../constant/routes";
 import "../../../views/public/PublicViews.css";
 
 const dateFormatter = new Intl.DateTimeFormat("es-CL", {
@@ -35,6 +37,7 @@ const formatSchedule = (event: PublicEvent): string => {
 
 export const BodyEvents = () => {
   const { data: events = [], isLoading } = usePublicEventsQuery();
+  const navigate = useNavigate();
 
   const cards = useMemo(
     () =>
@@ -46,9 +49,10 @@ export const BodyEvents = () => {
           dateLabel={formatDateRange(event)}
           scheduleLabel={formatSchedule(event)}
           ticketsAvailable={event.ticketsAvailable}
+          onReserve={() => navigate(publicEventPaths.detail(event.id))}
         />
       )),
-    [events],
+    [events, navigate],
   );
 
   return (
