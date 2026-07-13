@@ -259,7 +259,8 @@ export type EventStatus =
   | "ENABLED"
   | "CANCELLED"
   | "SUSPENDED"
-  | "RESCHEDULED";
+  | "RESCHEDULED"
+  | "COMING_SOON";
 
 export type EventTicketStatus = "ACTIVE" | "CANCELLED";
 
@@ -461,6 +462,7 @@ export interface PublicEvent {
   description: string | null;
   startsAt: string;
   endsAt: string;
+  officialImageUrl: string | null;
   schedules: PublicEventSchedule[];
   ticketsAvailable: boolean;
 }
@@ -588,6 +590,7 @@ export interface VenueEvent {
   endsAt: string;
   officialImageUrl: string | null;
   status: EventStatus;
+  publishAt: string | null;
   totalTickets: number;
   soldTickets: number;
   isFreeEntry: boolean;
@@ -655,6 +658,7 @@ export interface CreateVenueEventPayload {
   endsAt: string;
   officialImageUrl?: string;
   status?: EventStatus;
+  publishAt?: string;
   isFreeEntry?: boolean;
   hasSessions?: boolean;
   ticketTypes: EventTicketTypePayload[];
@@ -668,6 +672,7 @@ export interface UpdateVenueEventPayload {
   endsAt?: string;
   officialImageUrl?: string;
   status?: EventStatus;
+  publishAt?: string;
   isFreeEntry?: boolean;
   hasSessions?: boolean;
   ticketTypes?: EventTicketTypePayload[];

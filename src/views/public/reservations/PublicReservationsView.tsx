@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { CustomCalendarV2 } from "../../../components/ui/calendar/CustomCalendarV2";
-import { PublicHeader } from "../../../components/public/PublicHeader";
 import {
   usePublicCreateReservationMutation,
   usePublicReservationScheduleQuery,
@@ -197,7 +196,6 @@ export const PublicReservationsView = () => {
   return (
     <main className="publicPage">
       <div className="publicPageContainer">
-        <PublicHeader />
 
         <section className="publicGridTwo">
           <article className="publicPanel">

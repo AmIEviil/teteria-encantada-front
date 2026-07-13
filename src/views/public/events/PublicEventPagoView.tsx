@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { CardPayment } from "@mercadopago/sdk-react";
-import { PublicHeader } from "../../../components/public/PublicHeader";
 import { usePayEventMutation } from "../../../core/api/payments.hooks";
 import { usePurchaseStore } from "../../../store/purchaseStore";
 import { publicEventPaths } from "../../../constant/routes";
@@ -33,14 +32,17 @@ const rejectionMessages: Record<string, string> = {
   cc_rejected_card_disabled:
     "Tu tarjeta está inactiva. Llama a tu banco para activarla.",
   cc_rejected_insufficient_amount: "Tu tarjeta no tiene fondos suficientes.",
-  cc_rejected_invalid_installments: "Tu tarjeta no acepta esa cantidad de cuotas.",
+  cc_rejected_invalid_installments:
+    "Tu tarjeta no acepta esa cantidad de cuotas.",
   cc_rejected_duplicated_payment:
     "Ya hiciste un pago por ese monto. Si necesitas pagar de nuevo, usa otra tarjeta.",
   cc_rejected_max_attempts:
     "Alcanzaste el límite de intentos. Usa otra tarjeta u otro medio de pago.",
   cc_rejected_card_error: "No pudimos procesar tu tarjeta. Intenta nuevamente.",
-  cc_rejected_high_risk: "El pago fue rechazado. Intenta con otro medio de pago.",
-  cc_rejected_blacklist: "El pago fue rechazado. Intenta con otro medio de pago.",
+  cc_rejected_high_risk:
+    "El pago fue rechazado. Intenta con otro medio de pago.",
+  cc_rejected_blacklist:
+    "El pago fue rechazado. Intenta con otro medio de pago.",
 };
 
 const rejectionMessage = (statusDetail: string) =>
@@ -83,14 +85,17 @@ export const PublicEventPagoView = () => {
     return (
       <main className="publicPage">
         <div className="publicPageContainer">
-          <PublicHeader />
           <section className="publicPanel">
             <h2>¡Reserva confirmada!</h2>
             <p className="publicMuted">
               {result.tickets.length} ticket(s) para {result.eventTitle}.
             </p>
-            <p className="publicMuted">Tu boleta llegará a {result.buyerEmail}.</p>
-            <p className="publicMenuPrice">Total {formatMoneyNumber(result.total)}</p>
+            <p className="publicMuted">
+              Tu boleta llegará a {result.buyerEmail}.
+            </p>
+            <p className="publicMenuPrice">
+              Total {formatMoneyNumber(result.total)}
+            </p>
             <button
               type="button"
               className="publicJornadaButton"
@@ -107,7 +112,9 @@ export const PublicEventPagoView = () => {
   const scheduleLabel = session
     ? `${sessionDateFormatter.format(new Date(`${session.date}T00:00:00`))} · ${session.startTime}${session.name ? ` · ${session.name}` : ""}`
     : event
-      ? new Intl.DateTimeFormat("es-CL", { dateStyle: "long" }).format(new Date(event.startsAt))
+      ? new Intl.DateTimeFormat("es-CL", { dateStyle: "long" }).format(
+          new Date(event.startsAt),
+        )
       : "";
 
   const attendanceDate = event
@@ -143,7 +150,10 @@ export const PublicEventPagoView = () => {
       });
     } catch (error) {
       const err = error as { response?: { data?: { message?: string } } };
-      openSnackbar(err.response?.data?.message ?? "No se pudo completar el pago", "error");
+      openSnackbar(
+        err.response?.data?.message ?? "No se pudo completar el pago",
+        "error",
+      );
       // Re-lanzamos para que el Brick se resetee y el usuario pueda reintentar.
       throw error;
     }
@@ -165,7 +175,10 @@ export const PublicEventPagoView = () => {
 
     if (res.status === "pending") {
       // Pago en proceso: no reintentar para evitar un doble cobro.
-      openSnackbar("Tu pago está en proceso; te avisaremos por correo.", "info");
+      openSnackbar(
+        "Tu pago está en proceso; te avisaremos por correo.",
+        "info",
+      );
       return;
     }
 
@@ -177,8 +190,6 @@ export const PublicEventPagoView = () => {
   return (
     <main className="publicPage">
       <div className="publicPageContainer">
-        <PublicHeader />
-
         <header className="publicEventHero">
           <h2>Pago</h2>
           <p className="publicMuted">{event?.title}</p>
@@ -190,9 +201,12 @@ export const PublicEventPagoView = () => {
             {items.map((item) => (
               <li key={item.id} className="publicCartRow">
                 <span>
-                  {item.attendeeFirstName} {item.attendeeLastName} — {item.ticketTypeName}
+                  {item.attendeeFirstName} {item.attendeeLastName} —{" "}
+                  {item.ticketTypeName}
                 </span>
-                <span>{formatMoneyNumber(item.unitPrice + item.menuExtraPrice)}</span>
+                <span>
+                  {formatMoneyNumber(item.unitPrice + item.menuExtraPrice)}
+                </span>
               </li>
             ))}
           </ul>
@@ -200,7 +214,10 @@ export const PublicEventPagoView = () => {
         </section>
 
         <section className="publicPanel">
-          <CardPayment initialization={{ amount: total }} onSubmit={handleSubmit} />
+          <CardPayment
+            initialization={{ amount: total }}
+            onSubmit={handleSubmit}
+          />
         </section>
       </div>
     </main>

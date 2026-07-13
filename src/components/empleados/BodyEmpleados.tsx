@@ -749,26 +749,7 @@ export const BodyEmpleados = () => {
               }}
               fullWidth
             />
-            <TextField
-              type="date"
-              label="Desde"
-              value={createdFrom}
-              onChange={(event) => {
-                setCreatedFrom(event.target.value);
-                setPage(1);
-              }}
-              fullWidth
-            />
-            <TextField
-              type="date"
-              label="Hasta"
-              value={createdTo}
-              onChange={(event) => {
-                setCreatedTo(event.target.value);
-                setPage(1);
-              }}
-              fullWidth
-            />
+            
           </Stack>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <TextField

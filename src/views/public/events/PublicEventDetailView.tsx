@@ -1,5 +1,4 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { PublicHeader } from "../../../components/public/PublicHeader";
 import { JornadaCard } from "../../../components/public/events/JornadaCard/JornadaCard";
 import { usePublicEventDetailQuery } from "../../../core/api/public.hooks";
 import { usePurchaseStore } from "../../../store/purchaseStore";
@@ -24,7 +23,6 @@ export const PublicEventDetailView = () => {
     return (
       <main className="publicPage">
         <div className="publicPageContainer">
-          <PublicHeader />
           <p className="publicMuted">Cargando evento...</p>
         </div>
       </main>
@@ -35,7 +33,6 @@ export const PublicEventDetailView = () => {
     return (
       <main className="publicPage">
         <div className="publicPageContainer">
-          <PublicHeader />
           <p className="publicMuted">Evento no encontrado.</p>
         </div>
       </main>
@@ -55,8 +52,6 @@ export const PublicEventDetailView = () => {
   return (
     <main className="publicPage">
       <div className="publicPageContainer">
-        <PublicHeader />
-
         <section className="publicEventHero">
           {event.officialImageUrl && (
             <img
@@ -66,7 +61,9 @@ export const PublicEventDetailView = () => {
             />
           )}
           <h2>{event.title}</h2>
-          {event.description && <p className="publicMuted">{event.description}</p>}
+          {event.description && (
+            <p className="publicMuted">{event.description}</p>
+          )}
           <p className="publicMuted">
             {dateFormatter.format(new Date(event.startsAt))}
           </p>
@@ -95,7 +92,9 @@ export const PublicEventDetailView = () => {
                   {t.includesDetails && (
                     <p className="publicMenuDescription">{t.includesDetails}</p>
                   )}
-                  <p className="publicMenuPrice">{formatMoneyNumber(t.price)}</p>
+                  <p className="publicMenuPrice">
+                    {formatMoneyNumber(t.price)}
+                  </p>
                 </article>
               ))}
             </div>

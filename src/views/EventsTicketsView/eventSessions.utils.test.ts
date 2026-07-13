@@ -33,6 +33,8 @@ const baseForm = (overrides: Partial<EventFormState> = {}): EventFormState => ({
   endsAtTime: "23:00",
   officialImageUrl: "",
   status: "ENABLED",
+  publishAtDate: "",
+  publishAtTime: "",
   isFreeEntry: false,
   hasSessions: true,
   sameSessionsEveryDay: true,

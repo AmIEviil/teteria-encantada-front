@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { PublicHeader } from "../../../components/public/PublicHeader";
 import { AttendeeForm } from "../../../components/public/events/AttendeeForm/AttendeeForm";
 import {
   buildCartItem,
@@ -121,7 +120,6 @@ export const PublicEventReservaView = () => {
   return (
     <main className="publicPage">
       <div className="publicPageContainer">
-        <PublicHeader />
 
         <header className="publicEventHero">
           <h2>Mi Reserva</h2>

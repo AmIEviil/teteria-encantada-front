@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { PublicHeader } from "../../../components/public/PublicHeader";
 import { usePublicEventDetailQuery } from "../../../core/api/public.hooks";
 import { usePurchaseStore } from "../../../store/purchaseStore";
 import { publicEventPaths } from "../../../constant/routes";
@@ -43,7 +42,6 @@ export const PublicEventSessionView = () => {
       return (
         <main className="publicPage">
           <div className="publicPageContainer">
-            <PublicHeader />
             <p className="publicMuted">No se pudo cargar la jornada.</p>
           </div>
         </main>
@@ -52,7 +50,6 @@ export const PublicEventSessionView = () => {
     return (
       <main className="publicPage">
         <div className="publicPageContainer">
-          <PublicHeader />
           <p className="publicMuted">Cargando jornada...</p>
         </div>
       </main>
@@ -76,7 +73,6 @@ export const PublicEventSessionView = () => {
   return (
     <main className="publicPage">
       <div className="publicPageContainer">
-        <PublicHeader />
 
         <header className="publicEventHero">
           <h2>{activeEvent.title}</h2>

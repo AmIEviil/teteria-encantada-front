@@ -72,11 +72,11 @@ const LoginView = lazy(() =>
   })),
 );
 
-const PublicLoginView = lazy(() =>
-  import("../views/auth/PublicLoginView.tsx").then((module) => ({
-    default: module.PublicLoginView,
-  })),
-);
+// const PublicLoginView = lazy(() =>
+//   import("../views/auth/PublicLoginView.tsx").then((module) => ({
+//     default: module.PublicLoginView,
+//   })),
+// );
 
 const RegisterView = lazy(() =>
   import("../views/auth/RegisterView.tsx").then((module) => ({
@@ -108,25 +108,25 @@ const ForbiddenView = lazy(() =>
   })),
 );
 
-const PublicReservationsView = lazy(() =>
-  import("../views/public/reservations/PublicReservationsView.tsx").then(
-    (module) => ({
-      default: module.PublicReservationsView,
-    }),
-  ),
-);
+// const PublicReservationsView = lazy(() =>
+//   import("../views/public/reservations/PublicReservationsView.tsx").then(
+//     (module) => ({
+//       default: module.PublicReservationsView,
+//     }),
+//   ),
+// );
 
-const PublicMenuView = lazy(() =>
-  import("../views/public/menu/PublicMenuView.tsx").then((module) => ({
-    default: module.PublicMenuView,
-  })),
-);
+// const PublicMenuView = lazy(() =>
+//   import("../views/public/menu/PublicMenuView.tsx").then((module) => ({
+//     default: module.PublicMenuView,
+//   })),
+// );
 
-const PublicLoyaltyView = lazy(() =>
-  import("../views/public/loyalty/PublicLoyaltyView.tsx").then((module) => ({
-    default: module.PublicLoyaltyView,
-  })),
-);
+// const PublicLoyaltyView = lazy(() =>
+//   import("../views/public/loyalty/PublicLoyaltyView.tsx").then((module) => ({
+//     default: module.PublicLoyaltyView,
+//   })),
+// );
 
 const PublicEventsView = lazy(() =>
   import("../views/public/events/PublicEventsView.tsx").then((module) => ({
@@ -222,7 +222,7 @@ const DefaultRedirect = () =>
   createElement(Navigate, { to: "/", replace: true });
 
 const PublicRedirect = () =>
-  createElement(Navigate, { to: PAGE_ROUTES.PublicReservas, replace: true });
+  createElement(Navigate, { to: PAGE_ROUTES.PublicEvents, replace: true });
 
 export const router = createBrowserRouter(
   [
@@ -230,10 +230,10 @@ export const router = createBrowserRouter(
       path: PAGE_ROUTES.Login,
       Component: LoginView,
     },
-    {
-      path: PAGE_ROUTES.PublicLogin,
-      Component: PublicLoginView,
-    },
+    // {
+    //   path: PAGE_ROUTES.PublicLogin,
+    //   Component: PublicLoginView,
+    // },
     {
       path: PAGE_ROUTES.Register,
       Component: RegisterView,
@@ -263,14 +263,6 @@ export const router = createBrowserRouter(
           Component: PublicRedirect,
         },
         {
-          path: PAGE_ROUTES.PublicReservas,
-          Component: PublicReservationsView,
-        },
-        {
-          path: PAGE_ROUTES.PublicCarta,
-          Component: PublicMenuView,
-        },
-        {
           path: PAGE_ROUTES.PublicEvents,
           Component: PublicEventsView,
         },
@@ -289,14 +281,6 @@ export const router = createBrowserRouter(
         {
           path: PAGE_ROUTES.PublicEventPago,
           Component: PublicEventPagoView,
-        },
-        {
-          path: PAGE_ROUTES.PublicMisPuntos,
-          Component: withRoles(
-            PublicLoyaltyView,
-            [roles.CLIENT],
-            PAGE_ROUTES.PublicLogin,
-          ),
         },
       ],
     },

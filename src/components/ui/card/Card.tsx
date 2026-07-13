@@ -4,7 +4,7 @@ interface CardProps {
   title: string;
   description: string | null;
   dateLabel: string;
-  scheduleLabel: string;
+  scheduleLabel?: string;
   ticketsAvailable: boolean;
   imageUrl?: string | null;
   onReserve?: () => void;
@@ -32,7 +32,9 @@ export const Card = ({
           <p className={style.cardTitle}>{title}</p>
           {description && <span className={style.cardText}>{description}</span>}
           <span className={style.cardSubtitle}>{dateLabel}</span>
-          <span className={style.cardSubtitle}>{scheduleLabel}</span>
+          {scheduleLabel && (
+            <span className={style.cardSubtitle}>{scheduleLabel}</span>
+          )}
           <span
             className={
               ticketsAvailable ? style.cardAvailable : style.cardSoldOut
