@@ -21,6 +21,32 @@ interface CardPaymentFormData {
   payer: { email?: string };
 }
 
+// status_detail de MP → mensaje para el comprador. Los que no están acá caen
+// al genérico: MP agrega detalles nuevos sin aviso.
+const rejectionMessages: Record<string, string> = {
+  cc_rejected_bad_filled_card_number: "Revisa el número de tarjeta.",
+  cc_rejected_bad_filled_date: "Revisa la fecha de vencimiento.",
+  cc_rejected_bad_filled_security_code: "Revisa el código de seguridad.",
+  cc_rejected_bad_filled_other: "Revisa los datos de la tarjeta.",
+  cc_rejected_call_for_authorize:
+    "Tu banco debe autorizar el pago. Llámalos y vuelve a intentar.",
+  cc_rejected_card_disabled:
+    "Tu tarjeta está inactiva. Llama a tu banco para activarla.",
+  cc_rejected_insufficient_amount: "Tu tarjeta no tiene fondos suficientes.",
+  cc_rejected_invalid_installments: "Tu tarjeta no acepta esa cantidad de cuotas.",
+  cc_rejected_duplicated_payment:
+    "Ya hiciste un pago por ese monto. Si necesitas pagar de nuevo, usa otra tarjeta.",
+  cc_rejected_max_attempts:
+    "Alcanzaste el límite de intentos. Usa otra tarjeta u otro medio de pago.",
+  cc_rejected_card_error: "No pudimos procesar tu tarjeta. Intenta nuevamente.",
+  cc_rejected_high_risk: "El pago fue rechazado. Intenta con otro medio de pago.",
+  cc_rejected_blacklist: "El pago fue rechazado. Intenta con otro medio de pago.",
+};
+
+const rejectionMessage = (statusDetail: string) =>
+  rejectionMessages[statusDetail] ??
+  "El pago fue rechazado. Intenta con otra tarjeta u otro medio de pago.";
+
 const sessionDateFormatter = new Intl.DateTimeFormat("es-CL", {
   day: "numeric",
   month: "long",
@@ -143,7 +169,7 @@ export const PublicEventPagoView = () => {
       return;
     }
 
-    openSnackbar("El pago fue rechazado. Intenta con otro medio.", "error");
+    openSnackbar(rejectionMessage(res.statusDetail), "error");
     // El Brick requiere que el promise se rechace para resetear y permitir reintentar.
     throw new Error("El pago fue rechazado.");
   };
