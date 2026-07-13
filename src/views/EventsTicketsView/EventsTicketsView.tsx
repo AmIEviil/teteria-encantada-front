@@ -328,6 +328,7 @@ const createEmptyTicketType = (): TicketTypeDraft => ({
   promoMinQuantity: "2",
   promoBundlePrice: "",
   dailyStocks: [createEmptyDailyStock()],
+  customTicketTemplateUrl: "",
 });
 
 const createInitialEventForm = (): EventFormState => {
@@ -734,6 +735,7 @@ const parseTicketTypePayload = (
       promoMinQuantity: promotion.promoMinQuantity,
       promoBundlePrice: promotion.promoBundlePrice,
       dailyStocks: dailyStocks.length > 0 ? dailyStocks : undefined,
+      customTicketTemplateUrl: ticketType.customTicketTemplateUrl.trim() || undefined,
     },
   };
 };
@@ -839,6 +841,7 @@ const mapEventTicketTypeToDraft = (
           quantity: String(dailyStock.quantity),
         }))
       : [createEmptyDailyStock(fallbackDate)],
+  customTicketTemplateUrl: ticketType.customTicketTemplateUrl ?? "",
 });
 
 const buildTicketMenuSelectionPayload = (

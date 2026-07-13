@@ -575,6 +575,7 @@ export interface EventTicketType {
   promoMinQuantity: number | null;
   promoBundlePrice: number | null;
   dailyStocks: EventTicketTypeDailyStock[];
+  customTicketTemplateUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -644,6 +645,7 @@ export interface EventTicketTypePayload {
   promoMinQuantity?: number;
   promoBundlePrice?: number;
   dailyStocks?: EventTicketTypeDailyStockPayload[];
+  customTicketTemplateUrl?: string;
 }
 
 export interface CreateVenueEventPayload {

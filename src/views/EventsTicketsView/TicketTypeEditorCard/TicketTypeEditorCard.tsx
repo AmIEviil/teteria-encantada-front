@@ -17,6 +17,7 @@ import {
   toLocalDateString,
 } from "../../../utils/formatText.utils";
 import { CustomCalendarV2 } from "../../../components/ui/calendar/CustomCalendarV2";
+import { ImageUploadField } from "../../../components/ui/imageUpload/ImageUploadField";
 import type { TicketTypeEditorCardProps } from "../../../service/events/events.interface";
 
 export const TicketTypeEditorCard = ({
@@ -89,6 +90,22 @@ export const TicketTypeEditorCard = ({
             onTicketTypeFieldChange(ticketType.id, "description", event.target.value)
           }
           fullWidth
+        />
+
+        <ImageUploadField
+          label="Plantilla de ticket (opcional)"
+          value={
+            ticketType.customTicketTemplateUrl
+              ? { id: "", url: ticketType.customTicketTemplateUrl }
+              : null
+          }
+          onChange={(image) =>
+            onTicketTypeFieldChange(
+              ticketType.id,
+              "customTicketTemplateUrl",
+              image?.url ?? "",
+            )
+          }
         />
 
         <FormControlLabel
