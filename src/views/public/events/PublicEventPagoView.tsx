@@ -8,6 +8,7 @@ import { publicEventPaths } from "../../../constant/routes";
 import { formatMoneyNumber } from "../../../utils/formatText.utils";
 import { useSnackBarResponseStore } from "../../../store/snackBarStore";
 import type { PublicPurchaseResult } from "../../../core/api/publicEvents.types";
+import type { PayEventResult } from "../../../core/api/payments.types";
 import "../PublicViews.css";
 
 // Forma parcial del formData que emite el Card Payment Brick (solo los campos
@@ -91,10 +92,13 @@ export const PublicEventPagoView = () => {
     const buyerEmail = formData.payer.email;
     if (!buyerEmail) {
       openSnackbar("Falta el correo del comprador.", "error");
-      return;
+      // El Brick requiere que el promise se rechace para resetear y permitir reintentar.
+      throw new Error("Falta el correo del comprador.");
     }
+
+    let res: PayEventResult;
     try {
-      const res = await pay.mutateAsync({
+      res = await pay.mutateAsync({
         buyerEmail,
         items: items.map((item) => ({
           ticketTypeId: item.ticketTypeId,
@@ -111,18 +115,37 @@ export const PublicEventPagoView = () => {
           issuerId: formData.issuer_id ? String(formData.issuer_id) : undefined,
         },
       });
-      if (res.status === "approved" && res.purchase) {
-        reset();
-        setResult(res.purchase);
-      } else if (res.status === "pending") {
-        openSnackbar("Tu pago está en proceso; te avisaremos por correo.", "info");
-      } else {
-        openSnackbar("El pago fue rechazado. Intenta con otro medio.", "error");
-      }
     } catch (error) {
       const err = error as { response?: { data?: { message?: string } } };
       openSnackbar(err.response?.data?.message ?? "No se pudo completar el pago", "error");
+      // Re-lanzamos para que el Brick se resetee y el usuario pueda reintentar.
+      throw error;
     }
+
+    if (res.status === "approved" && res.purchase) {
+      reset();
+      setResult(res.purchase);
+      return;
+    }
+
+    if (res.status === "approved" && !res.purchase) {
+      // El cobro se realizó pero no llegó el detalle de la compra: no reintentar.
+      openSnackbar(
+        "Tu pago fue procesado. Si no recibes tus tickets por correo, contacta a soporte.",
+        "info",
+      );
+      return;
+    }
+
+    if (res.status === "pending") {
+      // Pago en proceso: no reintentar para evitar un doble cobro.
+      openSnackbar("Tu pago está en proceso; te avisaremos por correo.", "info");
+      return;
+    }
+
+    openSnackbar("El pago fue rechazado. Intenta con otro medio.", "error");
+    // El Brick requiere que el promise se rechace para resetear y permitir reintentar.
+    throw new Error("El pago fue rechazado.");
   };
 
   return (

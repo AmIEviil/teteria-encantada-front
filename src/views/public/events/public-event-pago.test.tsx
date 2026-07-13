@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { PublicEventPagoView } from "./PublicEventPagoView";
 import { usePurchaseStore } from "../../../store/purchaseStore";
+import { useSnackBarResponseStore } from "../../../store/snackBarStore";
 import type { PublicEventDetail, PublicEventDetailSession } from "../../../core/api/publicEvents.types";
 
 const payEvent = vi.hoisted(() => vi.fn());
@@ -15,6 +16,9 @@ vi.mock("../../../core/api/payments.hooks", () => ({
 }));
 
 // Mock del Brick: expone un botón que dispara onSubmit con datos MP simulados.
+// El Brick real captura el rechazo del promise de onSubmit para resetearse;
+// replicamos ese `.catch` acá para que un rechazo intencional (pago fallido)
+// no se propague como unhandled rejection dentro del test.
 vi.mock("@mercadopago/sdk-react", () => ({
   initMercadoPago: vi.fn(),
   CardPayment: ({ onSubmit }: any) => (
@@ -27,7 +31,7 @@ vi.mock("@mercadopago/sdk-react", () => ({
           payment_method_id: "visa",
           issuer_id: "310",
           payer: { email: "ana@correo.cl" },
-        })
+        }).catch(() => {})
       }
     >
       brick-submit
@@ -62,6 +66,7 @@ describe("PublicEventPagoView pago MP", () => {
     usePurchaseStore.getState().addItems([
       { id: "c1", ticketTypeId: "t1", ticketTypeName: "General", attendeeFirstName: "Ana", attendeeLastName: "P", unitPrice: 5000, menuExtraPrice: 0 },
     ]);
+    useSnackBarResponseStore.getState().resetSnackbar();
     payEvent.mockClear();
     payEvent.mockResolvedValue({
       status: "approved",
@@ -143,12 +148,28 @@ describe("PublicEventPagoView pago MP", () => {
     expect(screen.queryByText("¡Reserva confirmada!")).not.toBeInTheDocument();
   });
 
-  it("muestra snackbar de rechazo cuando el status es rejected", async () => {
+  it("muestra snackbar de rechazo cuando el status es rejected, y rechaza el promise para que el Brick se resetee", async () => {
     payEvent.mockResolvedValue({ status: "rejected", statusDetail: "cc_rejected_bad_filled_card_number", purchase: null });
     renderView();
     fireEvent.click(screen.getByRole("button", { name: "brick-submit" }));
 
-    await waitFor(() => expect(payEvent).toHaveBeenCalledTimes(1));
+    // El mock del Brick captura el rechazo del promise (igual que el Brick real),
+    // así que solo verificamos los efectos: snackbar de error y sin panel de éxito.
+    await waitFor(() =>
+      expect(useSnackBarResponseStore.getState().snackbarMessage).toMatch(/rechazado/),
+    );
+    expect(useSnackBarResponseStore.getState().snackbarType).toBe("error");
+    expect(screen.queryByText("¡Reserva confirmada!")).not.toBeInTheDocument();
+  });
+
+  it("muestra un mensaje distinto (no de rechazo) cuando el status es approved pero purchase es null", async () => {
+    payEvent.mockResolvedValue({ status: "approved", statusDetail: "ok", purchase: null });
+    renderView();
+    fireEvent.click(screen.getByRole("button", { name: "brick-submit" }));
+
+    await waitFor(() =>
+      expect(useSnackBarResponseStore.getState().snackbarMessage).toMatch(/contacta a soporte/),
+    );
     expect(screen.queryByText("¡Reserva confirmada!")).not.toBeInTheDocument();
   });
 });
