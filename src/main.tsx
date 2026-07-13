@@ -14,6 +14,8 @@ import { router } from "./router";
 const mpPublicKey = import.meta.env.VITE_MP_PUBLIC_KEY as string | undefined;
 if (mpPublicKey) {
   initMercadoPago(mpPublicKey, { locale: "es-CL" });
+} else {
+  console.error("Falta VITE_MP_PUBLIC_KEY: los Bricks de pago no se renderizarán.");
 }
 
 const queryClient = new QueryClient();
