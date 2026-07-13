@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { publicService } from "./public.service";
 import type { CreateReservationPayload, FindPublicReservationsFilters } from "./types";
-import type { PublicPurchasePayload } from "./publicEvents.types";
 
 const PUBLIC_MENU_QUERY_KEY = ["public-menu"] as const;
 const PUBLIC_TABLES_QUERY_KEY = ["public-tables"] as const;
@@ -75,19 +74,5 @@ export const usePublicEventDetailQuery = (id: string, enabled = true) => {
     queryKey: [...PUBLIC_EVENT_DETAIL_QUERY_KEY, id],
     queryFn: () => publicService.findEventDetail(id),
     enabled: enabled && Boolean(id),
-  });
-};
-
-export const usePublicPurchaseMutation = (eventId: string) => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (payload: PublicPurchasePayload) =>
-      publicService.purchaseEventTickets(eventId, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: PUBLIC_EVENTS_QUERY_KEY });
-      queryClient.invalidateQueries({
-        queryKey: [...PUBLIC_EVENT_DETAIL_QUERY_KEY, eventId],
-      });
-    },
   });
 };

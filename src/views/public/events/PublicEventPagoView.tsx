@@ -1,15 +1,51 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { CardPayment } from "@mercadopago/sdk-react";
 import { PublicHeader } from "../../../components/public/PublicHeader";
-import { usePublicPurchaseMutation } from "../../../core/api/public.hooks";
+import { usePayEventMutation } from "../../../core/api/payments.hooks";
 import { usePurchaseStore } from "../../../store/purchaseStore";
 import { publicEventPaths } from "../../../constant/routes";
 import { formatMoneyNumber } from "../../../utils/formatText.utils";
 import { useSnackBarResponseStore } from "../../../store/snackBarStore";
 import type { PublicPurchaseResult } from "../../../core/api/publicEvents.types";
+import type { PayEventResult } from "../../../core/api/payments.types";
 import "../PublicViews.css";
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Forma parcial del formData que emite el Card Payment Brick (solo los campos
+// que consumimos); el SDK no exporta un tipo público para el callback.
+interface CardPaymentFormData {
+  token: string;
+  installments: number;
+  payment_method_id: string;
+  issuer_id?: string | number;
+  payer: { email?: string };
+}
+
+// status_detail de MP → mensaje para el comprador. Los que no están acá caen
+// al genérico: MP agrega detalles nuevos sin aviso.
+const rejectionMessages: Record<string, string> = {
+  cc_rejected_bad_filled_card_number: "Revisa el número de tarjeta.",
+  cc_rejected_bad_filled_date: "Revisa la fecha de vencimiento.",
+  cc_rejected_bad_filled_security_code: "Revisa el código de seguridad.",
+  cc_rejected_bad_filled_other: "Revisa los datos de la tarjeta.",
+  cc_rejected_call_for_authorize:
+    "Tu banco debe autorizar el pago. Llámalos y vuelve a intentar.",
+  cc_rejected_card_disabled:
+    "Tu tarjeta está inactiva. Llama a tu banco para activarla.",
+  cc_rejected_insufficient_amount: "Tu tarjeta no tiene fondos suficientes.",
+  cc_rejected_invalid_installments: "Tu tarjeta no acepta esa cantidad de cuotas.",
+  cc_rejected_duplicated_payment:
+    "Ya hiciste un pago por ese monto. Si necesitas pagar de nuevo, usa otra tarjeta.",
+  cc_rejected_max_attempts:
+    "Alcanzaste el límite de intentos. Usa otra tarjeta u otro medio de pago.",
+  cc_rejected_card_error: "No pudimos procesar tu tarjeta. Intenta nuevamente.",
+  cc_rejected_high_risk: "El pago fue rechazado. Intenta con otro medio de pago.",
+  cc_rejected_blacklist: "El pago fue rechazado. Intenta con otro medio de pago.",
+};
+
+const rejectionMessage = (statusDetail: string) =>
+  rejectionMessages[statusDetail] ??
+  "El pago fue rechazado. Intenta con otra tarjeta u otro medio de pago.";
 
 const sessionDateFormatter = new Intl.DateTimeFormat("es-CL", {
   day: "numeric",
@@ -26,12 +62,11 @@ export const PublicEventPagoView = () => {
   const total = usePurchaseStore((s) => s.total());
   const reset = usePurchaseStore((s) => s.reset);
   const openSnackbar = useSnackBarResponseStore((s) => s.openSnackbar);
-  const purchase = usePublicPurchaseMutation(id);
+  const pay = usePayEventMutation(id);
 
-  const [email, setEmail] = useState("");
   const [result, setResult] = useState<PublicPurchaseResult | null>(null);
 
-  // ponytail: carrito en memoria; refresh duro pierde contexto → volver al detalle.
+  // carrito en memoria; refresh duro pierde contexto → volver al detalle.
   const hasValidContext = !!event && event.id === id;
 
   useEffect(() => {
@@ -54,9 +89,7 @@ export const PublicEventPagoView = () => {
             <p className="publicMuted">
               {result.tickets.length} ticket(s) para {result.eventTitle}.
             </p>
-            <p className="publicMuted">
-              Tu boleta llegará a {result.buyerEmail}. {/* ponytail: envío real pendiente */}
-            </p>
+            <p className="publicMuted">Tu boleta llegará a {result.buyerEmail}.</p>
             <p className="publicMenuPrice">Total {formatMoneyNumber(result.total)}</p>
             <button
               type="button"
@@ -81,13 +114,18 @@ export const PublicEventPagoView = () => {
     ? new Date(event.startsAt).toISOString().slice(0, 10)
     : undefined;
 
-  const canPay = EMAIL_RE.test(email) && items.length > 0 && !purchase.isPending;
+  const handleSubmit = async (formData: CardPaymentFormData) => {
+    const buyerEmail = formData.payer.email;
+    if (!buyerEmail) {
+      openSnackbar("Falta el correo del comprador.", "error");
+      // El Brick requiere que el promise se rechace para resetear y permitir reintentar.
+      throw new Error("Falta el correo del comprador.");
+    }
 
-  const handlePay = () => {
-    if (!canPay) return;
-    purchase.mutate(
-      {
-        buyerEmail: email,
+    let res: PayEventResult;
+    try {
+      res = await pay.mutateAsync({
+        buyerEmail,
         items: items.map((item) => ({
           ticketTypeId: item.ticketTypeId,
           sessionId: session?.id,
@@ -96,18 +134,44 @@ export const PublicEventPagoView = () => {
           attendeeLastName: item.attendeeLastName,
           menuSelection: item.menuSelection,
         })),
-      },
-      {
-        onSuccess: (data) => {
-          reset();
-          setResult(data);
+        payment: {
+          token: formData.token,
+          installments: formData.installments,
+          paymentMethodId: formData.payment_method_id,
+          issuerId: formData.issuer_id ? String(formData.issuer_id) : undefined,
         },
-        onError: (error) => {
-          const err = error as { response?: { data?: { message?: string } } };
-          openSnackbar(err.response?.data?.message ?? "No se pudo completar la reserva", "error");
-        },
-      },
-    );
+      });
+    } catch (error) {
+      const err = error as { response?: { data?: { message?: string } } };
+      openSnackbar(err.response?.data?.message ?? "No se pudo completar el pago", "error");
+      // Re-lanzamos para que el Brick se resetee y el usuario pueda reintentar.
+      throw error;
+    }
+
+    if (res.status === "approved" && res.purchase) {
+      reset();
+      setResult(res.purchase);
+      return;
+    }
+
+    if (res.status === "approved" && !res.purchase) {
+      // El cobro se realizó pero no llegó el detalle de la compra: no reintentar.
+      openSnackbar(
+        "Tu pago fue procesado. Si no recibes tus tickets por correo, contacta a soporte.",
+        "info",
+      );
+      return;
+    }
+
+    if (res.status === "pending") {
+      // Pago en proceso: no reintentar para evitar un doble cobro.
+      openSnackbar("Tu pago está en proceso; te avisaremos por correo.", "info");
+      return;
+    }
+
+    openSnackbar(rejectionMessage(res.statusDetail), "error");
+    // El Brick requiere que el promise se rechace para resetear y permitir reintentar.
+    throw new Error("El pago fue rechazado.");
   };
 
   return (
@@ -136,28 +200,7 @@ export const PublicEventPagoView = () => {
         </section>
 
         <section className="publicPanel">
-          <label className="input-title" htmlFor="buyer-email">
-            Email para recibir la boleta *
-          </label>
-          <input
-            id="buyer-email"
-            className="publicField"
-            type="email"
-            value={email}
-            placeholder="tucorreo@ejemplo.cl"
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <div className="publicActionsRow">
-            <button
-              type="button"
-              className="publicJornadaButton"
-              disabled={!canPay}
-              onClick={handlePay}
-            >
-              PAGAR
-            </button>
-          </div>
-          {/* ponytail: pasarela de pago real pendiente; hoy PAGAR crea los tickets. */}
+          <CardPayment initialization={{ amount: total }} onSubmit={handleSubmit} />
         </section>
       </div>
     </main>

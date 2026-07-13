@@ -8,11 +8,7 @@ import type {
   ReservationScheduleDay,
   PublicTable,
 } from "./types";
-import type {
-  PublicEventDetail,
-  PublicPurchasePayload,
-  PublicPurchaseResult,
-} from "./publicEvents.types";
+import type { PublicEventDetail } from "./publicEvents.types";
 
 const normalizeArrayPayload = <T>(payload: unknown): T[] => {
   if (Array.isArray(payload)) {
@@ -84,17 +80,6 @@ export const publicService = {
 
   findEventDetail: async (id: string): Promise<PublicEventDetail> => {
     const response = await apiClient.get<PublicEventDetail>(`/public/events/${id}`);
-    return response.data;
-  },
-
-  purchaseEventTickets: async (
-    id: string,
-    payload: PublicPurchasePayload,
-  ): Promise<PublicPurchaseResult> => {
-    const response = await apiClient.post<PublicPurchaseResult>(
-      `/public/events/${id}/tickets`,
-      payload,
-    );
     return response.data;
   },
 };

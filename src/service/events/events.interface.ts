@@ -66,6 +66,7 @@ export interface TicketTypeDraft {
   promoMinQuantity: string;
   promoBundlePrice: string;
   dailyStocks: TicketDailyStockDraft[];
+  customTicketTemplateUrl: string;
 }
 
 export interface EventFormState {
