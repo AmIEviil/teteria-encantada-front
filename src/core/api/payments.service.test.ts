@@ -1,4 +1,4 @@
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { vi, describe, it, expect, beforeEach, type Mock } from "vitest";
 import { paymentsService } from "./payments.service";
 import apiClient from "../client/client";
 
@@ -8,7 +8,7 @@ describe("paymentsService.payEvent", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("hace POST al endpoint de pago", async () => {
-    (apiClient.post as any).mockResolvedValue({
+    (apiClient.post as unknown as Mock).mockResolvedValue({
       data: { status: "approved", statusDetail: "ok", purchase: { tickets: [] } },
     });
     const res = await paymentsService.payEvent("e1", {

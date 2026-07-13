@@ -21,7 +21,7 @@ vi.mock("../../../core/api/payments.hooks", () => ({
 // no se propague como unhandled rejection dentro del test.
 vi.mock("@mercadopago/sdk-react", () => ({
   initMercadoPago: vi.fn(),
-  CardPayment: ({ onSubmit }: any) => (
+  CardPayment: ({ onSubmit }: { onSubmit: (data: unknown) => Promise<unknown> }) => (
     <button
       type="button"
       onClick={() =>
