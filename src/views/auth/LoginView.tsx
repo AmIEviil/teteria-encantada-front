@@ -142,9 +142,6 @@ export const LoginView = () => {
           <Link to={PAGE_ROUTES.ForgotPassword} className="auth-link">
             ¿Olvidaste tu contraseña?
           </Link>
-          <Link to={PAGE_ROUTES.Register} className="auth-link">
-            Crear usuario
-          </Link>
         </div>
       </div>
     </section>

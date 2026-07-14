@@ -18,7 +18,6 @@ const formatDateRange = (event: PublicEvent): string => {
   return startLabel === endLabel ? startLabel : `${startLabel} al ${endLabel}`;
 };
 
-
 export const BodyEvents = () => {
   const { data: events = [], isLoading } = usePublicEventsQuery();
   const navigate = useNavigate();
@@ -41,9 +40,9 @@ export const BodyEvents = () => {
 
   return (
     <div className="publicPageContainer">
-      <h2>Eventos</h2>
-      <p className="publicMuted">
-        Explora los eventos disponibles actualmente en Teteria.
+      <h4 className="text-6xl">Eventos</h4>
+      <p className="publicMuted ">
+        Explora los eventos disponibles actualmente en Experencias D'encanto.
       </p>
       {isLoading ? (
         <p className="publicMuted">Cargando eventos...</p>

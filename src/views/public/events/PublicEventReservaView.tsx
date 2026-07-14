@@ -49,7 +49,9 @@ export const PublicEventReservaView = () => {
   const availableTypes = hasValidContext
     ? session
       ? event!.ticketTypes.filter((t) =>
-          session.ticketTypes.some((st) => st.ticketTypeId === t.id && st.available),
+          session.ticketTypes.some(
+            (st) => st.ticketTypeId === t.id && st.available,
+          ),
         )
       : event!.ticketTypes.filter((t) => t.available)
     : [];
@@ -59,11 +61,14 @@ export const PublicEventReservaView = () => {
       availableTypes.map((t) => [
         t.id,
         session
-          ? session.ticketTypes.find((st) => st.ticketTypeId === t.id)?.remaining ?? null
+          ? (session.ticketTypes.find((st) => st.ticketTypeId === t.id)
+              ?.remaining ?? null)
           : t.remaining,
       ]),
     ),
-    seatsRemaining: session ? session.seatsRemaining : event?.seatsRemaining ?? null,
+    seatsRemaining: session
+      ? session.seatsRemaining
+      : (event?.seatsRemaining ?? null),
   };
 
   const [drafts, setDrafts] = useState<AttendeeDraft[]>(() => [
@@ -87,18 +92,23 @@ export const PublicEventReservaView = () => {
     setDrafts((prev) => [...prev, newDraft(availableTypes[0]?.id ?? "")]);
 
   // ¿cabe una persona más? probamos con un borrador extra del primer tipo disponible.
-  const canAddPerson = checkAvailability(
-    items,
-    [...drafts, newDraft(availableTypes[0]?.id ?? "")],
-    availabilityCtx,
-  ).ok;
+  // Además: no se agrega otra persona hasta completar nombre y apellido de las actuales.
+  const canAddPerson =
+    drafts.every((d) => d.firstName.trim() && d.lastName.trim()) &&
+    checkAvailability(
+      items,
+      [...drafts, newDraft(availableTypes[0]?.id ?? "")],
+      availabilityCtx,
+    ).ok;
 
   const removeDraft = (draftId: string) =>
     setDrafts((prev) => prev.filter((d) => d.id !== draftId));
 
   const addToCart = () => {
     const typeOf = (tid: string) => availableTypes.find((t) => t.id === tid);
-    const allValid = drafts.every((d) => isAttendeeDraftValid(d, typeOf(d.ticketTypeId)));
+    const allValid = drafts.every((d) =>
+      isAttendeeDraftValid(d, typeOf(d.ticketTypeId)),
+    );
     if (!allValid) {
       openSnackbar("Completa nombre, apellido y menú de cada persona", "error");
       return;
@@ -115,15 +125,16 @@ export const PublicEventReservaView = () => {
 
   const scheduleLabel = session
     ? `${sessionDateFormatter.format(new Date(`${session.date}T00:00:00`))} · ${session.startTime}${session.name ? ` · ${session.name}` : ""}`
-    : new Intl.DateTimeFormat("es-CL", { dateStyle: "long" }).format(new Date(event!.startsAt));
+    : new Intl.DateTimeFormat("es-CL", { dateStyle: "long" }).format(
+        new Date(event!.startsAt),
+      );
 
   return (
     <main className="publicPage">
       <div className="publicPageContainer">
-
         <header className="publicEventHero">
-          <h2>Mi Reserva</h2>
-          <p className="publicMuted">{event!.title}</p>
+          <h2 className="text-5xl">Mi Reserva</h2>
+          <p className="publicMuted text-lg">{event!.title}</p>
           <p className="publicMuted">{scheduleLabel}</p>
         </header>
 
@@ -135,7 +146,9 @@ export const PublicEventReservaView = () => {
               draft={draft}
               ticketTypes={availableTypes}
               onChange={updateDraft}
-              onRemove={drafts.length > 1 ? () => removeDraft(draft.id) : undefined}
+              onRemove={
+                drafts.length > 1 ? () => removeDraft(draft.id) : undefined
+              }
             />
           ))}
 
@@ -151,14 +164,17 @@ export const PublicEventReservaView = () => {
 
         {items.length > 0 && (
           <section className="publicPanel">
-            <h3>Carrito ({items.length})</h3>
+            <h3 className="text-3xl">Carrito ({items.length})</h3>
             <ul className="publicCartList">
               {items.map((item) => (
                 <li key={item.id} className="publicCartRow">
                   <span>
-                    {item.attendeeFirstName} {item.attendeeLastName} — {item.ticketTypeName}
+                    {item.attendeeFirstName} {item.attendeeLastName} —{" "}
+                    {item.ticketTypeName}
                   </span>
-                  <span>{formatMoneyNumber(item.unitPrice + item.menuExtraPrice)}</span>
+                  <span>
+                    {formatMoneyNumber(item.unitPrice + item.menuExtraPrice)}
+                  </span>
                   <button
                     type="button"
                     className="publicLinkButton"
@@ -172,8 +188,12 @@ export const PublicEventReservaView = () => {
           </section>
         )}
 
-        <div className="publicActionsRow">
-          <button type="button" className="publicJornadaButton" onClick={addToCart}>
+        <div className="flex gap-4 row justify-end">
+          <button
+            type="button"
+            className="publicJornadaButton"
+            onClick={addToCart}
+          >
             Agregar al carrito
           </button>
           <button

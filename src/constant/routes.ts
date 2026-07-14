@@ -28,6 +28,7 @@ export const PAGE_ROUTES = {
   MisPuntos: "/mis-puntos",
   // PublicReservas: "/publico/reservas",
   PublicEvents: "/publico/eventos",
+  PublicCalendario: "/publico/calendario",
   // PublicCarta: "/publico/carta",
   // PublicMisPuntos: "/publico/mis-puntos",
   PublicEventDetail: "/publico/eventos/:id",
@@ -114,7 +115,7 @@ export const publicTopbarOptions: IRoute[] = [
   },
   {
     name: "Calendario Actividades",
-    path: PAGE_ROUTES.PublicEvents,
+    path: PAGE_ROUTES.PublicCalendario,
     canAccess: [],
     icon: "events",
   },
@@ -145,7 +146,9 @@ export const publicTopbarOptions: IRoute[] = [
 ];
 
 export const publicEventPaths = {
-  detail: (id: string) => `/publico/eventos/${id}`,
+  // date en formato YYYY-MM-DD filtra las jornadas del evento a ese día
+  detail: (id: string, date?: string) =>
+    date ? `/publico/eventos/${id}?fecha=${date}` : `/publico/eventos/${id}`,
   session: (id: string, sessionId: string) =>
     `/publico/eventos/${id}/jornada/${sessionId}`,
   reserva: (id: string) => `/publico/eventos/${id}/reserva`,

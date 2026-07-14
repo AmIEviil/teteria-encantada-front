@@ -19,7 +19,7 @@ export const Card = ({
   imageUrl,
   onReserve,
 }: CardProps) => {
-  // ponytail: matchMedia check on click, no resize listener needed
+
   const handleCardClick = () => {
     if (window.matchMedia("(max-width: 480px)").matches) onReserve?.();
   };

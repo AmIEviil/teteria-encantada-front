@@ -1,12 +1,4 @@
-.publicPage {
-  min-height: 100vh;
-  padding: clamp(16px, 2.5vw, 36px);
-  background:
-    radial-gradient(circle at 4% -2%, rgba(188, 154, 98, 0.22), transparent 42%),
-    radial-gradient(circle at 96% 0%, rgba(141, 78, 115, 0.2), transparent 38%),
-    linear-gradient(180deg, #f8efdd 0%, #f2e2c4 100%);
-  color: var(--ink-strong);
-}
+
 
 .publicPageContainer {
   max-width: 1100px;
@@ -254,7 +246,6 @@
   margin-top: 12px;
   display: grid;
   gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
 }
 
 .publicMenuCard {
@@ -326,3 +317,115 @@
 .publicCartRow { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid #f0ebe3; }
 .publicActionsRow { display: flex; gap: 1rem; margin-top: 1rem; }
 @media (max-width: 480px) { .publicAttendeeGrid { grid-template-columns: 1fr; } }
+
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.calendarMonthLabel {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #4a3a28;
+  text-transform: capitalize;
+  min-width: 180px;
+  text-align: center;
+}
+
+.calendarNavButton {
+  border: 1px solid #d8c2a1;
+  background: #fffdf7;
+  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  font-size: 1.2rem;
+  color: #4a3a28;
+  cursor: pointer;
+}
+
+.calendarNavButton:hover {
+  background: #f6ead2;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.calendarWeekDay {
+  text-align: center;
+  font-weight: 600;
+  color: #675846;
+  padding: 6px 0;
+}
+
+.calendarCell {
+  min-height: 110px;
+  border: 1px solid #d8c2a1;
+  border-radius: 10px;
+  background: #fffdf7;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.calendarCellEmpty {
+  border: none;
+  background: transparent;
+}
+
+.calendarDayNumber {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #675846;
+}
+
+.calendarEventCard {
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 4px 6px;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  color: #3d3021;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendarEventCard:hover {
+  filter: brightness(0.95);
+}
+
+@media (max-width: 700px) {
+  .calendarGrid {
+    gap: 3px;
+  }
+
+  .calendarCell {
+    min-height: 74px;
+    padding: 3px;
+  }
+
+  .calendarEventCard {
+    font-size: 0.6rem;
+    padding: 2px 3px;
+  }
+}
+
+.publicSessionFilter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}

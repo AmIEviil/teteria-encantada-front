@@ -638,7 +638,7 @@ const EmpleadosTab = () => {
               />
               <TextField
                 type="date"
-                label="Fecha de nacimiento"
+                placeholder="Seleccionar fecha"
                 value={formState.fechaNacimiento}
                 onChange={(event) => handleBirthDateChange(event.target.value)}
                 fullWidth

@@ -78,12 +78,6 @@ const LoginView = lazy(() =>
 //   })),
 // );
 
-const RegisterView = lazy(() =>
-  import("../views/auth/RegisterView.tsx").then((module) => ({
-    default: module.RegisterView,
-  })),
-);
-
 const ForgotPasswordView = lazy(() =>
   import("../views/auth/ForgotPasswordView.tsx").then((module) => ({
     default: module.ForgotPasswordView,
@@ -131,6 +125,12 @@ const ForbiddenView = lazy(() =>
 const PublicEventsView = lazy(() =>
   import("../views/public/events/PublicEventsView.tsx").then((module) => ({
     default: module.PublicEventsView,
+  })),
+);
+
+const PublicCalendarView = lazy(() =>
+  import("../views/public/calendar/PublicCalendarView.tsx").then((m) => ({
+    default: m.PublicCalendarView,
   })),
 );
 
@@ -239,10 +239,6 @@ export const router = createBrowserRouter(
     //   Component: PublicLoginView,
     // },
     {
-      path: PAGE_ROUTES.Register,
-      Component: RegisterView,
-    },
-    {
       path: PAGE_ROUTES.ForgotPassword,
       Component: ForgotPasswordView,
     },
@@ -269,6 +265,10 @@ export const router = createBrowserRouter(
         {
           path: PAGE_ROUTES.PublicEvents,
           Component: PublicEventsView,
+        },
+        {
+          path: PAGE_ROUTES.PublicCalendario,
+          Component: PublicCalendarView,
         },
         {
           path: PAGE_ROUTES.PublicEventDetail,
