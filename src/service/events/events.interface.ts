@@ -78,6 +78,8 @@ export interface EventFormState {
   endsAtTime: string;
   officialImageUrl: string;
   status: EventStatus;
+  publishAtDate: string;
+  publishAtTime: string;
   isFreeEntry: boolean;
   hasSessions: boolean;
   sameSessionsEveryDay: boolean;

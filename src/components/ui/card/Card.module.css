@@ -13,11 +13,12 @@
   align-items: center;
   justify-content: center;
   flex: 1 1 auto;
-  min-width: 0;
   background-color: white;
   border-radius: 8px 0px 0px 8px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   padding: 16px;
+  min-height: 200px;
+  min-width: 400px;
 }
 
 .cardBody {
@@ -94,5 +95,9 @@
 @media (max-width: 480px) {
   .cardContainer {
     cursor: pointer;
+  }
+
+  .cardContent{
+    min-width: 100px !important;
   }
 }

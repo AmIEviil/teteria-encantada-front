@@ -13,7 +13,7 @@ import EventSeatIcon from "@mui/icons-material/EventSeat";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import LoyaltyIcon from "@mui/icons-material/Loyalty";
 import InstagramIcon from "@mui/icons-material/Instagram";
-import PhotoSizeSelectActualIcon from '@mui/icons-material/PhotoSizeSelectActual';
+import PhotoSizeSelectActualIcon from "@mui/icons-material/PhotoSizeSelectActual";
 import LogoutIcon from "../icons/LogoutIcon";
 import MigrationsIcon from "../icons/MigrationsIcon";
 import { useBoundStore } from "../../../store/BoundedStore";
@@ -110,7 +110,12 @@ const CustomDropmenu = ({ isAuthenticated }: CustomDropmenuProps) => {
         className={`${style.dropmenuLabelNav}`}
         onClick={() => setIsOpen(!isOpen)}
       >
-        {toUpperCaseFirstLetter(actualRoute)}
+        {isAuthenticated ? (
+          <>{toUpperCaseFirstLetter(actualRoute)}</>
+        ) : (
+          <></>
+        )}
+
         <BarsIcon size={16} color="white" className="icon w-5!" />
       </button>
       <div

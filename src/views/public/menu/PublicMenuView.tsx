@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { PublicHeader } from "../../../components/public/PublicHeader";
 import { usePublicMenuQuery } from "../../../core/api/public.hooks";
 import "../PublicViews.css";
 
@@ -31,7 +30,6 @@ export const PublicMenuView = () => {
   return (
     <main className="publicPage">
       <div className="publicPageContainer">
-        <PublicHeader />
 
         <section className="publicPanel">
           <h2>Carta de productos</h2>

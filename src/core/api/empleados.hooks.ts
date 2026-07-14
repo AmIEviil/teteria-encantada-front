@@ -1,12 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSnackBarResponseStore } from "../../store/snackBarStore";
 import { getApiErrorMessage } from "./apiError";
-import { authService } from "./auth.service";
 import { empleadosService } from "./empleados.service";
 import type {
+  AddWhitelistPayload,
   CreateTrabajadorPayload,
   FindEmpleadoUsersFilters,
-  RegisterPayload,
   UpdateTrabajadorPayload,
 } from "./types";
 
@@ -25,6 +24,7 @@ export const useEmpleadosUsersQuery = (
       filters?.lastName ?? "",
       filters?.createdFrom ?? "",
       filters?.createdTo ?? "",
+      filters?.onlyStaff ?? false,
     ],
     queryFn: () => empleadosService.findUsers(filters),
     enabled,
@@ -78,21 +78,49 @@ export const useUpdateTrabajadorMutation = () => {
   });
 };
 
-export const useCreateEmpleadoUserMutation = () => {
+export const useAddWhitelistMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: RegisterPayload) => authService.createUser(payload),
+    mutationFn: (payload: AddWhitelistPayload) => empleadosService.addToWhitelist(payload),
     onSuccess: () => {
       useSnackBarResponseStore
         .getState()
-        .openSnackbar("Usuario creado correctamente", "success");
+        .openSnackbar("Correo agregado a la whitelist", "success");
       queryClient.invalidateQueries({ queryKey: EMPLEADOS_QUERY_KEY });
     },
     onError: (error) => {
       useSnackBarResponseStore
         .getState()
-        .openSnackbar(getApiErrorMessage(error, "No se pudo crear el usuario"), "error");
+        .openSnackbar(getApiErrorMessage(error, "No se pudo agregar el correo"), "error");
+    },
+  });
+};
+
+interface SetWhitelistActivePayload {
+  id: string;
+  isActive: boolean;
+}
+
+export const useSetWhitelistActiveMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, isActive }: SetWhitelistActivePayload) =>
+      empleadosService.setWhitelistActive(id, isActive),
+    onSuccess: (user) => {
+      useSnackBarResponseStore
+        .getState()
+        .openSnackbar(
+          user.isActive ? "Acceso habilitado" : "Acceso revocado",
+          "success",
+        );
+      queryClient.invalidateQueries({ queryKey: EMPLEADOS_QUERY_KEY });
+    },
+    onError: (error) => {
+      useSnackBarResponseStore
+        .getState()
+        .openSnackbar(getApiErrorMessage(error, "No se pudo actualizar el acceso"), "error");
     },
   });
 };

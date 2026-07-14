@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { PublicHeader } from "../../../components/public/PublicHeader";
 import { usePublicEventDetailQuery } from "../../../core/api/public.hooks";
 import { usePurchaseStore } from "../../../store/purchaseStore";
 import { publicEventPaths } from "../../../constant/routes";
@@ -32,18 +31,17 @@ export const PublicEventSessionView = () => {
     }
   }, [needsFetch, fetched, sessionId, id, setContext, navigate]);
 
-  const activeEvent = event && event.id === id ? event : fetched ?? null;
+  const activeEvent = event && event.id === id ? event : (fetched ?? null);
   const activeSession =
     session && session.id === sessionId
       ? session
-      : activeEvent?.sessions.find((s) => s.id === sessionId) ?? null;
+      : (activeEvent?.sessions.find((s) => s.id === sessionId) ?? null);
 
   if (!activeEvent || !activeSession) {
     if (isError) {
       return (
         <main className="publicPage">
           <div className="publicPageContainer">
-            <PublicHeader />
             <p className="publicMuted">No se pudo cargar la jornada.</p>
           </div>
         </main>
@@ -52,7 +50,6 @@ export const PublicEventSessionView = () => {
     return (
       <main className="publicPage">
         <div className="publicPageContainer">
-          <PublicHeader />
           <p className="publicMuted">Cargando jornada...</p>
         </div>
       </main>
@@ -64,9 +61,13 @@ export const PublicEventSessionView = () => {
     : activeSession.startTime;
 
   const availableTypeIds = new Set(
-    activeSession.ticketTypes.filter((t) => t.available).map((t) => t.ticketTypeId),
+    activeSession.ticketTypes
+      .filter((t) => t.available)
+      .map((t) => t.ticketTypeId),
   );
-  const types = activeEvent.ticketTypes.filter((t) => availableTypeIds.has(t.id));
+  const types = activeEvent.ticketTypes.filter((t) =>
+    availableTypeIds.has(t.id),
+  );
 
   const goToReserva = () => {
     setContext(activeEvent, activeSession);
@@ -76,12 +77,11 @@ export const PublicEventSessionView = () => {
   return (
     <main className="publicPage">
       <div className="publicPageContainer">
-        <PublicHeader />
-
         <header className="publicEventHero">
-          <h2>{activeEvent.title}</h2>
+          <h2 className="text-5xl">{activeEvent.title}</h2>
           <p className="publicMuted" style={{ textTransform: "capitalize" }}>
-            {dateFormatter.format(new Date(`${activeSession.date}T00:00:00`))}
+            {dateFormatter.format(new Date(`${activeSession.date}T00:00:00`))} -{" "}
+            {activeSession.startTime} - {activeSession.endTime}
           </p>
           <p className="publicMuted">
             {scheduleLabel} · <span>{activeSession.name ?? "Jornada"}</span>
@@ -89,7 +89,7 @@ export const PublicEventSessionView = () => {
         </header>
 
         <section className="publicPanel">
-          <h3>Tipos de ticket</h3>
+          <h3 className="text-3xl">Tipos de ticket</h3>
           <div className="publicMenuGrid">
             {types.map((t) => (
               <article className="publicMenuCard" key={t.id}>
@@ -101,14 +101,23 @@ export const PublicEventSessionView = () => {
               </article>
             ))}
           </div>
-          <button
-            type="button"
-            className="publicJornadaButton"
-            disabled={types.length === 0}
-            onClick={goToReserva}
-          >
-            Reservar ahora
-          </button>
+          <div className="flex justify-center mt-4 gap-4">
+            <button
+              type="button"
+              className="publicJornadaButton"
+              onClick={() => navigate(publicEventPaths.detail(activeEvent.id))}
+            >
+              Volver
+            </button>
+            <button
+              type="button"
+              className="publicJornadaButton"
+              disabled={types.length === 0}
+              onClick={goToReserva}
+            >
+              Reservar ahora
+            </button>
+          </div>
         </section>
       </div>
     </main>

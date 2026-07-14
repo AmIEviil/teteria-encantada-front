@@ -148,7 +148,6 @@ describe("hooks mutations (success)", () => {
     await runMutation(() => publicHooks.usePublicCreateReservationMutation(), {});
     await runMutation(() => empleadoHooks.useCreateTrabajadorMutation(), {});
     await runMutation(() => empleadoHooks.useUpdateTrabajadorMutation(), { id: "tr", payload: {} });
-    await runMutation(() => empleadoHooks.useCreateEmpleadoUserMutation(), {});
     await runMutation(() => migrationHooks.useExecuteMigrationMutation(), "M1");
     await runMutation(() => migrationHooks.useRevertMigrationMutation(), "M1");
     await runMutation(() => imageHooks.useUploadImageMutation(), new File(["x"], "x.png"));
@@ -198,7 +197,6 @@ describe("hooks mutations (error)", () => {
     await runMutation(() => reservationHooks.useUpdateReservationScheduleMutation(), {});
     await runMutation(() => empleadoHooks.useCreateTrabajadorMutation(), {});
     await runMutation(() => empleadoHooks.useUpdateTrabajadorMutation(), { id: "tr", payload: {} });
-    await runMutation(() => empleadoHooks.useCreateEmpleadoUserMutation(), {});
     await runMutation(() => migrationHooks.useExecuteMigrationMutation(), "M1");
     await runMutation(() => migrationHooks.useRevertMigrationMutation(), "M1");
     expect(true).toBe(true);

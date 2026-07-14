@@ -10,7 +10,7 @@ interface IRoute {
 
 export const PAGE_ROUTES = {
   Login: "/login",
-  PublicLogin: "/acceso",
+  // PublicLogin: "/acceso",
   Register: "/register",
   ForgotPassword: "/forgot-password",
   ResetPassword: "/reset-password",
@@ -26,10 +26,11 @@ export const PAGE_ROUTES = {
   Migraciones: "/migraciones",
   Fidelizacion: "/fidelizacion",
   MisPuntos: "/mis-puntos",
-  PublicReservas: "/publico/reservas",
+  // PublicReservas: "/publico/reservas",
   PublicEvents: "/publico/eventos",
-  PublicCarta: "/publico/carta",
-  PublicMisPuntos: "/publico/mis-puntos",
+  PublicCalendario: "/publico/calendario",
+  // PublicCarta: "/publico/carta",
+  // PublicMisPuntos: "/publico/mis-puntos",
   PublicEventDetail: "/publico/eventos/:id",
   PublicEventSession: "/publico/eventos/:id/jornada/:sessionId",
   PublicEventReserva: "/publico/eventos/:id/reserva",
@@ -76,7 +77,7 @@ export const topbarOptions: IRoute[] = [
   {
     name: "Empleados",
     path: PAGE_ROUTES.Empleados,
-    canAccess: [roles.SUPER_ADMIN],
+    canAccess: [roles.SUPER_ADMIN, roles.ADMIN, roles.TEC],
     icon: "employees",
   },
   {
@@ -108,19 +109,19 @@ export const topbarOptions: IRoute[] = [
 export const publicTopbarOptions: IRoute[] = [
   {
     name: "Salon de eventos",
-    path: PAGE_ROUTES.PublicReservas,
+    path: PAGE_ROUTES.PublicEvents,
     canAccess: [],
     icon: "reservations",
   },
   {
     name: "Calendario Actividades",
-    path: PAGE_ROUTES.PublicEvents,
+    path: PAGE_ROUTES.PublicCalendario,
     canAccess: [],
     icon: "events",
   },
   {
     name: "Instagram",
-    path: PAGE_ROUTES.PublicCarta,
+    path: "",
     onClick: () => {
       window.open("https://www.instagram.com/clubdearteyte/", "_blank");
     },
@@ -129,7 +130,7 @@ export const publicTopbarOptions: IRoute[] = [
   },
   {
     name: "Tiktok",
-    path: PAGE_ROUTES.PublicMisPuntos,
+    path: "",
     onClick: () => {
       window.open("https://www.tiktok.com/@clubdearteyte", "_blank");
     },
@@ -138,14 +139,16 @@ export const publicTopbarOptions: IRoute[] = [
   },
   {
     name: "Galeria Fotos",
-    path: PAGE_ROUTES.PublicMisPuntos,
+    path: PAGE_ROUTES.PublicEvents,
     canAccess: [],
     icon: "gallery",
   },
 ];
 
 export const publicEventPaths = {
-  detail: (id: string) => `/publico/eventos/${id}`,
+  // date en formato YYYY-MM-DD filtra las jornadas del evento a ese día
+  detail: (id: string, date?: string) =>
+    date ? `/publico/eventos/${id}?fecha=${date}` : `/publico/eventos/${id}`,
   session: (id: string, sessionId: string) =>
     `/publico/eventos/${id}/jornada/${sessionId}`,
   reserva: (id: string) => `/publico/eventos/${id}/reserva`,

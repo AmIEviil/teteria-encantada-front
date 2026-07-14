@@ -12,8 +12,15 @@ interface AttendeeFormProps {
   onRemove?: () => void;
 }
 
+// ponytail: sin libs de validación; letras + espacios y separadores de nombre (O'Brien, Jean-Luc).
+const onlyLetters = (value: string) => value.replace(/[^\p{L}\s'-]/gu, "");
+
 export const AttendeeForm = ({
-  index, draft, ticketTypes, onChange, onRemove,
+  index,
+  draft,
+  ticketTypes,
+  onChange,
+  onRemove,
 }: AttendeeFormProps) => {
   const selectedType = ticketTypes.find((t) => t.id === draft.ticketTypeId);
   const menuGroups =
@@ -21,7 +28,11 @@ export const AttendeeForm = ({
       ? selectedType.menuTemplate.groups
       : [];
 
-  const toggleOption = (groupKey: string, optionId: string, maxSelect: number) => {
+  const toggleOption = (
+    groupKey: string,
+    optionId: string,
+    maxSelect: number,
+  ) => {
     const current = draft.menuByGroup[groupKey] ?? [];
     let next: string[];
     if (current.includes(optionId)) {
@@ -33,7 +44,10 @@ export const AttendeeForm = ({
     } else {
       next = current;
     }
-    onChange({ ...draft, menuByGroup: { ...draft.menuByGroup, [groupKey]: next } });
+    onChange({
+      ...draft,
+      menuByGroup: { ...draft.menuByGroup, [groupKey]: next },
+    });
   };
 
   return (
@@ -52,43 +66,51 @@ export const AttendeeForm = ({
           title="Nombre"
           require
           value={draft.firstName}
-          onChange={(v) => onChange({ ...draft, firstName: v })}
+          onChange={(v) => onChange({ ...draft, firstName: onlyLetters(v) })}
+          type="text"
         />
         <CustomInputText
           title="Apellido"
           require
           value={draft.lastName}
-          onChange={(v) => onChange({ ...draft, lastName: v })}
+          onChange={(v) => onChange({ ...draft, lastName: onlyLetters(v) })}
+          type="text"
         />
       </div>
 
-      <CustomSelect
-        title="Opción de ticket"
-        required
-        label="Selecciona un ticket"
-        value={draft.ticketTypeId}
-        options={ticketTypes.map((t) => ({
-          value: t.id,
-          label: `${t.name} — ${formatMoneyNumber(t.price)}`,
-        }))}
-        onChange={(e) =>
-          onChange({ ...draft, ticketTypeId: String(e.target.value), menuByGroup: {} })
-        }
-      />
+      <div className="mt-4">
+        <CustomSelect
+          title="Opción de ticket"
+          required
+          label="Selecciona un ticket"
+          value={draft.ticketTypeId}
+          options={ticketTypes.map((t) => ({
+            value: t.id,
+            label: `${t.name} — ${formatMoneyNumber(t.price)}`,
+          }))}
+          onChange={(e) =>
+            onChange({
+              ...draft,
+              ticketTypeId: String(e.target.value),
+              menuByGroup: {},
+            })
+          }
+        />
+      </div>
 
       {menuGroups.map((group) => (
         <fieldset className="publicMenuGroup" key={group.key}>
           <legend>
             {group.label}
             {group.required ? " *" : ""}{" "}
-            <span className="publicMuted">
-              (elige {group.maxSelect ?? 1})
-            </span>
+            <span className="publicMuted">(elige {group.maxSelect ?? 1})</span>
           </legend>
           {group.options
             .filter((o) => o.isActive)
             .map((option) => {
-              const selected = (draft.menuByGroup[group.key] ?? []).includes(option.id);
+              const selected = (draft.menuByGroup[group.key] ?? []).includes(
+                option.id,
+              );
               return (
                 <label key={option.id} className="publicMenuOption">
                   <input

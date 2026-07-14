@@ -147,28 +147,17 @@ export interface ResetPasswordPayload {
   confirmPassword: string;
 }
 
-export interface TrabajadorDocumento {
-  id: string;
-  nombreArchivo: string;
-  rutaArchivo: string;
-  tipoMime: string | null;
-  tamanoBytes: number | null;
-  descripcion: string | null;
-  createdAt: string;
-}
-
 export interface Trabajador {
   id: string;
   userId: string;
   rut: string;
-  comuna: string;
-  direccion: string;
   telefono: string;
-  fechaNacimiento: string;
-  edad: number;
-  sueldo: number;
+  comuna: string | null;
+  direccion: string | null;
+  fechaNacimiento: string | null;
+  edad: number | null;
+  sueldo: number | null;
   fotoUrl: string | null;
-  documentos: TrabajadorDocumento[];
   createdAt: string;
   updatedAt: string;
 }
@@ -193,6 +182,30 @@ export interface FindEmpleadoUsersFilters {
   lastName?: string;
   createdFrom?: string;
   createdTo?: string;
+  onlyStaff?: boolean;
+}
+
+export interface AddWhitelistPayload {
+  email: string;
+  roleName: string;
+}
+
+export interface RegistroHora {
+  fecha: string;
+  horas: number;
+}
+
+export interface RegistroHorasMes {
+  trabajadorId: string;
+  mes: string;
+  items: RegistroHora[];
+  totalHoras: number;
+}
+
+export interface UpsertRegistroHoraPayload {
+  trabajadorId?: string;
+  fecha: string;
+  horas: number;
 }
 
 export interface EmpleadoUsersResponse {
@@ -200,25 +213,16 @@ export interface EmpleadoUsersResponse {
   pagination: PaginationResponse;
 }
 
-export interface TrabajadorDocumentoPayload {
-  nombreArchivo: string;
-  rutaArchivo: string;
-  tipoMime?: string;
-  tamanoBytes?: number;
-  descripcion?: string;
-}
-
 export interface CreateTrabajadorPayload {
   userId: string;
   rut: string;
-  comuna: string;
-  direccion: string;
   telefono: string;
-  fechaNacimiento: string;
-  edad: number;
-  sueldo: number;
+  comuna?: string;
+  direccion?: string;
+  fechaNacimiento?: string;
+  edad?: number;
+  sueldo?: number;
   fotoUrl?: string;
-  documentos?: TrabajadorDocumentoPayload[];
 }
 
 export interface UpdateTrabajadorPayload {
@@ -230,7 +234,6 @@ export interface UpdateTrabajadorPayload {
   edad?: number;
   sueldo?: number;
   fotoUrl?: string;
-  documentos?: TrabajadorDocumentoPayload[];
 }
 
 export type OrderStatus =
@@ -259,7 +262,8 @@ export type EventStatus =
   | "ENABLED"
   | "CANCELLED"
   | "SUSPENDED"
-  | "RESCHEDULED";
+  | "RESCHEDULED"
+  | "COMING_SOON";
 
 export type EventTicketStatus = "ACTIVE" | "CANCELLED";
 
@@ -461,6 +465,7 @@ export interface PublicEvent {
   description: string | null;
   startsAt: string;
   endsAt: string;
+  officialImageUrl: string | null;
   schedules: PublicEventSchedule[];
   ticketsAvailable: boolean;
 }
@@ -588,6 +593,7 @@ export interface VenueEvent {
   endsAt: string;
   officialImageUrl: string | null;
   status: EventStatus;
+  publishAt: string | null;
   totalTickets: number;
   soldTickets: number;
   isFreeEntry: boolean;
@@ -655,6 +661,7 @@ export interface CreateVenueEventPayload {
   endsAt: string;
   officialImageUrl?: string;
   status?: EventStatus;
+  publishAt?: string;
   isFreeEntry?: boolean;
   hasSessions?: boolean;
   ticketTypes: EventTicketTypePayload[];
@@ -668,6 +675,7 @@ export interface UpdateVenueEventPayload {
   endsAt?: string;
   officialImageUrl?: string;
   status?: EventStatus;
+  publishAt?: string;
   isFreeEntry?: boolean;
   hasSessions?: boolean;
   ticketTypes?: EventTicketTypePayload[];

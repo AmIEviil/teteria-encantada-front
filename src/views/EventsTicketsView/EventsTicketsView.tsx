@@ -88,6 +88,7 @@ const MENU_GROUP_PRESETS: Array<{ key: string; label: string }> = [
 
 const EVENT_STATUS_OPTIONS: Array<{ value: EventStatus; label: string }> = [
   { value: "ENABLED", label: "Habilitado" },
+  { value: "COMING_SOON", label: "Proximamente" },
   { value: "SUSPENDED", label: "Suspendido" },
   { value: "CANCELLED", label: "Cancelado" },
   { value: "RESCHEDULED", label: "Re-agendado" },
@@ -98,6 +99,7 @@ const EVENT_STATUS_LABEL: Record<EventStatus, string> = {
   CANCELLED: "Cancelado",
   SUSPENDED: "Suspendido",
   RESCHEDULED: "Re-agendado",
+  COMING_SOON: "Proximamente",
 };
 
 const TICKET_STATUS_OPTIONS: Array<{ value: EventTicketStatus; label: string }> = [
@@ -343,6 +345,8 @@ const createInitialEventForm = (): EventFormState => {
     endsAtTime: "23:00",
     officialImageUrl: "",
     status: "ENABLED",
+    publishAtDate: today,
+    publishAtTime: "12:00",
     isFreeEntry: false,
     hasSessions: false,
     sameSessionsEveryDay: true,
@@ -1506,6 +1510,28 @@ export const EventsTicketsView = () => {
       return null;
     }
 
+    let publishAt: string | undefined;
+
+    if (eventForm.status === "COMING_SOON") {
+      if (!eventForm.publishAtDate || !eventForm.publishAtTime) {
+        openSnackbar(
+          "Debes indicar la fecha/hora de publicacion del evento",
+          "error",
+        );
+        return null;
+      }
+
+      publishAt = toIsoDateTime(eventForm.publishAtDate, eventForm.publishAtTime);
+
+      if (new Date(publishAt) > new Date(startsAt)) {
+        openSnackbar(
+          "La fecha de publicacion debe ser anterior al inicio del evento",
+          "error",
+        );
+        return null;
+      }
+    }
+
     const ticketTypes: EventTicketTypePayload[] = [];
 
     if (!eventForm.isFreeEntry) {
@@ -1557,6 +1583,7 @@ export const EventsTicketsView = () => {
       endsAt,
       officialImageUrl: eventForm.officialImageUrl.trim() || undefined,
       status: eventForm.status,
+      publishAt,
       isFreeEntry: eventForm.isFreeEntry,
       hasSessions: !eventForm.isFreeEntry && eventForm.hasSessions,
       sessions: sessionsPayload,
@@ -1587,6 +1614,9 @@ export const EventsTicketsView = () => {
   const loadEventToWizard = (eventItem: VenueEvent) => {
     const startsAt = toDateAndTime(eventItem.startsAt);
     const endsAt = toDateAndTime(eventItem.endsAt);
+    const publishAt = eventItem.publishAt
+      ? toDateAndTime(eventItem.publishAt)
+      : { date: getTodayDate(), time: "12:00" };
 
     const ticketTypeDrafts =
       eventItem.ticketTypes.length > 0
@@ -1617,6 +1647,8 @@ export const EventsTicketsView = () => {
       endsAtTime: endsAt.time,
       officialImageUrl: eventItem.officialImageUrl ?? "",
       status: eventItem.status,
+      publishAtDate: publishAt.date,
+      publishAtTime: publishAt.time,
       isFreeEntry: eventItem.isFreeEntry,
       hasSessions: eventItem.hasSessions,
       sameSessionsEveryDay: false,
@@ -1975,6 +2007,50 @@ export const EventsTicketsView = () => {
             </TextField>
           </Stack>
 
+          {eventForm.status === "COMING_SOON" && (
+            <Stack spacing={0.75}>
+              <Typography variant="body2" color="text.secondary">
+                El evento no se mostrara en el portal publico hasta esta fecha y
+                hora, momento en que pasara automaticamente a Habilitado.
+              </Typography>
+
+              <Stack direction={{ xs: "column", md: "row" }} spacing={1.25}>
+                <CustomCalendarV2
+                  label="Fecha de publicacion"
+                  placeholder="Selecciona fecha"
+                  initialDate={
+                    parseLocalDateString(eventForm.publishAtDate) ?? undefined
+                  }
+                  onSave={(date) =>
+                    setEventForm((previous) => ({
+                      ...previous,
+                      publishAtDate: date ? toLocalDateString(date) : "",
+                    }))
+                  }
+                />
+
+                <TextField
+                  select
+                  label="Hora de publicacion"
+                  value={eventForm.publishAtTime}
+                  onChange={(event) =>
+                    setEventForm((previous) => ({
+                      ...previous,
+                      publishAtTime: event.target.value,
+                    }))
+                  }
+                  fullWidth
+                >
+                  {TIME_OPTIONS.map((timeOption) => (
+                    <MenuItem key={timeOption.value} value={timeOption.value}>
+                      {timeOption.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Stack>
+            </Stack>
+          )}
+
           {!eventForm.isFreeEntry && eventForm.hasSessions && (
             <SessionsEditor
               sameSessionsEveryDay={eventForm.sameSessionsEveryDay}
@@ -2077,6 +2153,14 @@ export const EventsTicketsView = () => {
             <p>
               <strong>Estado:</strong> {EVENT_STATUS_LABEL[eventForm.status]}
             </p>
+            {eventForm.status === "COMING_SOON" && (
+              <p>
+                <strong>Se publica:</strong>{" "}
+                {eventForm.publishAtDate && eventForm.publishAtTime
+                  ? `${eventForm.publishAtDate} ${eventForm.publishAtTime}`
+                  : "-"}
+              </p>
+            )}
             <p>
               <strong>Imagen:</strong>{" "}
               {eventForm.officialImageUrl.trim() || "No especificada"}
@@ -2230,6 +2314,12 @@ export const EventsTicketsView = () => {
                         className="event-status-chip"
                       />
                     </Stack>
+
+                    {eventItem.status === "COMING_SOON" && eventItem.publishAt && (
+                      <Typography variant="body2" color="text.secondary">
+                        Se publica el {formatDateTime(eventItem.publishAt)}
+                      </Typography>
+                    )}
 
                     <Typography variant="body2">
                       Inicio: {formatDateTime(eventItem.startsAt)}
