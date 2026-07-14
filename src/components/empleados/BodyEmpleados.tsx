@@ -33,7 +33,12 @@ import { useBoundStore } from "../../store/BoundedStore";
 import { useSnackBarResponseStore } from "../../store/snackBarStore";
 import { HorasTab } from "./HorasTab";
 import { WhitelistTab } from "./WhitelistTab";
-import type { EmpleadoUser, Trabajador } from "../../core/api/types";
+import { RUT_ERROR, RUT_MAX_LENGTH, formatRut, isValidRut } from "./rut";
+import type {
+  CreateTrabajadorPayload,
+  EmpleadoUser,
+  Trabajador,
+} from "../../core/api/types";
 
 interface TrabajadorFormState {
   rut: string;
@@ -89,50 +94,6 @@ const calculateAge = (birthDate: string): number => {
   }
 
   return Math.max(0, age);
-};
-
-const sanitizeRut = (value?: string | null): string => {
-  return (value ?? "").toUpperCase().replaceAll(/[^0-9K]/g, "");
-};
-
-const formatRut = (value?: string | null): string => {
-  const sanitized = sanitizeRut(value);
-
-  if (sanitized.length <= 1) {
-    return sanitized;
-  }
-
-  const verifier = sanitized.slice(-1);
-  let body = sanitized.slice(0, -1).replaceAll("K", "");
-
-  if (!body) {
-    return verifier;
-  }
-
-  body = body.replaceAll(/\B(?=(\d{3})+(?!\d))/g, ".");
-
-  return `${body}-${verifier}`;
-};
-
-const isValidRut = (value: string): boolean => {
-  const sanitized = sanitizeRut(value);
-
-  if (sanitized.length < 2) {
-    return false;
-  }
-
-  const verifier = sanitized.slice(-1);
-  const body = sanitized.slice(0, -1);
-
-  if (!/^\d+$/.test(body)) {
-    return false;
-  }
-
-  if (!/^[\dK]$/.test(verifier)) {
-    return false;
-  }
-
-  return true;
 };
 
 const formatCellphone = (value?: string | null): string => {
@@ -309,9 +270,7 @@ const EmpleadosTab = () => {
     handleFieldChange("rut", formattedRut);
     setWorkerFieldErrors((prev) => ({
       ...prev,
-      rut: isValidRut(formattedRut)
-        ? ""
-        : "El RUT debe tener formato XX.XXX.XXX-X",
+      rut: isValidRut(formattedRut) ? "" : RUT_ERROR,
     }));
   };
 
@@ -355,15 +314,8 @@ const EmpleadosTab = () => {
       return false;
     }
 
-    if (
-      !formState.rut.trim() ||
-      !formState.comuna.trim() ||
-      !formState.direccion.trim() ||
-      !formState.telefono.trim() ||
-      !formState.fechaNacimiento ||
-      !formState.sueldo.trim()
-    ) {
-      const message = "Completa los campos obligatorios del trabajador";
+    if (!formState.rut.trim() || !formState.telefono.trim()) {
+      const message = "El RUT y el telefono son obligatorios";
       setValidationError(message);
       openSnackbar(message, "error");
       return false;
@@ -372,11 +324,9 @@ const EmpleadosTab = () => {
     const formattedRut = formatRut(formState.rut);
 
     if (!isValidRut(formattedRut)) {
-      const message =
-        "El RUT debe tener formato XX.XXX.XXX-X y solo admite K como letra final";
-      setValidationError(message);
-      setWorkerFieldErrors((prev) => ({ ...prev, rut: message }));
-      openSnackbar(message, "error");
+      setValidationError(RUT_ERROR);
+      setWorkerFieldErrors((prev) => ({ ...prev, rut: RUT_ERROR }));
+      openSnackbar(RUT_ERROR, "error");
       return false;
     }
 
@@ -390,9 +340,10 @@ const EmpleadosTab = () => {
       return false;
     }
 
-    const calculatedAge = calculateAge(formState.fechaNacimiento);
-
-    if (calculatedAge <= 0) {
+    if (
+      formState.fechaNacimiento &&
+      calculateAge(formState.fechaNacimiento) <= 0
+    ) {
       const message =
         "La fecha de nacimiento no es válida para calcular la edad";
       setValidationError(message);
@@ -409,18 +360,19 @@ const EmpleadosTab = () => {
       return;
     }
 
-    const formattedRut = formatRut(formState.rut);
-    const formattedCellphone = formatCellphone(formState.telefono);
-    const calculatedAge = calculateAge(formState.fechaNacimiento);
+    const birthDate = formatDateForInput(formState.fechaNacimiento);
 
-    const payload = {
-      rut: formattedRut,
-      comuna: formState.comuna.trim(),
-      direccion: formState.direccion.trim(),
-      telefono: formattedCellphone,
-      fechaNacimiento: formatDateForInput(formState.fechaNacimiento),
-      edad: calculatedAge,
-      sueldo: parseNumber(formState.sueldo),
+    // Solo RUT y telefono son obligatorios: el resto se omite si viene vacio.
+    const payload: Omit<CreateTrabajadorPayload, "userId"> = {
+      rut: formatRut(formState.rut),
+      telefono: formatCellphone(formState.telefono),
+      comuna: formState.comuna.trim() || undefined,
+      direccion: formState.direccion.trim() || undefined,
+      fechaNacimiento: birthDate || undefined,
+      edad: birthDate ? calculateAge(birthDate) : undefined,
+      sueldo: formState.sueldo.trim()
+        ? parseNumber(formState.sueldo)
+        : undefined,
       fotoUrl: formState.fotoUrl.trim() || undefined,
     };
 
@@ -595,12 +547,15 @@ const EmpleadosTab = () => {
 
             <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
               <TextField
+                required
                 label="RUT"
+                placeholder="202800074-2"
                 value={formState.rut}
                 onChange={(event) =>
                   handleFieldChange("rut", event.target.value)
                 }
                 onBlur={handleRutBlur}
+                slotProps={{ htmlInput: { maxLength: RUT_MAX_LENGTH } }}
                 error={Boolean(workerFieldErrors.rut)}
                 helperText={workerFieldErrors.rut}
                 fullWidth
@@ -626,6 +581,7 @@ const EmpleadosTab = () => {
 
             <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
               <TextField
+                required
                 label="Telefono"
                 value={formState.telefono}
                 onChange={(event) =>

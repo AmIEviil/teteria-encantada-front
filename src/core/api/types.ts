@@ -151,12 +151,12 @@ export interface Trabajador {
   id: string;
   userId: string;
   rut: string;
-  comuna: string;
-  direccion: string;
   telefono: string;
-  fechaNacimiento: string;
-  edad: number;
-  sueldo: number;
+  comuna: string | null;
+  direccion: string | null;
+  fechaNacimiento: string | null;
+  edad: number | null;
+  sueldo: number | null;
   fotoUrl: string | null;
   createdAt: string;
   updatedAt: string;
@@ -216,12 +216,12 @@ export interface EmpleadoUsersResponse {
 export interface CreateTrabajadorPayload {
   userId: string;
   rut: string;
-  comuna: string;
-  direccion: string;
   telefono: string;
-  fechaNacimiento: string;
-  edad: number;
-  sueldo: number;
+  comuna?: string;
+  direccion?: string;
+  fechaNacimiento?: string;
+  edad?: number;
+  sueldo?: number;
   fotoUrl?: string;
 }
 
