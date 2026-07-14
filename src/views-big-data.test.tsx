@@ -139,7 +139,6 @@ const data = vi.hoisted(() => {
       edad: 34,
       sueldo: 500000,
       fotoUrl: null,
-      documentos: [],
       createdAt: past,
       updatedAt: past,
     },

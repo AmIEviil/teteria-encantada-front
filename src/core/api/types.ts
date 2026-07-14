@@ -147,16 +147,6 @@ export interface ResetPasswordPayload {
   confirmPassword: string;
 }
 
-export interface TrabajadorDocumento {
-  id: string;
-  nombreArchivo: string;
-  rutaArchivo: string;
-  tipoMime: string | null;
-  tamanoBytes: number | null;
-  descripcion: string | null;
-  createdAt: string;
-}
-
 export interface Trabajador {
   id: string;
   userId: string;
@@ -168,7 +158,6 @@ export interface Trabajador {
   edad: number;
   sueldo: number;
   fotoUrl: string | null;
-  documentos: TrabajadorDocumento[];
   createdAt: string;
   updatedAt: string;
 }
@@ -200,14 +189,6 @@ export interface EmpleadoUsersResponse {
   pagination: PaginationResponse;
 }
 
-export interface TrabajadorDocumentoPayload {
-  nombreArchivo: string;
-  rutaArchivo: string;
-  tipoMime?: string;
-  tamanoBytes?: number;
-  descripcion?: string;
-}
-
 export interface CreateTrabajadorPayload {
   userId: string;
   rut: string;
@@ -218,7 +199,6 @@ export interface CreateTrabajadorPayload {
   edad: number;
   sueldo: number;
   fotoUrl?: string;
-  documentos?: TrabajadorDocumentoPayload[];
 }
 
 export interface UpdateTrabajadorPayload {
@@ -230,7 +210,6 @@ export interface UpdateTrabajadorPayload {
   edad?: number;
   sueldo?: number;
   fotoUrl?: string;
-  documentos?: TrabajadorDocumentoPayload[];
 }
 
 export type OrderStatus =

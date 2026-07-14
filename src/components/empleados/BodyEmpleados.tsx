@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import {
   Box,
@@ -42,16 +41,7 @@ import type {
   EmpleadoUser,
   RegisterPayload,
   Trabajador,
-  TrabajadorDocumentoPayload,
 } from "../../core/api/types";
-
-interface TrabajadorDocumentoFormState {
-  nombreArchivo: string;
-  rutaArchivo: string;
-  tipoMime: string;
-  tamanoBytes: string;
-  descripcion: string;
-}
 
 interface TrabajadorFormState {
   rut: string;
@@ -62,7 +52,6 @@ interface TrabajadorFormState {
   edad: string;
   sueldo: string;
   fotoUrl: string;
-  documentos: TrabajadorDocumentoFormState[];
 }
 
 interface UserFormState {
@@ -75,14 +64,6 @@ interface UserFormState {
   roleName: string;
 }
 
-const emptyDocumento = (): TrabajadorDocumentoFormState => ({
-  nombreArchivo: "",
-  rutaArchivo: "",
-  tipoMime: "",
-  tamanoBytes: "",
-  descripcion: "",
-});
-
 const emptyForm = (): TrabajadorFormState => ({
   rut: "",
   comuna: "",
@@ -92,7 +73,6 @@ const emptyForm = (): TrabajadorFormState => ({
   edad: "",
   sueldo: "",
   fotoUrl: "",
-  documentos: [emptyDocumento()],
 });
 
 const emptyUserForm = (): UserFormState => ({
@@ -231,7 +211,6 @@ const mapTrabajadorToForm = (
 
   const birthDate = formatDateForInput(trabajador.fechaNacimiento ?? "");
   const age = calculateAge(birthDate);
-  const documentos = trabajador.documentos ?? [];
 
   return {
     rut: formatRut(trabajador.rut ?? ""),
@@ -242,16 +221,6 @@ const mapTrabajadorToForm = (
     edad: String(age),
     sueldo: String(trabajador.sueldo ?? ""),
     fotoUrl: trabajador.fotoUrl ?? "",
-    documentos:
-      documentos.length > 0
-        ? documentos.map((documento) => ({
-            nombreArchivo: documento.nombreArchivo,
-            rutaArchivo: documento.rutaArchivo,
-            tipoMime: documento.tipoMime ?? "",
-            tamanoBytes: documento.tamanoBytes ? String(documento.tamanoBytes) : "",
-            descripcion: documento.descripcion ?? "",
-          }))
-        : [emptyDocumento()],
   };
 };
 
@@ -491,33 +460,6 @@ export const BodyEmpleados = () => {
     }));
   };
 
-  const handleDocumentoChange = <K extends keyof TrabajadorDocumentoFormState>(
-    index: number,
-    key: K,
-    value: TrabajadorDocumentoFormState[K],
-  ) => {
-    setFormState((prev) => ({
-      ...prev,
-      documentos: prev.documentos.map((documento, currentIndex) =>
-        currentIndex === index ? { ...documento, [key]: value } : documento,
-      ),
-    }));
-  };
-
-  const handleAddDocumento = () => {
-    setFormState((prev) => ({
-      ...prev,
-      documentos: [...prev.documentos, emptyDocumento()],
-    }));
-  };
-
-  const handleRemoveDocumento = (index: number) => {
-    setFormState((prev) => ({
-      ...prev,
-      documentos: prev.documentos.filter((_, currentIndex) => currentIndex !== index),
-    }));
-  };
-
   const validateForm = (): boolean => {
     if (!selectedUser) {
       const message = "Selecciona un usuario para crear o editar el trabajador";
@@ -570,42 +512,8 @@ export const BodyEmpleados = () => {
       return false;
     }
 
-    const hasIncompleteDocument = formState.documentos.some((documento) => {
-      const anyFilled =
-        documento.nombreArchivo.trim() ||
-        documento.rutaArchivo.trim() ||
-        documento.tipoMime.trim() ||
-        documento.tamanoBytes.trim() ||
-        documento.descripcion.trim();
-
-      if (!anyFilled) {
-        return false;
-      }
-
-      return !documento.nombreArchivo.trim() || !documento.rutaArchivo.trim();
-    });
-
-    if (hasIncompleteDocument) {
-      const message = "Cada documento debe tener nombre y ruta";
-      setValidationError(message);
-      openSnackbar(message, "error");
-      return false;
-    }
-
     setValidationError("");
     return true;
-  };
-
-  const buildDocumentPayload = (): TrabajadorDocumentoPayload[] => {
-    return formState.documentos
-      .filter((documento) => documento.nombreArchivo.trim() || documento.rutaArchivo.trim())
-      .map((documento) => ({
-        nombreArchivo: documento.nombreArchivo.trim(),
-        rutaArchivo: documento.rutaArchivo.trim(),
-        tipoMime: documento.tipoMime.trim() || undefined,
-        tamanoBytes: documento.tamanoBytes ? parseNumber(documento.tamanoBytes) : undefined,
-        descripcion: documento.descripcion.trim() || undefined,
-      }));
   };
 
   const handleSubmit = async () => {
@@ -626,7 +534,6 @@ export const BodyEmpleados = () => {
       edad: calculatedAge,
       sueldo: parseNumber(formState.sueldo),
       fotoUrl: formState.fotoUrl.trim() || undefined,
-      documentos: buildDocumentPayload(),
     };
 
     if (selectedUser.trabajador?.id) {
@@ -948,82 +855,6 @@ export const BodyEmpleados = () => {
               onChange={(event) => handleFieldChange("fotoUrl", event.target.value)}
               fullWidth
             />
-
-            <Stack spacing={1}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography variant="subtitle1" fontWeight={600}>
-                  Documentos
-                </Typography>
-                <Button startIcon={<AddIcon />} onClick={handleAddDocumento}>
-                  Agregar documento
-                </Button>
-              </Stack>
-
-              {formState.documentos.map((documento, index) => (
-                <Paper key={`${documento.nombreArchivo}-${index}`} variant="outlined" sx={{ p: 2 }}>
-                  <Stack spacing={1.5}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center">
-                      <Typography variant="subtitle2">Documento {index + 1}</Typography>
-                      <IconButton
-                        onClick={() => handleRemoveDocumento(index)}
-                        disabled={formState.documentos.length === 1}
-                        size="small"
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Stack>
-
-                    <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-                      <TextField
-                        label="Nombre"
-                        value={documento.nombreArchivo}
-                        onChange={(event) =>
-                          handleDocumentoChange(index, "nombreArchivo", event.target.value)
-                        }
-                        fullWidth
-                      />
-                      <TextField
-                        label="Ruta"
-                        value={documento.rutaArchivo}
-                        onChange={(event) =>
-                          handleDocumentoChange(index, "rutaArchivo", event.target.value)
-                        }
-                        fullWidth
-                      />
-                    </Stack>
-
-                    <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-                      <TextField
-                        label="Tipo MIME"
-                        value={documento.tipoMime}
-                        onChange={(event) =>
-                          handleDocumentoChange(index, "tipoMime", event.target.value)
-                        }
-                        fullWidth
-                      />
-                      <TextField
-                        type="number"
-                        label="Tamaño bytes"
-                        value={documento.tamanoBytes}
-                        onChange={(event) =>
-                          handleDocumentoChange(index, "tamanoBytes", event.target.value)
-                        }
-                        fullWidth
-                      />
-                    </Stack>
-
-                    <TextField
-                      label="Descripcion"
-                      value={documento.descripcion}
-                      onChange={(event) =>
-                        handleDocumentoChange(index, "descripcion", event.target.value)
-                      }
-                      fullWidth
-                    />
-                  </Stack>
-                </Paper>
-              ))}
-            </Stack>
 
             {validationError && (
               <Typography color="error" variant="body2">
