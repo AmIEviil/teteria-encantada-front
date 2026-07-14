@@ -1,22 +1,34 @@
 import { useMemo, useState } from "react";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import { Badge, Box, Button, MenuItem, Paper, Stack, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  Badge,
+  Box,
+  Button,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { PickersDay, type PickersDayProps } from "@mui/x-date-pickers/PickersDay";
-import dayjs, { Dayjs } from "dayjs";
+import axios from "axios";
+import { type Dayjs } from "dayjs";
 import "dayjs/locale/es";
 import { useEmpleadosUsersQuery } from "../../core/api/empleados.hooks";
 import { useRegistroHorasQuery } from "../../core/api/horas.hooks";
 import { RegistrarHorasModal } from "./RegistrarHorasModal";
+import { nowInSantiago } from "../../utils/santiagoDate.utils";
 
 interface HorasTabProps {
   isAdmin: boolean;
 }
 
 export const HorasTab = ({ isAdmin }: HorasTabProps) => {
-  const [mes, setMes] = useState<Dayjs>(dayjs());
+  const [mes, setMes] = useState<Dayjs>(() => nowInSantiago());
   const [trabajadorId, setTrabajadorId] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -30,10 +42,15 @@ export const HorasTab = ({ isAdmin }: HorasTabProps) => {
   );
 
   // Un admin sin empleado elegido consulta sus propias horas (trabajadorId undefined).
-  const { data, isLoading } = useRegistroHorasQuery(
+  const { data, isLoading, isError, error } = useRegistroHorasQuery(
     mes.format("YYYY-MM"),
     trabajadorId || undefined,
   );
+
+  const sinFichaPropia =
+    isError &&
+    axios.isAxiosError(error) &&
+    error.response?.status === 404;
 
   const horasPorFecha = useMemo(() => {
     const map: Record<string, number> = {};
@@ -97,26 +114,35 @@ export const HorasTab = ({ isAdmin }: HorasTabProps) => {
         </TextField>
       )}
 
-      <Paper sx={{ p: 2 }}>
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-          <DateCalendar
-            value={mes}
-            onMonthChange={(value: Dayjs) => setMes(value)}
-            onChange={(value: Dayjs | null) => {
-              if (value) {
-                setMes(value);
-              }
-            }}
-            disableFuture
-            loading={isLoading}
-            slots={{ day: renderDay }}
-          />
-        </LocalizationProvider>
+      {sinFichaPropia ? (
+        <Alert severity="info">
+          Tu usuario no tiene una ficha de trabajador asociada.
+          {isAdmin
+            ? " Selecciona un empleado en el listado de arriba para ver sus horas."
+            : " Contacta a un administrador para que te asocie una ficha de trabajador."}
+        </Alert>
+      ) : (
+        <Paper sx={{ p: 2 }}>
+          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+            <DateCalendar
+              value={mes}
+              onMonthChange={(value: Dayjs) => setMes(value)}
+              onChange={(value: Dayjs | null) => {
+                if (value) {
+                  setMes(value);
+                }
+              }}
+              maxDate={nowInSantiago()}
+              loading={isLoading}
+              slots={{ day: renderDay }}
+            />
+          </LocalizationProvider>
 
-        <Typography variant="subtitle1" fontWeight={600} sx={{ mt: 1 }}>
-          Total del mes: {data?.totalHoras ?? 0} h
-        </Typography>
-      </Paper>
+          <Typography variant="subtitle1" fontWeight={600} sx={{ mt: 1 }}>
+            Total del mes: {data?.totalHoras ?? 0} h
+          </Typography>
+        </Paper>
+      )}
 
       <RegistrarHorasModal
         open={modalOpen}

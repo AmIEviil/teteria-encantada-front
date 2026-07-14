@@ -202,6 +202,12 @@ const data = vi.hoisted(() => {
         details: {},
       },
     ],
+    horas: {
+      trabajadorId: "tr1",
+      mes: "2026-07",
+      items: [{ fecha: "2026-07-01", horas: 8 }],
+      totalHoras: 8,
+    },
   };
 });
 
@@ -303,6 +309,10 @@ vi.mock("./core/api/migrations.hooks", () => ({
   useExecuteMigrationMutation: mResult,
   useRevertMigrationMutation: mResult,
 }));
+vi.mock("./core/api/horas.hooks", () => ({
+  useRegistroHorasQuery: () => qResult(data.horas),
+  useUpsertRegistroHoraMutation: mResult,
+}));
 
 import { MigrationsView } from "./views/MigrationsView/MigrationsView";
 import { SalesReportView } from "./views/SalesView/SalesReportView";
@@ -312,6 +322,7 @@ import { BodyEmpleados } from "./components/empleados/BodyEmpleados";
 import { OrderTaker } from "./components/teaRoom/components/OrderTaker/OrderTaker";
 import { EventsTicketsView } from "./views/EventsTicketsView/EventsTicketsView";
 import { PublicReservationsView } from "./views/public/reservations/PublicReservationsView";
+import { useBoundStore } from "./store/BoundedStore";
 
 const renderView = (ui: React.ReactElement) => {
   const qc = new QueryClient({
@@ -350,6 +361,23 @@ const sweep = () => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // BodyEmpleados solo muestra las pestanas de Admin (Empleados/Whitelist/HH)
+  // cuando hay un usuario Superadmin/Admin en la store; sin esto entra por la
+  // rama de Tecnico y solo monta HorasTab, dejando EmpleadosTab y
+  // WhitelistTab sin cobertura.
+  useBoundStore.setState({
+    userData: {
+      id: "u1",
+      username: "admin",
+      first_name: "Admin",
+      last_name: "Uno",
+      email: "admin@teteria.cl",
+      isActive: true,
+      role: { id: "r1", name: "Superadmin" },
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    } as never,
+  });
 });
 
 describe("Vistas grandes con datos (render + interaccion)", () => {

@@ -55,6 +55,12 @@ const MIG_STATUS = vi.hoisted(() => ({
   order: "asc",
   summary: { totalExecuted: 0, totalPending: 0, totalMigrations: 0 },
 }));
+const HORAS = vi.hoisted(() => ({
+  trabajadorId: "trab-1",
+  mes: "2026-07",
+  items: [] as unknown[],
+  totalHoras: 0,
+}));
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (k: string) => k, i18n: { language: "es" } }),
@@ -128,6 +134,10 @@ vi.mock("./core/api/migrations.hooks", () => ({
   useExecuteMigrationMutation: shared.m,
   useRevertMigrationMutation: shared.m,
 }));
+vi.mock("./core/api/horas.hooks", () => ({
+  useRegistroHorasQuery: () => shared.q(HORAS),
+  useUpsertRegistroHoraMutation: shared.m,
+}));
 
 import { MigrationsView } from "./views/MigrationsView/MigrationsView";
 import { SalesReportView } from "./views/SalesView/SalesReportView";
@@ -140,6 +150,7 @@ import { InventoryView } from "./views/admin/EmployeesView/InventoryView";
 import { ForbiddenView } from "./views/auth/ForbiddenView";
 import { EmpleadosView } from "./views/admin/EmployeesView/EmpleadosView";
 import { PublicReservationsView } from "./views/public/reservations/PublicReservationsView";
+import { useBoundStore } from "./store/BoundedStore";
 
 const renderView = (ui: React.ReactElement) => {
   const qc = new QueryClient({
@@ -167,6 +178,23 @@ const typeInInputs = () => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // BodyEmpleados solo muestra las pestanas de Admin (Empleados/Whitelist/HH)
+  // cuando hay un usuario Superadmin/Admin en la store; sin esto entra por la
+  // rama de Tecnico y solo monta HorasTab, dejando EmpleadosTab y
+  // WhitelistTab sin cobertura.
+  useBoundStore.setState({
+    userData: {
+      id: "u1",
+      username: "admin",
+      first_name: "Admin",
+      last_name: "Uno",
+      email: "admin@teteria.cl",
+      isActive: true,
+      role: { id: "r1", name: "Superadmin" },
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    } as never,
+  });
 });
 
 // Hace clic en cada boton una vez (refs estables evitan bucles) y rellena

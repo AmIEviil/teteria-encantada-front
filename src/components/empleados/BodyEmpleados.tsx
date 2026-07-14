@@ -9,7 +9,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  MenuItem,
   Paper,
   Stack,
   Tab,
@@ -172,7 +171,9 @@ const isValidCellphone = (value: string): boolean => {
 const hasTrabajadorData = (
   trabajador: EmpleadoUser["trabajador"] | Trabajador | null | undefined,
 ): trabajador is Trabajador => {
-  return Boolean(trabajador && typeof trabajador.id === "string" && trabajador.id.length > 0);
+  return Boolean(
+    trabajador && typeof trabajador.id === "string" && trabajador.id.length > 0,
+  );
 };
 
 const mapTrabajadorToForm = (
@@ -256,7 +257,11 @@ const EmpleadosTab = () => {
 
   const handleOpenForm = async (user: EmpleadoUser) => {
     setSelectedUser(user);
-    setFormState(hasTrabajadorData(user.trabajador) ? mapTrabajadorToForm(user.trabajador) : emptyForm());
+    setFormState(
+      hasTrabajadorData(user.trabajador)
+        ? mapTrabajadorToForm(user.trabajador)
+        : emptyForm(),
+    );
     setValidationError("");
     setDialogOpen(true);
 
@@ -304,7 +309,9 @@ const EmpleadosTab = () => {
     handleFieldChange("rut", formattedRut);
     setWorkerFieldErrors((prev) => ({
       ...prev,
-      rut: isValidRut(formattedRut) ? "" : "El RUT debe tener formato XX.XXX.XXX-X",
+      rut: isValidRut(formattedRut)
+        ? ""
+        : "El RUT debe tener formato XX.XXX.XXX-X",
     }));
   };
 
@@ -313,7 +320,9 @@ const EmpleadosTab = () => {
     handleFieldChange("telefono", formattedPhone);
     setWorkerFieldErrors((prev) => ({
       ...prev,
-      telefono: isValidCellphone(formattedPhone) ? "" : "El teléfono debe tener formato +56 9 XXXX XXXX",
+      telefono: isValidCellphone(formattedPhone)
+        ? ""
+        : "El teléfono debe tener formato +56 9 XXXX XXXX",
     }));
   };
 
@@ -384,7 +393,8 @@ const EmpleadosTab = () => {
     const calculatedAge = calculateAge(formState.fechaNacimiento);
 
     if (calculatedAge <= 0) {
-      const message = "La fecha de nacimiento no es válida para calcular la edad";
+      const message =
+        "La fecha de nacimiento no es válida para calcular la edad";
       setValidationError(message);
       openSnackbar(message, "error");
       return false;
@@ -440,19 +450,6 @@ const EmpleadosTab = () => {
 
   return (
     <Stack spacing={2}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Box>
-          <Typography variant="body2" color="text.secondary">
-            Usuarios registrados con filtros por nombre, apellido y fecha de creación.
-          </Typography>
-        </Box>
-        <Stack direction="row" spacing={1}>
-          <Button variant="outlined" onClick={handleResetFilters}>
-            Limpiar filtros
-          </Button>
-        </Stack>
-      </Stack>
-
       <Paper sx={{ p: 2 }}>
         <Stack spacing={2}>
           <Typography variant="h6">Filtros</Typography>
@@ -475,28 +472,9 @@ const EmpleadosTab = () => {
               }}
               fullWidth
             />
-            
-          </Stack>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <TextField
-              select
-              label="Resultados por página"
-              value={limit}
-              onChange={(event) => {
-                setLimit(Number(event.target.value));
-                setPage(1);
-              }}
-              sx={{ width: 220 }}
-            >
-              {[10, 20, 50].map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </TextField>
-            <Typography variant="body2" color="text.secondary">
-              {pagination ? `${pagination.totalItems} usuarios encontrados` : "Cargando..."}
-            </Typography>
+            <Button variant="outlined" onClick={handleResetFilters}>
+              Limpiar filtros
+            </Button>
           </Stack>
         </Stack>
       </Paper>
@@ -543,11 +521,17 @@ const EmpleadosTab = () => {
                   <TableCell>{formatDateTime(user.createdAt)}</TableCell>
                   <TableCell>
                     {user.trabajador ? (
-                      <Box component="span" sx={{ color: "success.main", fontWeight: 600 }}>
+                      <Box
+                        component="span"
+                        sx={{ color: "success.main", fontWeight: 600 }}
+                      >
                         Completo
                       </Box>
                     ) : (
-                      <Box component="span" sx={{ color: "warning.main", fontWeight: 600 }}>
+                      <Box
+                        component="span"
+                        sx={{ color: "warning.main", fontWeight: 600 }}
+                      >
                         Pendiente
                       </Box>
                     )}
@@ -578,14 +562,25 @@ const EmpleadosTab = () => {
         </Box>
       </Paper>
 
-      <Dialog open={dialogOpen} onClose={handleCloseForm} fullWidth maxWidth="md">
+      <Dialog
+        open={dialogOpen}
+        onClose={handleCloseForm}
+        fullWidth
+        maxWidth="md"
+      >
         <DialogTitle>
-          {selectedUser?.trabajador ? "Editar trabajador" : "Completar trabajador"}
+          {selectedUser?.trabajador
+            ? "Editar trabajador"
+            : "Completar trabajador"}
         </DialogTitle>
         <DialogContent dividers>
           <Stack spacing={2} sx={{ pt: 1 }}>
             <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              <Typography
+                variant="subtitle2"
+                color="text.secondary"
+                gutterBottom
+              >
                 Usuario asociado
               </Typography>
               <Typography fontWeight={600}>
@@ -602,7 +597,9 @@ const EmpleadosTab = () => {
               <TextField
                 label="RUT"
                 value={formState.rut}
-                onChange={(event) => handleFieldChange("rut", event.target.value)}
+                onChange={(event) =>
+                  handleFieldChange("rut", event.target.value)
+                }
                 onBlur={handleRutBlur}
                 error={Boolean(workerFieldErrors.rut)}
                 helperText={workerFieldErrors.rut}
@@ -611,7 +608,9 @@ const EmpleadosTab = () => {
               <TextField
                 label="Comuna"
                 value={formState.comuna}
-                onChange={(event) => handleFieldChange("comuna", event.target.value)}
+                onChange={(event) =>
+                  handleFieldChange("comuna", event.target.value)
+                }
                 fullWidth
               />
             </Stack>
@@ -619,7 +618,9 @@ const EmpleadosTab = () => {
             <TextField
               label="Direccion"
               value={formState.direccion}
-              onChange={(event) => handleFieldChange("direccion", event.target.value)}
+              onChange={(event) =>
+                handleFieldChange("direccion", event.target.value)
+              }
               fullWidth
             />
 
@@ -627,7 +628,9 @@ const EmpleadosTab = () => {
               <TextField
                 label="Telefono"
                 value={formState.telefono}
-                onChange={(event) => handleFieldChange("telefono", event.target.value)}
+                onChange={(event) =>
+                  handleFieldChange("telefono", event.target.value)
+                }
                 onBlur={handlePhoneBlur}
                 error={Boolean(workerFieldErrors.telefono)}
                 helperText={workerFieldErrors.telefono}
@@ -654,7 +657,9 @@ const EmpleadosTab = () => {
                 type="number"
                 label="Sueldo"
                 value={formState.sueldo}
-                onChange={(event) => handleFieldChange("sueldo", event.target.value)}
+                onChange={(event) =>
+                  handleFieldChange("sueldo", event.target.value)
+                }
                 fullWidth
               />
             </Stack>
@@ -671,7 +676,9 @@ const EmpleadosTab = () => {
             <TextField
               label="Foto URL"
               value={formState.fotoUrl}
-              onChange={(event) => handleFieldChange("fotoUrl", event.target.value)}
+              onChange={(event) =>
+                handleFieldChange("fotoUrl", event.target.value)
+              }
               fullWidth
             />
 

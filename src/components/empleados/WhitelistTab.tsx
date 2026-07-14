@@ -28,7 +28,9 @@ import {
   useSetWhitelistActiveMutation,
 } from "../../core/api/empleados.hooks";
 import { useSnackBarResponseStore } from "../../store/snackBarStore";
+import { useBoundStore } from "../../store/BoundedStore";
 import { validateEmail } from "../../utils/validation.utils";
+import { roles } from "../../utils/role.utils";
 import type { AuthRole } from "../../core/api/types";
 
 const formatDateTime = (value: string): string =>
@@ -45,6 +47,8 @@ export const WhitelistTab = () => {
   const openSnackbar = useSnackBarResponseStore((state) => state.openSnackbar);
   const addWhitelistMutation = useAddWhitelistMutation();
   const setActiveMutation = useSetWhitelistActiveMutation();
+  const currentUserRole = useBoundStore((state) => state.userData)?.role.name;
+  const isSuperadmin = currentUserRole === roles.SUPER_ADMIN;
 
   const filters = useMemo(
     () => ({ page, limit: 20, onlyStaff: true }),
@@ -57,24 +61,33 @@ export const WhitelistTab = () => {
 
     authService
       .roles()
-      .then((roles) => {
+      .then((fetchedRoles) => {
         if (isMounted) {
-          setAvailableRoles(roles.filter((role) => role.name !== "Cliente"));
+          setAvailableRoles(
+            fetchedRoles.filter(
+              (role) =>
+                role.name !== roles.CLIENT &&
+                (isSuperadmin || role.name !== roles.SUPER_ADMIN),
+            ),
+          );
         }
       })
       .catch(() => {
         if (isMounted) {
-          setAvailableRoles([
-            { id: "fallback-admin", name: "Admin" },
-            { id: "fallback-tec", name: "Tecnico" },
-          ]);
+          setAvailableRoles(
+            [
+              { id: "fallback-super", name: roles.SUPER_ADMIN },
+              { id: "fallback-admin", name: roles.ADMIN },
+              { id: "fallback-tec", name: roles.TEC },
+            ].filter((role) => isSuperadmin || role.name !== roles.SUPER_ADMIN),
+          );
         }
       });
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [isSuperadmin]);
 
   const users = data?.items ?? [];
   const pagination = data?.pagination;

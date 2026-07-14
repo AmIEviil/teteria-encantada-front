@@ -15,10 +15,11 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import dayjs, { Dayjs } from "dayjs";
+import { type Dayjs } from "dayjs";
 import "dayjs/locale/es";
 import { useUpsertRegistroHoraMutation } from "../../core/api/horas.hooks";
 import { clampHoras, HORA_STEP, MAX_HORAS } from "../../utils/horas.utils";
+import { nowInSantiago } from "../../utils/santiagoDate.utils";
 
 interface RegistrarHorasModalProps {
   open: boolean;
@@ -33,7 +34,7 @@ export const RegistrarHorasModal = ({
   horasPorFecha,
   onClose,
 }: RegistrarHorasModalProps) => {
-  const [fecha, setFecha] = useState<Dayjs>(dayjs());
+  const [fecha, setFecha] = useState<Dayjs>(() => nowInSantiago());
   const [horas, setHoras] = useState("8");
   const [lastSyncKey, setLastSyncKey] = useState<string | null>(null);
   const upsertMutation = useUpsertRegistroHoraMutation();
@@ -72,7 +73,7 @@ export const RegistrarHorasModal = ({
             <DatePicker
               label="Día"
               value={fecha}
-              disableFuture
+              maxDate={nowInSantiago()}
               onChange={(value) => {
                 if (value?.isValid()) {
                   setFecha(value);
@@ -115,7 +116,11 @@ export const RegistrarHorasModal = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancelar</Button>
-        <Button variant="contained" onClick={handleSubmit} disabled={upsertMutation.isPending}>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={upsertMutation.isPending || horas.trim() === ""}
+        >
           {upsertMutation.isPending ? "Guardando..." : "Guardar"}
         </Button>
       </DialogActions>
