@@ -6,6 +6,7 @@ import { usePurchaseStore } from "../../../store/purchaseStore";
 import { publicEventPaths } from "../../../constant/routes";
 import { formatMoneyNumber } from "../../../utils/formatText.utils";
 import { useSnackBarResponseStore } from "../../../store/snackBarStore";
+import LoadingSpinner from "../../../components/ui/loading/Loading";
 import type { PublicPurchaseResult } from "../../../core/api/publicEvents.types";
 import type { PayEventResult } from "../../../core/api/payments.types";
 import "../PublicViews.css";
@@ -220,6 +221,22 @@ export const PublicEventPagoView = () => {
           />
         </section>
       </div>
+
+      {pay.isPending && (
+        <div
+          className="publicPaymentOverlay"
+          role="status"
+          aria-live="polite"
+          data-testid="payment-loading-overlay"
+        >
+          <LoadingSpinner size={140} iconSize={48} />
+          <p className="publicPaymentOverlayTitle">Validando tu pago…</p>
+          <p className="publicMuted">
+            En breve te indicaremos si fue aprobado o rechazado. No cierres esta
+            ventana.
+          </p>
+        </div>
+      )}
     </main>
   );
 };
