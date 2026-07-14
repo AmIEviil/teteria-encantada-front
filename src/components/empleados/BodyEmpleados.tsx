@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import {
@@ -9,11 +9,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  InputAdornment,
-  IconButton,
   MenuItem,
   Paper,
   Stack,
+  Tab,
+  Tabs,
   Table,
   TableBody,
   TableCell,
@@ -23,25 +23,18 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import CustomPagination from "../ui/pagination/Pagination";
 import {
-  useCreateEmpleadoUserMutation,
   useCreateTrabajadorMutation,
   useEmpleadosUsersQuery,
   useUpdateTrabajadorMutation,
 } from "../../core/api/empleados.hooks";
-import { authService } from "../../core/api/auth.service";
 import { empleadosService } from "../../core/api/empleados.service";
+import { useBoundStore } from "../../store/BoundedStore";
 import { useSnackBarResponseStore } from "../../store/snackBarStore";
-import { validateEmail, validatePassword } from "../../utils/validation.utils";
-import type {
-  AuthRole,
-  EmpleadoUser,
-  RegisterPayload,
-  Trabajador,
-} from "../../core/api/types";
+import { HorasTab } from "./HorasTab";
+import { WhitelistTab } from "./WhitelistTab";
+import type { EmpleadoUser, Trabajador } from "../../core/api/types";
 
 interface TrabajadorFormState {
   rut: string;
@@ -54,16 +47,6 @@ interface TrabajadorFormState {
   fotoUrl: string;
 }
 
-interface UserFormState {
-  username: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  roleName: string;
-}
-
 const emptyForm = (): TrabajadorFormState => ({
   rut: "",
   comuna: "",
@@ -73,16 +56,6 @@ const emptyForm = (): TrabajadorFormState => ({
   edad: "",
   sueldo: "",
   fotoUrl: "",
-});
-
-const emptyUserForm = (): UserFormState => ({
-  username: "",
-  first_name: "",
-  last_name: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-  roleName: "Tecnico",
 });
 
 const formatDateForInput = (value: string): string => {
@@ -243,7 +216,7 @@ const parseNumber = (value: string): number => {
 
 const normalizeText = (value: string | null): string => value?.trim() || "-";
 
-export const BodyEmpleados = () => {
+const EmpleadosTab = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [firstName, setFirstName] = useState("");
@@ -252,26 +225,13 @@ export const BodyEmpleados = () => {
   const [createdTo, setCreatedTo] = useState("");
   const [selectedUser, setSelectedUser] = useState<EmpleadoUser | null>(null);
   const [formState, setFormState] = useState<TrabajadorFormState>(emptyForm());
-  const [userForm, setUserForm] = useState<UserFormState>(emptyUserForm());
-  const [availableRoles, setAvailableRoles] = useState<AuthRole[]>([]);
-  const [isLoadingRoles, setIsLoadingRoles] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
   const [isLoadingTrabajador, setIsLoadingTrabajador] = useState(false);
   const [validationError, setValidationError] = useState("");
   const [workerFieldErrors, setWorkerFieldErrors] = useState({
     rut: "",
     telefono: "",
   });
-  const [userFieldErrors, setUserFieldErrors] = useState({
-    username: "",
-    first_name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const [showUserPassword, setShowUserPassword] = useState(false);
-  const [showUserConfirmPassword, setShowUserConfirmPassword] = useState(false);
 
   const filters = useMemo(
     () => ({
@@ -286,56 +246,9 @@ export const BodyEmpleados = () => {
   );
 
   const { data, isLoading, isFetching } = useEmpleadosUsersQuery(filters);
-  const createEmpleadoUserMutation = useCreateEmpleadoUserMutation();
   const createTrabajadorMutation = useCreateTrabajadorMutation();
   const updateTrabajadorMutation = useUpdateTrabajadorMutation();
   const openSnackbar = useSnackBarResponseStore((state) => state.openSnackbar);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadRoles = async () => {
-      setIsLoadingRoles(true);
-
-      try {
-        const roles = await authService.roles();
-
-        if (!isMounted) {
-          return;
-        }
-
-        setAvailableRoles(roles);
-
-        if (roles.length > 0) {
-          setUserForm((prev) => ({
-            ...prev,
-            roleName: prev.roleName || roles[0].name,
-          }));
-        }
-      } catch {
-        if (!isMounted) {
-          return;
-        }
-
-        setAvailableRoles([
-          { id: "fallback-super", name: "Superadmin" },
-          { id: "fallback-admin", name: "Admin" },
-          { id: "fallback-tec", name: "Tecnico" },
-          { id: "fallback-client", name: "Cliente" },
-        ]);
-      } finally {
-        if (isMounted) {
-          setIsLoadingRoles(false);
-        }
-      }
-    };
-
-    void loadRoles();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const users = data?.items ?? [];
   const pagination = data?.pagination;
@@ -384,41 +297,6 @@ export const BodyEmpleados = () => {
     setIsLoadingTrabajador(false);
     setValidationError("");
     setWorkerFieldErrors({ rut: "", telefono: "" });
-  };
-
-  const handleOpenCreateUser = () => {
-    setUserForm((prev) => ({
-      ...emptyUserForm(),
-      roleName: prev.roleName || availableRoles[0]?.name || "Tecnico",
-    }));
-    setCreateUserDialogOpen(true);
-  };
-
-  const handleCloseCreateUser = () => {
-    setCreateUserDialogOpen(false);
-    setUserForm((prev) => ({
-      ...emptyUserForm(),
-      roleName: prev.roleName || availableRoles[0]?.name || "Tecnico",
-    }));
-    setUserFieldErrors({
-      username: "",
-      first_name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    });
-    setShowUserPassword(false);
-    setShowUserConfirmPassword(false);
-  };
-
-  const handleUserFieldChange = <K extends keyof UserFormState>(
-    key: K,
-    value: UserFormState[K],
-  ) => {
-    setUserForm((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
   };
 
   const handleRutBlur = () => {
@@ -551,59 +429,6 @@ export const BodyEmpleados = () => {
     handleCloseForm();
   };
 
-  const handleCreateUser = async () => {
-    if (
-      !userForm.username.trim() ||
-      !userForm.first_name.trim() ||
-      !userForm.email.trim() ||
-      !userForm.password
-    ) {
-      const message = "Completa los campos obligatorios del usuario";
-      openSnackbar(message, "error");
-      setUserFieldErrors((prev) => ({
-        ...prev,
-        username: userForm.username.trim() ? "" : "El usuario es obligatorio",
-        first_name: userForm.first_name.trim() ? "" : "El nombre es obligatorio",
-        email: userForm.email.trim() ? validateEmail(userForm.email) : "El correo es obligatorio",
-        password: userForm.password ? validatePassword(userForm.password) : "La contraseña es obligatoria",
-      }));
-      return;
-    }
-
-    const emailError = validateEmail(userForm.email);
-    const passwordError = validatePassword(userForm.password);
-    const confirmPasswordError =
-      userForm.password === userForm.confirmPassword
-        ? ""
-        : "La confirmación de contraseña no coincide";
-
-    setUserFieldErrors((prev) => ({
-      ...prev,
-      username: userForm.username.trim().length < 3 ? "El usuario debe tener al menos 3 caracteres" : "",
-      first_name: userForm.first_name.trim() ? "" : "El nombre es obligatorio",
-      email: emailError,
-      password: passwordError,
-      confirmPassword: confirmPasswordError,
-    }));
-
-    if (emailError || passwordError || confirmPasswordError) {
-      openSnackbar("Revisa los campos del usuario", "error");
-      return;
-    }
-
-    const payload: RegisterPayload = {
-      username: userForm.username.trim(),
-      first_name: userForm.first_name.trim(),
-      last_name: userForm.last_name.trim() || undefined,
-      email: userForm.email.trim(),
-      password: userForm.password,
-      roleName: userForm.roleName,
-    };
-
-    await createEmpleadoUserMutation.mutateAsync(payload);
-    handleCloseCreateUser();
-  };
-
   const handleResetFilters = () => {
     setPage(1);
     setLimit(10);
@@ -617,17 +442,11 @@ export const BodyEmpleados = () => {
     <Stack spacing={2}>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Box>
-          <Typography variant="h4" fontWeight={600}>
-            Empleados
-          </Typography>
           <Typography variant="body2" color="text.secondary">
             Usuarios registrados con filtros por nombre, apellido y fecha de creación.
           </Typography>
         </Box>
         <Stack direction="row" spacing={1}>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenCreateUser}>
-            Crear usuario
-          </Button>
           <Button variant="outlined" onClick={handleResetFilters}>
             Limpiar filtros
           </Button>
@@ -877,150 +696,39 @@ export const BodyEmpleados = () => {
           </Button>
         </DialogActions>
       </Dialog>
+    </Stack>
+  );
+};
 
-      <Dialog
-        open={createUserDialogOpen}
-        onClose={handleCloseCreateUser}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle>Crear usuario</DialogTitle>
-        <DialogContent dividers>
-          <Stack spacing={2} sx={{ pt: 1 }}>
-            <TextField
-              label="Nombre de usuario"
-              value={userForm.username}
-              onChange={(event) => handleUserFieldChange("username", event.target.value)}
-              fullWidth
-            />
-            <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-              <TextField
-                label="Nombre"
-                value={userForm.first_name}
-                onChange={(event) => handleUserFieldChange("first_name", event.target.value)}
-                fullWidth
-              />
-              <TextField
-                label="Apellido"
-                value={userForm.last_name}
-                onChange={(event) => handleUserFieldChange("last_name", event.target.value)}
-                fullWidth
-              />
-            </Stack>
-            <TextField
-              label="Correo"
-              type="email"
-              value={userForm.email}
-              onChange={(event) => {
-                handleUserFieldChange("email", event.target.value);
-                setUserFieldErrors((prev) => ({ ...prev, email: "" }));
-              }}
-              onBlur={() =>
-                setUserFieldErrors((prev) => ({
-                  ...prev,
-                  email: validateEmail(userForm.email),
-                }))
-              }
-              error={Boolean(userFieldErrors.email)}
-              helperText={userFieldErrors.email}
-              fullWidth
-            />
-            <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
-              <TextField
-                label="Contraseña"
-                type={showUserPassword ? "text" : "password"}
-                value={userForm.password}
-                onChange={(event) => {
-                  handleUserFieldChange("password", event.target.value);
-                  setUserFieldErrors((prev) => ({ ...prev, password: "" }));
-                }}
-                onBlur={() =>
-                  setUserFieldErrors((prev) => ({
-                    ...prev,
-                    password: validatePassword(userForm.password),
-                  }))
-                }
-                error={Boolean(userFieldErrors.password)}
-                helperText={userFieldErrors.password}
-                slotProps={{
-                  input: {
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowUserPassword((current) => !current)}
-                          edge="end"
-                        >
-                          {showUserPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-                fullWidth
-              />
-              <TextField
-                label="Confirmar contraseña"
-                type={showUserConfirmPassword ? "text" : "password"}
-                value={userForm.confirmPassword}
-                onChange={(event) => {
-                  handleUserFieldChange("confirmPassword", event.target.value);
-                  setUserFieldErrors((prev) => ({ ...prev, confirmPassword: "" }));
-                }}
-                onBlur={() =>
-                  setUserFieldErrors((prev) => ({
-                    ...prev,
-                    confirmPassword:
-                      userForm.password === userForm.confirmPassword
-                        ? ""
-                        : "La confirmación de contraseña no coincide",
-                  }))
-                }
-                error={Boolean(userFieldErrors.confirmPassword)}
-                helperText={userFieldErrors.confirmPassword}
-                slotProps={{
-                  input: {
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowUserConfirmPassword((current) => !current)}
-                          edge="end"
-                        >
-                          {showUserConfirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-                fullWidth
-              />
-            </Stack>
-            <TextField
-              select
-              label="Rol"
-              value={userForm.roleName}
-              onChange={(event) => handleUserFieldChange("roleName", event.target.value)}
-              disabled={isLoadingRoles}
-              fullWidth
-            >
-              {availableRoles.map((role) => (
-                <MenuItem key={role.id} value={role.name}>
-                  {role.name}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseCreateUser}>Cancelar</Button>
-          <Button
-            variant="contained"
-            onClick={handleCreateUser}
-            disabled={createEmpleadoUserMutation.isPending}
-          >
-            {createEmpleadoUserMutation.isPending ? "Creando..." : "Crear usuario"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+const ADMIN_ROLES = ["Superadmin", "Admin"];
+
+export const BodyEmpleados = () => {
+  const userData = useBoundStore((state) => state.userData);
+  const isAdmin = ADMIN_ROLES.includes(userData?.role.name ?? "");
+  const [tab, setTab] = useState(0);
+
+  if (!isAdmin) {
+    // Un Tecnico solo ve su propio registro de horas.
+    return <HorasTab isAdmin={false} />;
+  }
+
+  return (
+    <Stack spacing={2}>
+      <Box>
+        <Typography variant="h4" fontWeight={600}>
+          Empleados
+        </Typography>
+      </Box>
+
+      <Tabs value={tab} onChange={(_, value: number) => setTab(value)}>
+        <Tab label="Empleados" />
+        <Tab label="Whitelist" />
+        <Tab label="Registro HH" />
+      </Tabs>
+
+      {tab === 0 && <EmpleadosTab />}
+      {tab === 1 && <WhitelistTab />}
+      {tab === 2 && <HorasTab isAdmin />}
     </Stack>
   );
 };

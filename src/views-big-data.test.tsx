@@ -281,9 +281,10 @@ vi.mock("./core/api/public.hooks", () => ({
 }));
 vi.mock("./core/api/empleados.hooks", () => ({
   useEmpleadosUsersQuery: () => qResult(data.empleados),
-  useCreateEmpleadoUserMutation: mResult,
   useCreateTrabajadorMutation: mResult,
   useUpdateTrabajadorMutation: mResult,
+  useAddWhitelistMutation: mResult,
+  useSetWhitelistActiveMutation: mResult,
 }));
 vi.mock("./core/api/events.hooks", () => ({
   useEventsQuery: () => qResult(data.events),

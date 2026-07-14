@@ -106,9 +106,10 @@ vi.mock("./core/api/public.hooks", () => ({
 }));
 vi.mock("./core/api/empleados.hooks", () => ({
   useEmpleadosUsersQuery: () => shared.q(EMPLEADOS),
-  useCreateEmpleadoUserMutation: shared.m,
   useCreateTrabajadorMutation: shared.m,
   useUpdateTrabajadorMutation: shared.m,
+  useAddWhitelistMutation: shared.m,
+  useSetWhitelistActiveMutation: shared.m,
 }));
 vi.mock("./core/api/events.hooks", () => ({
   useEventsQuery: () => shared.q(shared.EMPTY),

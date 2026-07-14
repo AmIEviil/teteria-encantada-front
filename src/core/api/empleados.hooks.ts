@@ -1,13 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSnackBarResponseStore } from "../../store/snackBarStore";
 import { getApiErrorMessage } from "./apiError";
-import { authService } from "./auth.service";
 import { empleadosService } from "./empleados.service";
 import type {
   AddWhitelistPayload,
   CreateTrabajadorPayload,
   FindEmpleadoUsersFilters,
-  RegisterPayload,
   UpdateTrabajadorPayload,
 } from "./types";
 
@@ -76,25 +74,6 @@ export const useUpdateTrabajadorMutation = () => {
           getApiErrorMessage(error, "No se pudo actualizar el trabajador"),
           "error",
         );
-    },
-  });
-};
-
-export const useCreateEmpleadoUserMutation = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (payload: RegisterPayload) => authService.createUser(payload),
-    onSuccess: () => {
-      useSnackBarResponseStore
-        .getState()
-        .openSnackbar("Usuario creado correctamente", "success");
-      queryClient.invalidateQueries({ queryKey: EMPLEADOS_QUERY_KEY });
-    },
-    onError: (error) => {
-      useSnackBarResponseStore
-        .getState()
-        .openSnackbar(getApiErrorMessage(error, "No se pudo crear el usuario"), "error");
     },
   });
 };
