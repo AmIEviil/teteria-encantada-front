@@ -182,6 +182,30 @@ export interface FindEmpleadoUsersFilters {
   lastName?: string;
   createdFrom?: string;
   createdTo?: string;
+  onlyStaff?: boolean;
+}
+
+export interface AddWhitelistPayload {
+  email: string;
+  roleName: string;
+}
+
+export interface RegistroHora {
+  fecha: string;
+  horas: number;
+}
+
+export interface RegistroHorasMes {
+  trabajadorId: string;
+  mes: string;
+  items: RegistroHora[];
+  totalHoras: number;
+}
+
+export interface UpsertRegistroHoraPayload {
+  trabajadorId?: string;
+  fecha: string;
+  horas: number;
 }
 
 export interface EmpleadoUsersResponse {

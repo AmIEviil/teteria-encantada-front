@@ -1,6 +1,8 @@
 import apiClient from "../client/client";
 import type {
+  AddWhitelistPayload,
   CreateTrabajadorPayload,
+  EmpleadoUser,
   EmpleadoUsersResponse,
   FindEmpleadoUsersFilters,
   Trabajador,
@@ -19,6 +21,7 @@ export const empleadosService = {
         lastName: filters?.lastName,
         createdFrom: filters?.createdFrom,
         createdTo: filters?.createdTo,
+        onlyStaff: filters?.onlyStaff,
       },
     });
 
@@ -55,6 +58,20 @@ export const empleadosService = {
   },
   update: async (id: string, payload: UpdateTrabajadorPayload): Promise<Trabajador> => {
     const response = await apiClient.patch<Trabajador>(`/trabajadores/${id}`, payload);
+    return response.data;
+  },
+  addToWhitelist: async (payload: AddWhitelistPayload): Promise<EmpleadoUser> => {
+    const response = await apiClient.post<EmpleadoUser>(
+      "/trabajadores/whitelist",
+      payload,
+    );
+    return response.data;
+  },
+  setWhitelistActive: async (id: string, isActive: boolean): Promise<EmpleadoUser> => {
+    const response = await apiClient.patch<EmpleadoUser>(
+      `/trabajadores/whitelist/${id}`,
+      { isActive },
+    );
     return response.data;
   },
 };
