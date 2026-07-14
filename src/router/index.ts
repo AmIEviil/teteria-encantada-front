@@ -206,7 +206,11 @@ const SalesReportProtected = withRoles(SalesReportView, [
   roles.SUPER_ADMIN,
   roles.ADMIN,
 ]);
-const EmpleadosProtected = withRoles(EmpleadosView, [roles.SUPER_ADMIN]);
+const EmpleadosProtected = withRoles(EmpleadosView, [
+  roles.SUPER_ADMIN,
+  roles.ADMIN,
+  roles.TEC,
+]);
 const MigrationsProtected = withRoles(MigrationsView, [roles.SUPER_ADMIN]);
 const LoyaltyAdminProtected = withRoles(LoyaltyAdminView, [
   roles.SUPER_ADMIN,

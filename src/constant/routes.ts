@@ -76,7 +76,7 @@ export const topbarOptions: IRoute[] = [
   {
     name: "Empleados",
     path: PAGE_ROUTES.Empleados,
-    canAccess: [roles.SUPER_ADMIN],
+    canAccess: [roles.SUPER_ADMIN, roles.ADMIN, roles.TEC],
     icon: "employees",
   },
   {
