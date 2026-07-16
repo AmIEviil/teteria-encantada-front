@@ -693,6 +693,21 @@ export interface FindEventsFilters {
   endDate?: string;
 }
 
+export interface CreateEventPurchaseItemPayload {
+  ticketTypeId: string;
+  attendeeFirstName: string;
+  attendeeLastName: string;
+  attendanceDate?: string;
+  sessionId?: string;
+  menuSelection?: EventTicketMenuSelection;
+}
+
+export interface CreateEventPurchasePayload {
+  buyerEmail: string;
+  paymentMethod: string;
+  items: CreateEventPurchaseItemPayload[];
+}
+
 export interface CreateEventTicketPayload {
   ticketTypeId: string;
   attendeeFirstName: string;

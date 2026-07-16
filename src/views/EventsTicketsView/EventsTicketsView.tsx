@@ -25,6 +25,7 @@ import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import {
   useCreateEventMutation,
   useCreateEventTicketMutation,
+  useCreateEventPurchaseMutation,
   useDeleteEventMutation,
   useDeleteEventTicketMutation,
   useEventsQuery,
@@ -63,6 +64,7 @@ import type {
   TicketTypeDraft,
   EventFormState,
   TicketFormState,
+  PurchaseFormState,
   SessionDraft,
 } from "../../service/events/events.interface";
 import { TicketTypeEditorCard } from "./TicketTypeEditorCard/TicketTypeEditorCard";
@@ -372,6 +374,7 @@ const createInitialTicketForm = (selectedEvent: VenueEvent | null): TicketFormSt
   }
 
   return {
+    id: crypto.randomUUID(),
     ticketTypeId: defaultTicketType?.id ?? "",
     sessionId: selectedEvent?.hasSessions
       ? (selectedEvent.sessions[0]?.id ?? "")
@@ -379,11 +382,16 @@ const createInitialTicketForm = (selectedEvent: VenueEvent | null): TicketFormSt
     attendeeFirstName: "",
     attendeeLastName: "",
     attendanceDate: defaultDate,
-    quantity: "1",
-    applyPromotion: false,
     menuSelectionByGroup,
+    isBuyer: true,
   };
 };
+
+const createInitialPurchaseForm = (selectedEvent: VenueEvent | null): PurchaseFormState => ({
+  buyerEmail: "",
+  paymentMethod: "CASH",
+  tickets: [createInitialTicketForm(selectedEvent)],
+});
 
 const parseMenuOptionPayload = (
   option: TicketMenuOptionDraft,
@@ -887,59 +895,7 @@ const buildTicketMenuSelectionPayload = (
   };
 };
 
-const buildPromotionPayload = (
-  ticketType: VenueEvent["ticketTypes"][number],
-  quantityInput: string,
-  applyPromotion: boolean,
-): {
-  quantity?: number;
-  applyPromotion?: boolean;
-  estimatedTotal?: number;
-  error?: string;
-} => {
-  const quantity = Number(quantityInput || "1");
 
-  if (!Number.isInteger(quantity) || quantity < 1) {
-    return {
-      error: "La cantidad de tickets debe ser un entero mayor o igual a 1",
-    };
-  }
-
-  if (!applyPromotion) {
-    return {
-      quantity,
-      estimatedTotal: quantity * ticketType.price,
-    };
-  }
-
-  if (
-    !ticketType.isPromotional ||
-    ticketType.promoMinQuantity === null ||
-    ticketType.promoBundlePrice === null
-  ) {
-    return {
-      error: "El tipo de ticket seleccionado no tiene una promo disponible",
-    };
-  }
-
-  if (quantity < ticketType.promoMinQuantity) {
-    return {
-      error: `Para promo debes registrar al menos ${ticketType.promoMinQuantity} tickets`,
-    };
-  }
-
-  const promoBlocks = Math.floor(quantity / ticketType.promoMinQuantity);
-  const promoTickets = promoBlocks * ticketType.promoMinQuantity;
-  const regularTickets = quantity - promoTickets;
-  const estimatedTotal =
-    promoBlocks * ticketType.promoBundlePrice + regularTickets * ticketType.price;
-
-  return {
-    quantity,
-    applyPromotion: true,
-    estimatedTotal,
-  };
-};
 
 const removeMenuOptionFromGroups = (
   groups: TicketMenuGroupDraft[],
@@ -1013,8 +969,8 @@ export const EventsTicketsView = () => {
   const [ticketAttendanceDateFilter, setTicketAttendanceDateFilter] = useState("");
 
   const [editingTicketId, setEditingTicketId] = useState<string | null>(null);
-  const [ticketForm, setTicketForm] = useState<TicketFormState>(
-    createInitialTicketForm(null),
+  const [purchaseForm, setPurchaseForm] = useState<PurchaseFormState>(
+    createInitialPurchaseForm(null),
   );
 
   const eventsQuery = useEventsQuery({
@@ -1078,6 +1034,7 @@ export const EventsTicketsView = () => {
   const deleteEventMutation = useDeleteEventMutation();
 
   const createEventTicketMutation = useCreateEventTicketMutation();
+  const createEventPurchaseMutation = useCreateEventPurchaseMutation();
   const updateEventTicketMutation = useUpdateEventTicketMutation();
   const deleteEventTicketMutation = useDeleteEventTicketMutation();
 
@@ -1089,7 +1046,8 @@ export const EventsTicketsView = () => {
   const isTicketSubmitting =
     createEventTicketMutation.isPending ||
     updateEventTicketMutation.isPending ||
-    deleteEventTicketMutation.isPending;
+    deleteEventTicketMutation.isPending ||
+    createEventPurchaseMutation.isPending;
 
   const eventFormAvailableDates = useMemo(() => {
     if (!eventForm.startsAtDate || !eventForm.endsAtDate) {
@@ -1107,34 +1065,7 @@ export const EventsTicketsView = () => {
     return buildDateRangeKeys(ticketsModalEvent.startsAt, ticketsModalEvent.endsAt);
   }, [ticketsModalEvent]);
 
-  const selectedTicketType = useMemo(() => {
-    if (!ticketsModalEvent) {
-      return null;
-    }
-
-    return (
-      ticketsModalEvent.ticketTypes.find(
-        (ticketType) => ticketType.id === ticketForm.ticketTypeId,
-      ) ?? null
-    );
-  }, [ticketsModalEvent, ticketForm.ticketTypeId]);
-
-  const promotionPreview = useMemo(() => {
-    if (!selectedTicketType || Boolean(editingTicketId)) {
-      return null;
-    }
-
-    return buildPromotionPayload(
-      selectedTicketType,
-      ticketForm.quantity,
-      ticketForm.applyPromotion,
-    );
-  }, [
-    editingTicketId,
-    selectedTicketType,
-    ticketForm.applyPromotion,
-    ticketForm.quantity,
-  ]);
+  // Selected ticket type and promotion preview are evaluated per ticket in the UI if needed
 
   const buildMenuSelectionByTemplate = (
     menuTemplate?: EventTicketMenuTemplate | null,
@@ -1172,9 +1103,9 @@ export const EventsTicketsView = () => {
     resetEventWizard();
   };
 
-  const resetTicketForm = (targetEvent: VenueEvent | null) => {
+  const resetPurchaseForm = (targetEvent: VenueEvent | null) => {
     setEditingTicketId(null);
-    setTicketForm(createInitialTicketForm(targetEvent));
+    setPurchaseForm(createInitialPurchaseForm(targetEvent));
   };
 
   const openTicketsModalForEvent = (eventItem: VenueEvent) => {
@@ -1185,7 +1116,7 @@ export const EventsTicketsView = () => {
     setTicketsModalEventId(eventItem.id);
     setTicketStatusFilter("ALL");
     setTicketAttendanceDateFilter("");
-    resetTicketForm(eventItem);
+    resetPurchaseForm(eventItem);
     setIsTicketsModalOpen(true);
   };
 
@@ -1194,7 +1125,7 @@ export const EventsTicketsView = () => {
     setTicketsModalEventId(null);
     setTicketStatusFilter("ALL");
     setTicketAttendanceDateFilter("");
-    resetTicketForm(null);
+    resetPurchaseForm(null);
   };
 
   const updateTicketTypeDraft = (
@@ -1668,144 +1599,151 @@ export const EventsTicketsView = () => {
     }
   };
 
-  const handleTicketTypeFormChange = (ticketTypeId: string) => {
-    if (!ticketsModalEvent) {
-      return;
-    }
-
-    const ticketType = ticketsModalEvent.ticketTypes.find(
-      (candidate) => candidate.id === ticketTypeId,
-    );
-
-    if (!ticketType) {
-      setTicketForm((previous) => ({
-        ...previous,
-        ticketTypeId,
-        quantity: "1",
-        applyPromotion: false,
-        menuSelectionByGroup: {},
-      }));
-      return;
-    }
-
-    setTicketForm((previous) => ({
-      ...previous,
-      ticketTypeId,
-      quantity: previous.quantity || "1",
-      applyPromotion:
-        ticketType.isPromotional && !editingTicketId
-          ? previous.applyPromotion
-          : false,
-      menuSelectionByGroup: buildMenuSelectionByTemplate(
-        ticketType.menuTemplate,
-        previous.menuSelectionByGroup,
-      ),
-    }));
+  const handleTicketTypeFormChange = (index: number, ticketTypeId: string) => {
+    if (!ticketsModalEvent) return;
+    const ticketType = ticketsModalEvent.ticketTypes.find((candidate) => candidate.id === ticketTypeId);
+    setPurchaseForm((prev) => {
+      const nextTickets = [...prev.tickets];
+      if (!ticketType) {
+        nextTickets[index] = { ...nextTickets[index], ticketTypeId, menuSelectionByGroup: {} };
+      } else {
+        nextTickets[index] = {
+          ...nextTickets[index],
+          ticketTypeId,
+          menuSelectionByGroup: buildMenuSelectionByTemplate(ticketType.menuTemplate, nextTickets[index].menuSelectionByGroup),
+        };
+      }
+      return { ...prev, tickets: nextTickets };
+    });
   };
 
-  const handleTicketMenuSelectionChange = (
-    groupKey: string,
-    optionIds: string[],
-  ) => {
-    setTicketForm((previous) => ({
-      ...previous,
-      menuSelectionByGroup: {
-        ...previous.menuSelectionByGroup,
-        [groupKey]: optionIds,
-      },
+  const handleTicketMenuSelectionChange = (index: number, groupKey: string, optionIds: string[]) => {
+    setPurchaseForm((prev) => {
+      const nextTickets = [...prev.tickets];
+      nextTickets[index] = {
+        ...nextTickets[index],
+        menuSelectionByGroup: { ...nextTickets[index].menuSelectionByGroup, [groupKey]: optionIds },
+      };
+      return { ...prev, tickets: nextTickets };
+    });
+  };
+
+  const handleTicketFieldChange = (index: number, field: keyof TicketFormState, value: any) => {
+    setPurchaseForm((prev) => {
+      const nextTickets = [...prev.tickets];
+      if (field === 'isBuyer' && value === true) {
+        nextTickets.forEach(t => t.isBuyer = false);
+      }
+      nextTickets[index] = { ...nextTickets[index], [field]: value };
+      return { ...prev, tickets: nextTickets };
+    });
+  };
+  
+  const addTicketDraft = () => {
+    setPurchaseForm(prev => ({
+      ...prev,
+      tickets: [...prev.tickets, createInitialTicketForm(ticketsModalEvent)]
     }));
+  };
+  
+  const removeTicketDraft = (index: number) => {
+    setPurchaseForm(prev => {
+      const next = prev.tickets.filter((_, i) => i !== index);
+      if (prev.tickets[index]?.isBuyer && next.length > 0) next[0].isBuyer = true;
+      return { ...prev, tickets: next };
+    });
   };
 
   const handleSubmitTicket = async () => {
-    if (!ticketsModalEvent) {
-      return;
-    }
+    if (!ticketsModalEvent) return;
+    
+    if (editingTicketId) {
+      const form = purchaseForm.tickets[0];
+      const selectedType = ticketsModalEvent.ticketTypes.find(t => t.id === form.ticketTypeId);
+      if (!selectedType) return;
+      
+      const basePayload: UpdateEventTicketPayload = {
+        ticketTypeId: form.ticketTypeId,
+        attendeeFirstName: form.attendeeFirstName.trim(),
+        attendeeLastName: form.attendeeLastName.trim(),
+        ...(ticketsModalEvent.hasSessions
+          ? { sessionId: form.sessionId }
+          : { attendanceDate: `${form.attendanceDate}T00:00:00` }),
+      };
 
-    if (!ticketForm.ticketTypeId) {
-      openSnackbar("Debes seleccionar un tipo de ticket", "error");
-      return;
-    }
+      const menuSelectionPayload = buildTicketMenuSelectionPayload(
+        selectedType,
+        form.menuSelectionByGroup,
+      );
 
-    if (!selectedTicketType) {
-      openSnackbar("El tipo de ticket seleccionado ya no esta disponible", "error");
-      return;
-    }
-
-    const attendeeFirstName = ticketForm.attendeeFirstName.trim();
-    const attendeeLastName = ticketForm.attendeeLastName.trim();
-
-    if (!attendeeFirstName || !attendeeLastName) {
-      openSnackbar("Debes indicar nombres y apellidos del asistente", "error");
-      return;
-    }
-
-    if (ticketsModalEvent.hasSessions) {
-      if (!ticketForm.sessionId) {
-        openSnackbar("Debes seleccionar una jornada", "error");
+      if (menuSelectionPayload.error) {
+        openSnackbar(menuSelectionPayload.error, "error");
         return;
       }
-    } else if (!ticketForm.attendanceDate) {
-      openSnackbar("Debes indicar fecha de asistencia", "error");
-      return;
-    }
 
-    const basePayload: UpdateEventTicketPayload = {
-      ticketTypeId: ticketForm.ticketTypeId,
-      attendeeFirstName,
-      attendeeLastName,
-      ...(ticketsModalEvent.hasSessions
-        ? { sessionId: ticketForm.sessionId }
-        : { attendanceDate: `${ticketForm.attendanceDate}T00:00:00` }),
-    };
+      if (menuSelectionPayload.payload) {
+        basePayload.menuSelection = menuSelectionPayload.payload;
+      }
 
-    const menuSelectionPayload = buildTicketMenuSelectionPayload(
-      selectedTicketType,
-      ticketForm.menuSelectionByGroup,
-    );
-
-    if (menuSelectionPayload.error) {
-      openSnackbar(menuSelectionPayload.error, "error");
-      return;
-    }
-
-    if (menuSelectionPayload.payload) {
-      basePayload.menuSelection = menuSelectionPayload.payload;
-    }
-
-    if (editingTicketId) {
       await updateEventTicketMutation.mutateAsync({
         eventId: ticketsModalEvent.id,
         ticketId: editingTicketId,
         payload: basePayload,
       });
     } else {
-      const promotionPayload = buildPromotionPayload(
-        selectedTicketType,
-        ticketForm.quantity,
-        ticketForm.applyPromotion,
-      );
-
-      if (promotionPayload.error) {
-        openSnackbar(promotionPayload.error, "error");
+      const items = [];
+      for (const form of purchaseForm.tickets) {
+        const selectedType = ticketsModalEvent.ticketTypes.find(t => t.id === form.ticketTypeId);
+        if (!selectedType) {
+          openSnackbar("Tipo de ticket invalido en la lista", "error");
+          return;
+        }
+        if (!form.attendeeFirstName.trim() || !form.attendeeLastName.trim()) {
+          openSnackbar("Nombres y apellidos son obligatorios", "error");
+          return;
+        }
+        
+        const menuSelectionPayload = buildTicketMenuSelectionPayload(
+          selectedType,
+          form.menuSelectionByGroup,
+        );
+        if (menuSelectionPayload.error) {
+          openSnackbar(menuSelectionPayload.error, "error");
+          return;
+        }
+        
+        items.push({
+          ticketTypeId: form.ticketTypeId,
+          attendeeFirstName: form.attendeeFirstName.trim(),
+          attendeeLastName: form.attendeeLastName.trim(),
+          ...(ticketsModalEvent.hasSessions
+            ? { sessionId: form.sessionId }
+            : { attendanceDate: `${form.attendanceDate}T00:00:00` }),
+          menuSelection: menuSelectionPayload.payload,
+        });
+      }
+      
+      const buyerForm = purchaseForm.tickets.find(t => t.isBuyer);
+      if (!buyerForm) {
+        openSnackbar("Debe seleccionar un comprador", "error");
         return;
       }
-
-      await createEventTicketMutation.mutateAsync({
+      if (!purchaseForm.buyerEmail.trim()) {
+        openSnackbar("Debe indicar email del comprador", "error");
+        return;
+      }
+      
+      await createEventPurchaseMutation.mutateAsync({
         eventId: ticketsModalEvent.id,
         payload: {
-          ticketTypeId: basePayload.ticketTypeId ?? "",
-          attendeeFirstName: basePayload.attendeeFirstName ?? "",
-          attendeeLastName: basePayload.attendeeLastName ?? "",
-          attendanceDate: basePayload.attendanceDate,
-          sessionId: basePayload.sessionId,
-          quantity: promotionPayload.quantity,
-          applyPromotion: promotionPayload.applyPromotion,
-          menuSelection: basePayload.menuSelection,
+          buyerEmail: purchaseForm.buyerEmail.trim(),
+          paymentMethod: purchaseForm.paymentMethod,
+          items,
         },
       });
     }
 
-    resetTicketForm(ticketsModalEvent);
+    resetPurchaseForm(ticketsModalEvent);
   };
 
   const handleLoadTicketToEdit = (ticket: EventTicket) => {
@@ -1816,15 +1754,19 @@ export const EventsTicketsView = () => {
     }
 
     setEditingTicketId(ticket.id);
-    setTicketForm({
-      ticketTypeId: ticket.ticketTypeId,
-      attendeeFirstName: ticket.attendeeFirstName,
-      attendeeLastName: ticket.attendeeLastName,
-      attendanceDate: toDateOnlyKey(ticket.attendanceDate),
-      quantity: "1",
-      applyPromotion: false,
-      sessionId: ticket.sessionId ?? "",
-      menuSelectionByGroup,
+    setPurchaseForm({
+      buyerEmail: "",
+      paymentMethod: "CASH",
+      tickets: [{
+        id: crypto.randomUUID(),
+        ticketTypeId: ticket.ticketTypeId,
+        attendeeFirstName: ticket.attendeeFirstName,
+        attendeeLastName: ticket.attendeeLastName,
+        attendanceDate: toDateOnlyKey(ticket.attendanceDate),
+        sessionId: ticket.sessionId ?? "",
+        menuSelectionByGroup,
+        isBuyer: true,
+      }]
     });
   };
 
@@ -2490,233 +2432,199 @@ export const EventsTicketsView = () => {
               <Divider />
 
               <Stack spacing={1.25}>
-                <Typography fontWeight={700}>
-                  {editingTicketId ? "Editar ticket" : "Registrar ticket"}
+                <Typography fontWeight={700} variant="h6">
+                  {editingTicketId ? "Editar ticket" : "Registrar tickets"}
                 </Typography>
 
-                <Stack direction={{ xs: "column", md: "row" }} spacing={1.25}>
-                  <TextField
-                    select
-                    label="Tipo de ticket"
-                    value={ticketForm.ticketTypeId}
-                    onChange={(event) => handleTicketTypeFormChange(event.target.value)}
-                    fullWidth
-                  >
-                    <MenuItem value="">Seleccionar</MenuItem>
-                    {ticketsModalEvent.ticketTypes.map((ticketType) => (
-                      <MenuItem key={ticketType.id} value={ticketType.id}>
-                        {ticketType.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-
-                  {ticketsModalEvent.hasSessions ? (
+                {!editingTicketId && (
+                  <Stack direction={{ xs: "column", md: "row" }} spacing={1.25} sx={{ p: 2, bgcolor: "background.default", borderRadius: 1 }}>
+                    <TextField
+                      label="Email del comprador"
+                      value={purchaseForm.buyerEmail}
+                      onChange={(e) => setPurchaseForm(prev => ({ ...prev, buyerEmail: e.target.value }))}
+                      fullWidth
+                    />
                     <TextField
                       select
-                      label="Jornada"
-                      value={ticketForm.sessionId}
-                      onChange={(event) =>
-                        setTicketForm((previous) => ({
-                          ...previous,
-                          sessionId: event.target.value,
-                        }))
-                      }
+                      label="Medio de pago"
+                      value={purchaseForm.paymentMethod}
+                      onChange={(e) => setPurchaseForm(prev => ({ ...prev, paymentMethod: e.target.value }))}
                       fullWidth
                     >
-                      <MenuItem value="">Seleccionar</MenuItem>
-                      {ticketsModalEvent.sessions.map((session) => (
-                        <MenuItem key={session.id} value={session.id}>
-                          {formatDateKeyLabel(session.date)} {session.startTime}
-                          {session.endTime ? ` - ${session.endTime}` : ""} (cap.{" "}
-                          {session.capacity})
-                        </MenuItem>
-                      ))}
+                      <MenuItem value="CASH">Efectivo</MenuItem>
+                      <MenuItem value="CARD">Tarjeta</MenuItem>
                     </TextField>
-                  ) : (
-                    <CustomCalendarV2
-                      label="Fecha asistencia"
-                      placeholder="Selecciona fecha"
-                      initialDate={
-                        parseLocalDateString(ticketForm.attendanceDate) ?? undefined
-                      }
-                      availableDates={ticketsModalEventAvailableDates}
-                      onSave={(date) =>
-                        setTicketForm((previous) => ({
-                          ...previous,
-                          attendanceDate: date ? toLocalDateString(date) : "",
-                        }))
-                      }
-                    />
-                  )}
-                </Stack>
-
-                <Stack direction={{ xs: "column", md: "row" }} spacing={1.25}>
-                  <TextField
-                    label="Nombres"
-                    value={ticketForm.attendeeFirstName}
-                    onChange={(event) =>
-                      setTicketForm((previous) => ({
-                        ...previous,
-                        attendeeFirstName: event.target.value,
-                      }))
-                    }
-                    fullWidth
-                  />
-
-                  <TextField
-                    label="Apellidos"
-                    value={ticketForm.attendeeLastName}
-                    onChange={(event) =>
-                      setTicketForm((previous) => ({
-                        ...previous,
-                        attendeeLastName: event.target.value,
-                      }))
-                    }
-                    fullWidth
-                  />
-                </Stack>
-
-                {!editingTicketId && selectedTicketType && (
-                  <Stack spacing={0.8}>
-                    <Stack direction={{ xs: "column", md: "row" }} spacing={1.25}>
-                      <TextField
-                        label="Cantidad de tickets"
-                        type="number"
-                        value={ticketForm.quantity}
-                        onChange={(event) =>
-                          setTicketForm((previous) => ({
-                            ...previous,
-                            quantity: event.target.value,
-                          }))
-                        }
-                        slotProps={{ htmlInput: { min: 1, step: 1 } }}
-                        fullWidth
-                      />
-
-                      <FormControlLabel
-                        control={
-                          <Switch
-                            checked={ticketForm.applyPromotion}
-                            disabled={!selectedTicketType.isPromotional}
-                            onChange={(event) =>
-                              setTicketForm((previous) => ({
-                                ...previous,
-                                applyPromotion: event.target.checked,
-                              }))
-                            }
-                          />
-                        }
-                        label="Aplicar promo"
-                      />
-                    </Stack>
-
-                    {selectedTicketType.isPromotional &&
-                      selectedTicketType.promoMinQuantity !== null &&
-                      selectedTicketType.promoBundlePrice !== null && (
-                        <Typography variant="body2" color="text.secondary">
-                          Promo del tipo: cada bloque de {selectedTicketType.promoMinQuantity} tickets cuesta{" "}
-                          {formatCurrency(selectedTicketType.promoBundlePrice)}.
-                        </Typography>
-                      )}
-
-                    {promotionPreview?.error && ticketForm.applyPromotion && (
-                      <Typography variant="body2" color="error.main">
-                        {promotionPreview.error}
-                      </Typography>
-                    )}
-
-                    {!promotionPreview?.error &&
-                      promotionPreview?.estimatedTotal !== undefined && (
-                        <Typography variant="body2" color="text.secondary">
-                          Total estimado de la compra: {formatCurrency(promotionPreview.estimatedTotal)}
-                        </Typography>
-                      )}
                   </Stack>
                 )}
 
-                {selectedTicketType?.menuMode === "CUSTOMIZABLE" && (
-                  <Stack spacing={1}>
-                    <Typography fontWeight={700}>Seleccion de menu</Typography>
+                {purchaseForm.tickets.map((form, index) => {
+                  const selectedTicketType = ticketsModalEvent.ticketTypes.find(t => t.id === form.ticketTypeId);
+                  return (
+                    <Paper key={form.id} variant="outlined" sx={{ p: 2 }}>
+                      <Stack spacing={1.25}>
+                        <Stack direction="row" justifyContent="space-between" alignItems="center">
+                          <Typography fontWeight={700}>
+                            Ticket {index + 1}
+                          </Typography>
+                          {!editingTicketId && purchaseForm.tickets.length > 1 && (
+                            <Button size="small" color="error" onClick={() => removeTicketDraft(index)}>
+                              Quitar
+                            </Button>
+                          )}
+                        </Stack>
 
-                    {(selectedTicketType.menuTemplate?.groups ?? []).map((group) => {
-                      const activeOptions = group.options.filter((option) => option.isActive);
-                      const allowMultipleSelection = group.maxSelect > 1;
-                      const selectedOptionIds =
-                        ticketForm.menuSelectionByGroup[group.key] ?? [];
+                        <Stack direction={{ xs: "column", md: "row" }} spacing={1.25}>
+                          <TextField
+                            select
+                            label="Tipo de ticket"
+                            value={form.ticketTypeId}
+                            onChange={(event) => handleTicketTypeFormChange(index, event.target.value)}
+                            fullWidth
+                          >
+                            <MenuItem value="">Seleccionar</MenuItem>
+                            {ticketsModalEvent.ticketTypes.map((ticketType) => (
+                              <MenuItem key={ticketType.id} value={ticketType.id}>
+                                {ticketType.name}
+                              </MenuItem>
+                            ))}
+                          </TextField>
 
-                      return (
-                        <TextField
-                          key={group.key}
-                          select
-                          fullWidth
-                          label={`${group.label}${group.required ? " *" : ""}`}
-                          value={
-                            allowMultipleSelection
-                              ? selectedOptionIds
-                              : (selectedOptionIds[0] ?? "")
-                          }
-                          slotProps={{
-                            select: {
-                              multiple: allowMultipleSelection,
-                              renderValue: (selected) => {
-                                const selectedIds =
-                                  typeof selected === "string"
-                                    ? [selected]
-                                    : (selected as string[]);
-
-                                return activeOptions
-                                  .filter((option) => selectedIds.includes(option.id))
-                                  .map((option) => option.label)
-                                  .join(", ");
-                              },
-                            },
-                          }}
-                          helperText={`Selecciona entre ${group.minSelect} y ${group.maxSelect} opcion(es)`}
-                          onChange={(event) => {
-                            let selectedValues: string[];
-
-                            if (allowMultipleSelection) {
-                              if (typeof event.target.value === "string") {
-                                selectedValues = [event.target.value];
-                              } else {
-                                selectedValues = event.target.value as string[];
+                          {ticketsModalEvent.hasSessions ? (
+                            <TextField
+                              select
+                              label="Jornada"
+                              value={form.sessionId}
+                              onChange={(event) => handleTicketFieldChange(index, 'sessionId', event.target.value)}
+                              fullWidth
+                            >
+                              <MenuItem value="">Seleccionar</MenuItem>
+                              {ticketsModalEvent.sessions.map((session) => (
+                                <MenuItem key={session.id} value={session.id}>
+                                  {formatDateKeyLabel(session.date)} {session.startTime}
+                                  {session.endTime ? ` - ${session.endTime}` : ""} (cap.{" "}
+                                  {session.capacity})
+                                </MenuItem>
+                              ))}
+                            </TextField>
+                          ) : (
+                            <CustomCalendarV2
+                              label="Fecha asistencia"
+                              placeholder="Selecciona fecha"
+                              initialDate={
+                                parseLocalDateString(form.attendanceDate) ?? undefined
                               }
-                            } else {
-                              selectedValues = [String(event.target.value)];
+                              availableDates={ticketsModalEventAvailableDates}
+                              onSave={(date) =>
+                                handleTicketFieldChange(index, 'attendanceDate', date ? toLocalDateString(date) : "")
+                              }
+                            />
+                          )}
+                        </Stack>
+
+                        <Stack direction={{ xs: "column", md: "row" }} spacing={1.25}>
+                          <TextField
+                            label="Nombres"
+                            value={form.attendeeFirstName}
+                            onChange={(event) => handleTicketFieldChange(index, 'attendeeFirstName', event.target.value)}
+                            fullWidth
+                          />
+
+                          <TextField
+                            label="Apellidos"
+                            value={form.attendeeLastName}
+                            onChange={(event) => handleTicketFieldChange(index, 'attendeeLastName', event.target.value)}
+                            fullWidth
+                          />
+                        </Stack>
+
+                        {!editingTicketId && (
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={form.isBuyer}
+                                onChange={(e) => handleTicketFieldChange(index, 'isBuyer', e.target.checked)}
+                              />
                             }
+                            label="Es el comprador principal"
+                          />
+                        )}
 
-                            handleTicketMenuSelectionChange(group.key, selectedValues);
-                          }}
-                        >
-                          {activeOptions.map((option) => (
-                            <MenuItem key={option.id} value={option.id}>
-                              {option.label}
-                              {option.extraPrice > 0
-                                ? ` (+${formatCurrency(option.extraPrice)})`
-                                : ""}
-                            </MenuItem>
-                          ))}
-                        </TextField>
-                      );
-                    })}
-                  </Stack>
-                )}
+                        {selectedTicketType?.menuMode === "CUSTOMIZABLE" && (
+                          <Stack spacing={1}>
+                            <Typography fontWeight={700}>Seleccion de menu</Typography>
 
-                {selectedTicketType && (
-                  <Typography variant="body2" color="text.secondary">
-                    Tipo seleccionado: {selectedTicketType.name} | Precio base: {" "}
-                    {formatCurrency(selectedTicketType.price)}
-                    {selectedTicketType.menuMode === "CUSTOMIZABLE" &&
-                      " | Menu personalizable"}
-                    {selectedTicketType.isPromotional &&
-                      selectedTicketType.promoMinQuantity !== null &&
-                      selectedTicketType.promoBundlePrice !== null && (
-                        <>
-                          {" "}| Promo: x{selectedTicketType.promoMinQuantity} por{" "}
-                          {formatCurrency(selectedTicketType.promoBundlePrice)}
-                        </>
-                      )}
-                  </Typography>
+                            {(selectedTicketType.menuTemplate?.groups ?? []).map((group) => {
+                              const activeOptions = group.options.filter((option) => option.isActive);
+                              const allowMultipleSelection = group.maxSelect > 1;
+                              const selectedOptionIds =
+                                form.menuSelectionByGroup[group.key] ?? [];
+
+                              return (
+                                <TextField
+                                  key={group.key}
+                                  select
+                                  fullWidth
+                                  label={`${group.label}${group.required ? " *" : ""}`}
+                                  value={
+                                    allowMultipleSelection
+                                      ? selectedOptionIds
+                                      : (selectedOptionIds[0] ?? "")
+                                  }
+                                  slotProps={{
+                                    select: {
+                                      multiple: allowMultipleSelection,
+                                      renderValue: (selected) => {
+                                        const selectedIds =
+                                          typeof selected === "string"
+                                            ? [selected]
+                                            : (selected as string[]);
+
+                                        return activeOptions
+                                          .filter((option) => selectedIds.includes(option.id))
+                                          .map((option) => option.label)
+                                          .join(", ");
+                                      },
+                                    },
+                                  }}
+                                  helperText={`Selecciona entre ${group.minSelect} y ${group.maxSelect} opcion(es)`}
+                                  onChange={(event) => {
+                                    let selectedValues: string[];
+
+                                    if (allowMultipleSelection) {
+                                      if (typeof event.target.value === "string") {
+                                        selectedValues = [event.target.value];
+                                      } else {
+                                        selectedValues = event.target.value as string[];
+                                      }
+                                    } else {
+                                      selectedValues = [String(event.target.value)];
+                                    }
+
+                                    handleTicketMenuSelectionChange(index, group.key, selectedValues);
+                                  }}
+                                >
+                                  {activeOptions.map((option) => (
+                                    <MenuItem key={option.id} value={option.id}>
+                                      {option.label}
+                                      {option.extraPrice > 0
+                                        ? ` (+${formatCurrency(option.extraPrice)})`
+                                        : ""}
+                                    </MenuItem>
+                                  ))}
+                                </TextField>
+                              );
+                            })}
+                          </Stack>
+                        )}
+                      </Stack>
+                    </Paper>
+                  );
+                })}
+
+                {!editingTicketId && (
+                  <Button variant="text" startIcon={<AddIcon />} onClick={addTicketDraft}>
+                    Agregar otro ticket
+                  </Button>
                 )}
 
                 <Stack direction={{ xs: "column", md: "row" }} spacing={1}>
@@ -2729,18 +2637,19 @@ export const EventsTicketsView = () => {
                       isTicketSubmitting
                     }
                   >
-                    {editingTicketId ? "Guardar cambios" : "Registrar ticket"}
+                    {editingTicketId ? "Guardar cambios" : "Registrar tickets"}
                   </Button>
 
                   <Button
                     variant="outlined"
-                    onClick={() => resetTicketForm(ticketsModalEvent)}
+                    onClick={() => resetPurchaseForm(ticketsModalEvent)}
                     disabled={isTicketSubmitting}
                   >
                     Limpiar formulario
                   </Button>
                 </Stack>
               </Stack>
+
 
               <Divider />
 

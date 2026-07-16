@@ -91,14 +91,20 @@ export interface EventFormState {
 }
 
 export interface TicketFormState {
+  id: string;
   ticketTypeId: string;
   attendeeFirstName: string;
   attendeeLastName: string;
   attendanceDate: string;
-  quantity: string;
-  applyPromotion: boolean;
   sessionId: string;
   menuSelectionByGroup: Record<string, string[]>;
+  isBuyer: boolean;
+}
+
+export interface PurchaseFormState {
+  buyerEmail: string;
+  paymentMethod: string;
+  tickets: TicketFormState[];
 }
 
 export interface TicketTypeEditorCardProps {

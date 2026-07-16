@@ -36,7 +36,8 @@ export const buildMonthEventMap = (
     if (eventEnd < monthStart || eventStart > monthEnd) continue;
 
     const firstDay = eventStart < monthStart ? 1 : eventStart.getDate();
-    const lastDay = eventEnd > monthEnd ? monthEnd.getDate() : eventEnd.getDate();
+    const lastDay =
+      eventEnd > monthEnd ? monthEnd.getDate() : eventEnd.getDate();
 
     for (let day = firstDay; day <= lastDay; day += 1) {
       const dayEvents = map.get(day) ?? [];
@@ -74,9 +75,16 @@ export const EventsCalendar = () => {
   );
 
   const shiftMonth = (delta: number) =>
-    setMonth((current) => new Date(current.getFullYear(), current.getMonth() + delta, 1));
+    setMonth(
+      (current) =>
+        new Date(current.getFullYear(), current.getMonth() + delta, 1),
+    );
 
-  const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+  const daysInMonth = new Date(
+    month.getFullYear(),
+    month.getMonth() + 1,
+    0,
+  ).getDate();
   const leadingBlanks = weekDayIndex(month);
   const monthLabel = monthFormatter.format(month);
 
@@ -84,7 +92,8 @@ export const EventsCalendar = () => {
     <div className="publicPageContainer">
       <h4 className="text-6xl">Calendario de Actividades</h4>
       <p className="publicMuted">
-        Revisa las actividades del mes. Haz click en un evento para ver su detalle.
+        Revisa las actividades del mes. Haz click en un evento para ver su
+        detalle.
       </p>
 
       <div className="calendarHeader">
@@ -118,7 +127,10 @@ export const EventsCalendar = () => {
           ))}
 
           {Array.from({ length: leadingBlanks }, (_, index) => (
-            <div key={`blank-${index}`} className="calendarCell calendarCellEmpty" />
+            <div
+              key={`blank-${index}`}
+              className="calendarCell calendarCellEmpty"
+            />
           ))}
 
           {Array.from({ length: daysInMonth }, (_, index) => {

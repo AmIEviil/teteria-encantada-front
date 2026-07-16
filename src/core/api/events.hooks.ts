@@ -3,6 +3,7 @@ import { useSnackBarResponseStore } from "../../store/snackBarStore";
 import { getApiErrorMessage } from "./apiError";
 import { eventsService } from "./events.service";
 import type {
+  CreateEventPurchasePayload,
   CreateEventTicketPayload,
   CreateVenueEventPayload,
   FindEventsFilters,
@@ -181,6 +182,41 @@ export const useCreateEventTicketMutation = () => {
       useSnackBarResponseStore
         .getState()
         .openSnackbar(getApiErrorMessage(error, "No se pudo registrar el ticket"), "error");
+    },
+  });
+};
+
+interface CreateEventPurchaseMutationPayload {
+  eventId: string;
+  payload: CreateEventPurchasePayload;
+}
+
+export const useCreateEventPurchaseMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ eventId, payload }: CreateEventPurchaseMutationPayload) =>
+      eventsService.createPurchase(eventId, payload),
+    onSuccess: (createdTickets, variables) => {
+      const createdCount = createdTickets.length;
+      useSnackBarResponseStore
+        .getState()
+        .openSnackbar(
+          createdCount > 1
+            ? `${createdCount} tickets registrados correctamente`
+            : "Ticket registrado correctamente",
+          "success",
+        );
+      queryClient.invalidateQueries({ queryKey: EVENTS_QUERY_KEY });
+      queryClient.invalidateQueries({
+        queryKey: [...EVENT_TICKETS_QUERY_KEY, variables.eventId],
+      });
+      queryClient.invalidateQueries({ queryKey: EVENT_TICKETS_QUERY_KEY });
+    },
+    onError: (error) => {
+      useSnackBarResponseStore
+        .getState()
+        .openSnackbar(getApiErrorMessage(error, "No se pudo registrar la compra"), "error");
     },
   });
 };

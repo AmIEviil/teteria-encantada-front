@@ -1,6 +1,7 @@
 import apiClient from "../client/client";
 import type {
   CreateEventTicketPayload,
+  CreateEventPurchasePayload,
   CreateVenueEventPayload,
   EventTicket,
   FindEventsFilters,
@@ -110,6 +111,17 @@ export const eventsService = {
   ): Promise<EventTicket[]> => {
     const response = await apiClient.post<EventTicket[]>(
       `/events/${eventId}/tickets`,
+      payload,
+    );
+    return response.data;
+  },
+
+  createPurchase: async (
+    eventId: string,
+    payload: CreateEventPurchasePayload,
+  ): Promise<EventTicket[]> => {
+    const response = await apiClient.post<EventTicket[]>(
+      `/events/${eventId}/purchase`,
       payload,
     );
     return response.data;
