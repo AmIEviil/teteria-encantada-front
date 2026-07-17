@@ -21,7 +21,7 @@ const startOfDay = (value: string): Date => {
 const weekDayIndex = (date: Date): number => (date.getDay() + 6) % 7;
 
 /** Día del mes -> eventos activos ese día. Un evento multi-día aparece en cada uno de sus días. */
-export const buildMonthEventMap = (
+const buildMonthEventMap = (
   events: PublicEvent[],
   year: number,
   month: number,

@@ -1628,6 +1628,7 @@ export const EventsTicketsView = () => {
     });
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleTicketFieldChange = (index: number, field: keyof TicketFormState, value: any) => {
     setPurchaseForm((prev) => {
       const nextTickets = [...prev.tickets];
