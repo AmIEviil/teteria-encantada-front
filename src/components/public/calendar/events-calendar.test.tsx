@@ -3,7 +3,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import type { PublicEvent } from "../../../core/api/types";
-import { EventsCalendar, buildMonthEventMap } from "./EventsCalendar";
+import { EventsCalendar } from "./EventsCalendar";
+import { buildMonthEventMap } from "./events-calendar.utils";
 
 const event = (id: string, title: string, startsAt: string, endsAt: string): PublicEvent => ({
   id,
