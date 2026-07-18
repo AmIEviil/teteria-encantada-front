@@ -54,18 +54,6 @@ const MigrationsView = lazy(() =>
   })),
 );
 
-const LoyaltyAdminView = lazy(() =>
-  import("../views/LoyaltyAdminView/LoyaltyAdminView.tsx").then((module) => ({
-    default: module.LoyaltyAdminView,
-  })),
-);
-
-const LoyaltyView = lazy(() =>
-  import("../views/LoyaltyView/LoyaltyView.tsx").then((module) => ({
-    default: module.LoyaltyView,
-  })),
-);
-
 const LoginView = lazy(() =>
   import("../views/auth/LoginView.tsx").then((module) => ({
     default: module.LoginView,
@@ -212,15 +200,6 @@ const EmpleadosProtected = withRoles(EmpleadosView, [
   roles.TEC,
 ]);
 const MigrationsProtected = withRoles(MigrationsView, [roles.SUPER_ADMIN]);
-const LoyaltyAdminProtected = withRoles(LoyaltyAdminView, [
-  roles.SUPER_ADMIN,
-  roles.ADMIN,
-]);
-const LoyaltyProtected = withRoles(LoyaltyView, [
-  roles.CLIENT,
-  roles.SUPER_ADMIN,
-  roles.ADMIN,
-]);
 
 const DefaultRedirect = () =>
   createElement(Navigate, { to: "/", replace: true });
@@ -319,14 +298,6 @@ export const router = createBrowserRouter(
         {
           path: PAGE_ROUTES.Migraciones,
           Component: MigrationsProtected,
-        },
-        {
-          path: PAGE_ROUTES.Fidelizacion,
-          Component: LoyaltyAdminProtected,
-        },
-        {
-          path: PAGE_ROUTES.MisPuntos,
-          Component: LoyaltyProtected,
         },
       ],
     },
