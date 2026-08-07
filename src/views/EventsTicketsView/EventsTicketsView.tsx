@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ImageUploadField } from "../../components/ui/imageUpload/ImageUploadField";
 import {
   Box,
@@ -958,6 +959,7 @@ const updateMenuOptionInGroups = (
 
 export const EventsTicketsView = () => {
   const openSnackbar = useSnackBarResponseStore((state) => state.openSnackbar);
+  const queryClient = useQueryClient();
 
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [wizardStep, setWizardStep] = useState<EventWizardStep>(0);
@@ -1150,11 +1152,20 @@ export const EventsTicketsView = () => {
         "Hay un cobro con QR pendiente. Si cierras, se cancelará. ¿Continuar?",
       );
       if (!confirmed) return;
-      await cancelQrCheckout.mutateAsync({
-        eventId: ticketsModalEvent.id,
-        purchaseId: activeQrCheckout.purchaseId,
-      });
-      setActiveQrCheckout(null);
+
+      try {
+        await cancelQrCheckout.mutateAsync({
+          eventId: ticketsModalEvent.id,
+          purchaseId: activeQrCheckout.purchaseId,
+        });
+        setActiveQrCheckout(null);
+      } catch {
+        // El snackbar de error ya lo dispara el onError de la mutación. Si la
+        // cancelación no se aplicó (p.ej. red caída), el cobro sigue vivo en
+        // MercadoPago: no cerramos el modal como si nada, para que el
+        // operador vea el QR y pueda reintentar la cancelación.
+        return;
+      }
     }
 
     setIsTicketsModalOpen(false);
@@ -2454,7 +2465,7 @@ export const EventsTicketsView = () => {
 
       <Dialog
         open={isTicketsModalOpen && Boolean(ticketsModalEvent)}
-        onClose={closeTicketsModal}
+        onClose={() => void closeTicketsModal()}
         disableEscapeKeyDown={createQrCheckout.isPending}
         fullWidth
         maxWidth="lg"
@@ -2493,6 +2504,16 @@ export const EventsTicketsView = () => {
                     if (status === "PAID") {
                       openSnackbar("Pago aprobado, tickets emitidos", "success");
                       resetPurchaseForm(ticketsModalEvent);
+                      // Los tickets recién emitidos y los cupos vendidos vienen
+                      // del backend: sin invalidar, la lista y el contador de
+                      // cupos quedan desactualizados y el operador no tiene
+                      // confirmación visual de que la entrega ya se hizo.
+                      queryClient.invalidateQueries({ queryKey: ["events"] });
+                      queryClient.invalidateQueries({ queryKey: ["event-tickets"] });
+                      return;
+                    }
+                    if (status === "REJECTED") {
+                      openSnackbar("El pago fue rechazado", "info");
                       return;
                     }
                     openSnackbar(
@@ -2843,7 +2864,7 @@ export const EventsTicketsView = () => {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={closeTicketsModal} disabled={createQrCheckout.isPending}>
+          <Button onClick={() => void closeTicketsModal()} disabled={createQrCheckout.isPending}>
             Cerrar
           </Button>
         </DialogActions>

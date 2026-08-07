@@ -1,14 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 
 const cancelMutate = vi.fn().mockResolvedValue({ status: "CANCELLED" });
 let realtimeCallback: ((p: { status: string }) => void) | null = null;
+
+// Estado mutable leído por el mock de useQrCheckoutStatusQuery en cada
+// render: permite simular la respuesta del polling de respaldo (Arreglo 4)
+// sin tener que reescribir vi.mock por test, ya que las factories quedan
+// elevadas (mismo patrón que EventsTicketsView.test.tsx).
+const qrCheckoutStatusState = vi.hoisted(() => ({
+  data: undefined as { status: string } | undefined,
+}));
 
 vi.mock("../../../core/api/payments.hooks", () => ({
   useCancelQrCheckoutMutation: () => ({
     mutateAsync: cancelMutate,
     isPending: false,
   }),
+  useQrCheckoutStatusQuery: () => ({ data: qrCheckoutStatusState.data }),
 }));
 vi.mock("../../../core/realtime/useRealtimeEventPurchase", () => ({
   useRealtimeEventPurchase: (
@@ -38,6 +47,7 @@ describe("QrCheckoutPanel", () => {
   beforeEach(() => {
     cancelMutate.mockClear();
     realtimeCallback = null;
+    qrCheckoutStatusState.data = undefined;
   });
 
   it("muestra el QR con la URL de pago", () => {
@@ -106,5 +116,52 @@ describe("QrCheckoutPanel", () => {
 
     await waitFor(() => expect(cancelMutate).toHaveBeenCalled());
     expect(onSettled).not.toHaveBeenCalled();
+  });
+
+  it("si el socket falló pero el polling de respaldo ve que el pago ya no está pendiente, avisa al padre", async () => {
+    qrCheckoutStatusState.data = { status: "PAID" };
+    const onSettled = vi.fn();
+    render(
+      <QrCheckoutPanel eventId="e1" checkout={checkout} onSettled={onSettled} />,
+    );
+
+    await waitFor(() => expect(onSettled).toHaveBeenCalledWith("PAID"));
+  });
+
+  it("mientras el polling de respaldo sigue en PENDING, no avisa al padre", () => {
+    qrCheckoutStatusState.data = { status: "PENDING" };
+    const onSettled = vi.fn();
+    render(
+      <QrCheckoutPanel eventId="e1" checkout={checkout} onSettled={onSettled} />,
+    );
+
+    expect(onSettled).not.toHaveBeenCalled();
+  });
+
+  it("al llegar la cuenta regresiva a 00:00 se auto-liquida como EXPIRED", () => {
+    vi.useFakeTimers();
+    try {
+      const onSettled = vi.fn();
+      const almostExpiredCheckout = {
+        ...checkout,
+        expiresAt: new Date(Date.now() + 1000).toISOString(),
+      };
+
+      render(
+        <QrCheckoutPanel
+          eventId="e1"
+          checkout={almostExpiredCheckout}
+          onSettled={onSettled}
+        />,
+      );
+
+      act(() => {
+        vi.advanceTimersByTime(1500);
+      });
+
+      expect(onSettled).toHaveBeenCalledWith("EXPIRED");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

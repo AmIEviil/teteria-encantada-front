@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
 import { QRCodeSVG } from "qrcode.react";
-import { useCancelQrCheckoutMutation } from "../../../core/api/payments.hooks";
+import {
+  useCancelQrCheckoutMutation,
+  useQrCheckoutStatusQuery,
+} from "../../../core/api/payments.hooks";
 import { useRealtimeEventPurchase } from "../../../core/realtime/useRealtimeEventPurchase";
 import type { EventPurchaseStatus, QrCheckout } from "../../../core/api/payments.types";
 import { useSnackBarResponseStore } from "../../../store/snackBarStore";
@@ -46,6 +49,19 @@ export const QrCheckoutPanel = ({
     settleOnce(payload.status);
   });
 
+  // Respaldo del socket: si se cayó justo cuando el backend cambió el estado
+  // del pago, este polling (ver useQrCheckoutStatusQuery) igual lo rescata,
+  // en vez de dejar el QR congelado hasta que corra el cron de expiración.
+  const checkoutStatusQuery = useQrCheckoutStatusQuery(eventId, checkout.purchaseId);
+
+  useEffect(() => {
+    const status = checkoutStatusQuery.data?.status;
+    if (status && status !== "PENDING") {
+      settleOnce(status);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkoutStatusQuery.data?.status]);
+
   useEffect(() => {
     const expiresAt = new Date(checkout.expiresAt).getTime();
     const timer = setInterval(() => {
@@ -53,10 +69,17 @@ export const QrCheckoutPanel = ({
       setRemainingMs(remaining);
       // Sin esto el intervalo sigue re-renderizando cada segundo para siempre
       // después de que el código expiró.
-      if (remaining <= 0) clearInterval(timer);
+      if (remaining <= 0) {
+        clearInterval(timer);
+        // MercadoPago ya no acepta este código pasado el vencimiento: se
+        // liquida localmente para sacar el QR de pantalla, en vez de esperar
+        // hasta 60s a que el cron de expiración del backend lo haga.
+        settleOnce("EXPIRED");
+      }
     }, 1000);
     setRemainingMs(expiresAt - Date.now());
     return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkout.expiresAt]);
 
   const handleCopy = async () => {
