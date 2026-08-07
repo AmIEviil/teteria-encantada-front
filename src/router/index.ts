@@ -142,6 +142,11 @@ const PublicEventPagoView = lazy(() =>
     default: m.PublicEventPagoView,
   })),
 );
+const PublicPaymentResultView = lazy(() =>
+  import("../views/public/payment/PublicPaymentResultView.tsx").then((m) => ({
+    default: m.PublicPaymentResultView,
+  })),
+);
 
 const withRoles = (
   View: ComponentType,
@@ -264,6 +269,10 @@ export const router = createBrowserRouter(
         {
           path: PAGE_ROUTES.PublicEventPago,
           Component: PublicEventPagoView,
+        },
+        {
+          path: PAGE_ROUTES.PublicPagoResultado,
+          Component: PublicPaymentResultView,
         },
       ],
     },
