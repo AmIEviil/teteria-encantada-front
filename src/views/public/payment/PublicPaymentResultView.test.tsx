@@ -31,4 +31,19 @@ describe("PublicPaymentResultView", () => {
     renderAt("");
     expect(screen.getByText(/no se pudo completar/i)).toBeInTheDocument();
   });
+
+  it("en_process: se trata como pendiente", () => {
+    renderAt("?status=in_process&payment_id=1&external_reference=p1");
+    expect(screen.getByText(/procesando/i)).toBeInTheDocument();
+  });
+
+  it("muestra el payment_id como dato de respaldo cuando viene en la URL", () => {
+    renderAt("?status=approved&payment_id=123456789&external_reference=p1");
+    expect(screen.getByText(/123456789/)).toBeInTheDocument();
+  });
+
+  it("no muestra el dato de payment_id si no viene en la URL", () => {
+    renderAt("?status=approved");
+    expect(screen.queryByText(/N\.º de pago/i)).not.toBeInTheDocument();
+  });
 });

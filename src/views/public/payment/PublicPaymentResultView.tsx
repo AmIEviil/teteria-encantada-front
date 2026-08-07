@@ -1,8 +1,9 @@
 import { useSearchParams } from "react-router-dom";
 import "../PublicViews.css";
 
-// Checkout Pro vuelve con ?status=approved|pending|rejected. No se depende del
-// purchaseStore: se llega acá con la app recargada desde el sitio de MP.
+// Checkout Pro vuelve con ?status=approved|pending|in_process|rejected. No se
+// depende del purchaseStore: se llega acá con la app recargada desde el sitio
+// de MP.
 const messages = {
   approved: {
     title: "¡Pago confirmado!",
@@ -29,6 +30,10 @@ const resolveKey = (status: string | null): PaymentResultKey => {
 export const PublicPaymentResultView = () => {
   const [searchParams] = useSearchParams();
   const { title, body } = messages[resolveKey(searchParams.get("status"))];
+  // MercadoPago manda el id de su transacción en el redirect; se muestra
+  // como dato de respaldo para que el cliente pueda citarlo si necesita
+  // reclamar (no depende del purchaseStore, así que es lo único disponible).
+  const paymentId = searchParams.get("payment_id");
 
   return (
     <main className="publicPage">
@@ -36,6 +41,9 @@ export const PublicPaymentResultView = () => {
         <section className="publicPanel">
           <h2>{title}</h2>
           <p>{body}</p>
+          {paymentId && (
+            <p className="publicMuted">N.º de pago (MercadoPago): {paymentId}</p>
+          )}
         </section>
       </div>
     </main>
