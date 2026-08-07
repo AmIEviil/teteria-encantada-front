@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Box, Button, Paper, Stack, TextField, Typography } from "@mui/material";
 import { QRCodeSVG } from "qrcode.react";
 import { useCancelQrCheckoutMutation } from "../../../core/api/payments.hooks";
@@ -32,15 +32,30 @@ export const QrCheckoutPanel = ({
     () => new Date(checkout.expiresAt).getTime() - Date.now(),
   );
 
+  // Un cobro se liquida una sola vez. Cancelar por botón y recibir el evento
+  // de pago por socket pueden llegar casi juntos: sin este guard el padre
+  // recibiría dos avisos con estados contradictorios (CANCELLED y PAID).
+  const hasSettledRef = useRef(false);
+  const settleOnce = (status: EventPurchaseStatus) => {
+    if (hasSettledRef.current) return;
+    hasSettledRef.current = true;
+    onSettled(status);
+  };
+
   useRealtimeEventPurchase(checkout.purchaseId, (payload) => {
-    onSettled(payload.status);
+    settleOnce(payload.status);
   });
 
   useEffect(() => {
     const expiresAt = new Date(checkout.expiresAt).getTime();
-    const tick = () => setRemainingMs(expiresAt - Date.now());
-    const timer = setInterval(tick, 1000);
-    tick();
+    const timer = setInterval(() => {
+      const remaining = expiresAt - Date.now();
+      setRemainingMs(remaining);
+      // Sin esto el intervalo sigue re-renderizando cada segundo para siempre
+      // después de que el código expiró.
+      if (remaining <= 0) clearInterval(timer);
+    }, 1000);
+    setRemainingMs(expiresAt - Date.now());
     return () => clearInterval(timer);
   }, [checkout.expiresAt]);
 
@@ -54,11 +69,17 @@ export const QrCheckoutPanel = ({
   };
 
   const handleCancel = async () => {
-    const result = await cancelCheckout.mutateAsync({
-      eventId,
-      purchaseId: checkout.purchaseId,
-    });
-    onSettled(result.status);
+    try {
+      const result = await cancelCheckout.mutateAsync({
+        eventId,
+        purchaseId: checkout.purchaseId,
+      });
+      settleOnce(result.status);
+    } catch {
+      // El snackbar de error ya lo dispara el onError de la mutación. Se
+      // captura acá sólo para que el rechazo no quede sin manejar, y el panel
+      // se queda abierto: el cobro sigue vivo si la cancelación no se aplicó.
+    }
   };
 
   return (

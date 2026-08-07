@@ -82,4 +82,29 @@ describe("QrCheckoutPanel", () => {
 
     await waitFor(() => expect(onSettled).toHaveBeenCalledWith("PAID"));
   });
+
+  it("no avisa dos veces si cancelar y el evento de pago llegan juntos", async () => {
+    const onSettled = vi.fn();
+    render(
+      <QrCheckoutPanel eventId="e1" checkout={checkout} onSettled={onSettled} />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /cancelar cobro/i }));
+    realtimeCallback?.({ status: "PAID" });
+
+    await waitFor(() => expect(onSettled).toHaveBeenCalledTimes(1));
+  });
+
+  it("si cancelar falla, no avisa al padre y no deja el rechazo sin manejar", async () => {
+    cancelMutate.mockRejectedValueOnce(new Error("red caída"));
+    const onSettled = vi.fn();
+    render(
+      <QrCheckoutPanel eventId="e1" checkout={checkout} onSettled={onSettled} />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /cancelar cobro/i }));
+
+    await waitFor(() => expect(cancelMutate).toHaveBeenCalled());
+    expect(onSettled).not.toHaveBeenCalled();
+  });
 });
