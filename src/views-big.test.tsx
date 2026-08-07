@@ -125,8 +125,14 @@ vi.mock("./core/api/events.hooks", () => ({
   useUpdateEventStatusMutation: shared.m,
   useDeleteEventMutation: shared.m,
   useCreateEventTicketMutation: shared.m,
+  useCreateEventPurchaseMutation: shared.m,
   useUpdateEventTicketMutation: shared.m,
   useDeleteEventTicketMutation: shared.m,
+}));
+vi.mock("./core/api/payments.hooks", () => ({
+  useCreateQrCheckoutMutation: shared.m,
+  useCancelQrCheckoutMutation: shared.m,
+  useQrCheckoutStatusQuery: () => shared.q(null),
 }));
 vi.mock("./core/api/migrations.hooks", () => ({
   useMigrationsStatusQuery: () => shared.q(MIG_STATUS),
