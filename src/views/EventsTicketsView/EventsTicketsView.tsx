@@ -33,6 +33,11 @@ import {
   useUpdateEventMutation,
   useUpdateEventTicketMutation,
 } from "../../core/api/events.hooks";
+import {
+  useCancelQrCheckoutMutation,
+  useCreateQrCheckoutMutation,
+} from "../../core/api/payments.hooks";
+import type { EventPurchaseStatus, QrCheckout } from "../../core/api/payments.types";
 import type {
   CreateVenueEventPayload,
   EventSessionPayload,
@@ -70,6 +75,7 @@ import type {
 import { TicketTypeEditorCard } from "./TicketTypeEditorCard/TicketTypeEditorCard";
 import { SessionsEditor } from "./SessionsEditor/SessionsEditor";
 import { SessionAllocationsEditor } from "./SessionAllocationsEditor/SessionAllocationsEditor";
+import { QrCheckoutPanel } from "./QrCheckoutPanel/QrCheckoutPanel";
 import {
   TIME_OPTIONS,
   buildSessionsPayload,
@@ -1038,6 +1044,10 @@ export const EventsTicketsView = () => {
   const updateEventTicketMutation = useUpdateEventTicketMutation();
   const deleteEventTicketMutation = useDeleteEventTicketMutation();
 
+  const createQrCheckout = useCreateQrCheckoutMutation();
+  const cancelQrCheckout = useCancelQrCheckoutMutation();
+  const [activeQrCheckout, setActiveQrCheckout] = useState<QrCheckout | null>(null);
+
   const isEventSubmitting =
     createEventMutation.isPending ||
     updateEventMutation.isPending ||
@@ -1120,7 +1130,19 @@ export const EventsTicketsView = () => {
     setIsTicketsModalOpen(true);
   };
 
-  const closeTicketsModal = () => {
+  const closeTicketsModal = async () => {
+    if (activeQrCheckout && ticketsModalEvent) {
+      const confirmed = window.confirm(
+        "Hay un cobro con QR pendiente. Si cierras, se cancelará. ¿Continuar?",
+      );
+      if (!confirmed) return;
+      await cancelQrCheckout.mutateAsync({
+        eventId: ticketsModalEvent.id,
+        purchaseId: activeQrCheckout.purchaseId,
+      });
+      setActiveQrCheckout(null);
+    }
+
     setIsTicketsModalOpen(false);
     setTicketsModalEventId(null);
     setTicketStatusFilter("ALL");
@@ -1733,7 +1755,21 @@ export const EventsTicketsView = () => {
         openSnackbar("Debe indicar email del comprador", "error");
         return;
       }
-      
+
+      if (purchaseForm.paymentMethod === "MP_QR") {
+        const checkout = await createQrCheckout.mutateAsync({
+          eventId: ticketsModalEvent.id,
+          payload: {
+            buyerEmail: purchaseForm.buyerEmail.trim(),
+            items,
+          },
+        });
+        setActiveQrCheckout(checkout);
+        // No se resetea el formulario: si el cobro se cancela o expira, el
+        // operador vuelve a los mismos datos sin recargarlos a mano.
+        return;
+      }
+
       await createEventPurchaseMutation.mutateAsync({
         eventId: ticketsModalEvent.id,
         payload: {
@@ -2309,6 +2345,7 @@ export const EventsTicketsView = () => {
                         <Button
                           variant="contained"
                           startIcon={<ConfirmationNumberIcon />}
+                          aria-label="Tickets"
                           onClick={() => openTicketsModalForEvent(eventItem)}
                         >
                           Registrar tickets
@@ -2432,6 +2469,26 @@ export const EventsTicketsView = () => {
 
               <Divider />
 
+              {activeQrCheckout ? (
+                <QrCheckoutPanel
+                  eventId={ticketsModalEvent.id}
+                  checkout={activeQrCheckout}
+                  onSettled={(status: EventPurchaseStatus) => {
+                    setActiveQrCheckout(null);
+                    if (status === "PAID") {
+                      openSnackbar("Pago aprobado, tickets emitidos", "success");
+                      resetPurchaseForm(ticketsModalEvent);
+                      return;
+                    }
+                    openSnackbar(
+                      status === "EXPIRED"
+                        ? "El código QR expiró sin pago"
+                        : "Cobro cancelado",
+                      "info",
+                    );
+                  }}
+                />
+              ) : (
               <Stack spacing={1.25}>
                 <Typography fontWeight={700} variant="h6">
                   {editingTicketId ? "Editar ticket" : "Registrar tickets"}
@@ -2454,6 +2511,7 @@ export const EventsTicketsView = () => {
                     >
                       <MenuItem value="CASH">Efectivo</MenuItem>
                       <MenuItem value="CARD">Tarjeta</MenuItem>
+                      <MenuItem value="MP_QR">MercadoPago (QR)</MenuItem>
                     </TextField>
                   </Stack>
                 )}
@@ -2650,6 +2708,7 @@ export const EventsTicketsView = () => {
                   </Button>
                 </Stack>
               </Stack>
+              )}
 
 
               <Divider />
