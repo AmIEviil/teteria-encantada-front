@@ -11,6 +11,7 @@ vi.mock("../../core/api/events.hooks", () => ({
   useUpdateEventMutation: m,
   useDeleteEventMutation: m,
   useCreateEventTicketMutation: m,
+  useCreateEventPurchaseMutation: m,
   useUpdateEventTicketMutation: m,
   useDeleteEventTicketMutation: m,
 }));
