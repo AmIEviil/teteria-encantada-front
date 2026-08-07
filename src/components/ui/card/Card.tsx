@@ -27,7 +27,11 @@ export const Card = ({
   return (
     <div className={style.cardContainer} onClick={handleCardClick}>
       <div className={style.cardContent}>
-        <img src={imageUrl || "/path/to/image.jpg"} alt={title} />
+        {imageUrl ? (
+          <img src={imageUrl} alt={title} />
+        ) : (
+          <div className={style.cardImagePlaceholder} aria-hidden="true" />
+        )}
         <div className={style.cardBody}>
           <p className={style.cardTitle}>{title}</p>
           {description && <span className={style.cardText}>{description}</span>}

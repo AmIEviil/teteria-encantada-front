@@ -93,10 +93,16 @@ const formatCurrency = (value: number): string => {
 };
 
 const formatDateTime = (value: string): string => {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+
   return new Intl.DateTimeFormat("es-CL", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(value));
+  }).format(date);
 };
 
 const formatMonthLabel = (month: string): string => {
@@ -109,9 +115,12 @@ const formatMonthLabel = (month: string): string => {
   }
 
   const monthDate = new Date(Date.UTC(year, monthNumber - 1, 1));
+  // El instante se construye en UTC: hay que formatearlo en UTC tambien, o en
+  // zonas al oeste de Greenwich (Chile) el mes retrocede uno.
   const label = new Intl.DateTimeFormat("es-CL", {
     month: "long",
     year: "numeric",
+    timeZone: "UTC",
   }).format(monthDate);
 
   return label.charAt(0).toUpperCase() + label.slice(1);

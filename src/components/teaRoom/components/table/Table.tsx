@@ -18,6 +18,8 @@ export interface TableProps {
   type?: "small" | "large";
   cellSize?: number;
   scale?: number;
+  /** Grados para contrarrestar la rotacion del plano y dejar el texto legible. */
+  contentRotation?: number;
   position?: { x: number; y: number };
   isRotated?: boolean; // Propiedad para saber si está rotada
   isSelected?: boolean;
@@ -80,6 +82,7 @@ export const Table = ({
   type,
   cellSize = 80,
   scale = 1,
+  contentRotation = 0,
   position,
   isRotated,
   isSelected = false,
@@ -127,6 +130,9 @@ export const Table = ({
   };
 
   const tableTypeClass = getTableTypeClass(type, isRotated);
+  const contentRotationStyle = contentRotation
+    ? { transform: `rotate(${contentRotation}deg)` }
+    : undefined;
   const swapNameOptions = buildSwapNameOptions(id, allTables, onSwapLabels);
   const badge = confirmationStatus ? CONFIRMATION_BADGE[confirmationStatus] : null;
 
@@ -168,7 +174,7 @@ export const Table = ({
           style={onlyViewPositionStyle ?? { position: "relative" }}
           disabled={isOutOfService}
         >
-          <div className={s.headerTable}>
+          <div className={s.headerTable} style={contentRotationStyle}>
             <p>{tableName}</p>
             {numberOfSeats !== undefined && <p>{numberOfSeats} asientos</p>}
           </div>
@@ -198,7 +204,7 @@ export const Table = ({
         className={`${s.onlyView} ${tableTypeClass} ${openOrderClass} ${reservedClass} ${outOfServiceClass} ${selectedClass}`}
         style={{ ...onlyViewPositionStyle, position: "relative" }}
       >
-        <div className={s.headerTable}>
+        <div className={s.headerTable} style={contentRotationStyle}>
           <p>{tableName}</p>
           {numberOfSeats !== undefined && <p>{numberOfSeats} asientos</p>}
         </div>
@@ -240,7 +246,7 @@ export const Table = ({
           className={`${s.table} ${tableTypeClass} ${openOrderClass} ${reservedClass} ${outOfServiceClass} ${selectedClass}`}
           disabled={isOutOfService}
         >
-          <div className={s.headerTable}>
+          <div className={s.headerTable} style={contentRotationStyle}>
             <p>{tableName}</p>
             {numberOfSeats !== undefined && <p>{numberOfSeats} asientos</p>}
           </div>
@@ -266,7 +272,7 @@ export const Table = ({
           ref={nodeRef}
           className={`${s.table} ${tableTypeClass} ${openOrderClass} ${reservedClass} ${outOfServiceClass} ${selectedClass}`}
         >
-          <div className={s.headerTable}>
+          <div className={s.headerTable} style={contentRotationStyle}>
             <p>{tableName}</p>
             {numberOfSeats !== undefined && <p>{numberOfSeats} asientos</p>}
           </div>

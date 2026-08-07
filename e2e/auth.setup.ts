@@ -14,8 +14,8 @@ setup("authenticate", async ({ page }) => {
   }
 
   await page.goto("/login");
-  await page.getByLabel("Nombre de usuario").fill(username);
-  await page.getByLabel("Contraseña").fill(password);
+  await page.getByLabel("Correo electrónico o usuario").fill(username);
+  await page.locator('input[type="password"]').fill(password);
   await page.getByRole("button", { name: "Iniciar sesión" }).click();
 
   // App redirects away from /login on success.
