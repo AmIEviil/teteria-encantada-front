@@ -1057,7 +1057,8 @@ export const EventsTicketsView = () => {
     createEventTicketMutation.isPending ||
     updateEventTicketMutation.isPending ||
     deleteEventTicketMutation.isPending ||
-    createEventPurchaseMutation.isPending;
+    createEventPurchaseMutation.isPending ||
+    createQrCheckout.isPending;
 
   const eventFormAvailableDates = useMemo(() => {
     if (!eventForm.startsAtDate || !eventForm.endsAtDate) {
@@ -1123,6 +1124,11 @@ export const EventsTicketsView = () => {
       return;
     }
 
+    // Defensivo: si quedó un cobro QR de un evento anterior (p.ej. el POST de
+    // creación resolvió después de que el operador ya cerró y reabrió el
+    // modal en otro evento), un cobro que cruza de evento apuntaría al
+    // evento equivocado al cancelarlo. Se descarta la referencia acá.
+    setActiveQrCheckout(null);
     setTicketsModalEventId(eventItem.id);
     setTicketStatusFilter("ALL");
     setTicketAttendanceDateFilter("");
@@ -1131,6 +1137,14 @@ export const EventsTicketsView = () => {
   };
 
   const closeTicketsModal = async () => {
+    // Mientras el POST de creación del cobro QR está en vuelo, activeQrCheckout
+    // todavía es null (se setea recién cuando la promesa resuelve), así que
+    // el guard de abajo no alcanza a dispararse. Sin este corte, el modal se
+    // cierra igual y el cobro queda huérfano cuando la mutación termine.
+    if (createQrCheckout.isPending) {
+      return;
+    }
+
     if (activeQrCheckout && ticketsModalEvent) {
       const confirmed = window.confirm(
         "Hay un cobro con QR pendiente. Si cierras, se cancelará. ¿Continuar?",
@@ -1617,7 +1631,7 @@ export const EventsTicketsView = () => {
     await deleteEventMutation.mutateAsync(eventId);
 
     if (ticketsModalEventId === eventId) {
-      closeTicketsModal();
+      void closeTicketsModal();
     }
   };
 
@@ -2441,6 +2455,7 @@ export const EventsTicketsView = () => {
       <Dialog
         open={isTicketsModalOpen && Boolean(ticketsModalEvent)}
         onClose={closeTicketsModal}
+        disableEscapeKeyDown={createQrCheckout.isPending}
         fullWidth
         maxWidth="lg"
       >
@@ -2828,7 +2843,9 @@ export const EventsTicketsView = () => {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={closeTicketsModal}>Cerrar</Button>
+          <Button onClick={closeTicketsModal} disabled={createQrCheckout.isPending}>
+            Cerrar
+          </Button>
         </DialogActions>
       </Dialog>
     </Stack>
