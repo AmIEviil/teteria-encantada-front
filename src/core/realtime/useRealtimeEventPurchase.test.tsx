@@ -54,6 +54,25 @@ describe("useRealtimeEventPurchase", () => {
     expect(on).toHaveBeenCalledTimes(1);
   });
 
+  it("invoca el callback más reciente tras un rerender", () => {
+    const first = vi.fn();
+    const latest = vi.fn();
+    const { rerender } = renderHook(
+      ({ cb }: { cb: () => void }) => useRealtimeEventPurchase("p1", cb),
+      { initialProps: { cb: first } },
+    );
+    rerender({ cb: latest });
+
+    handlers.get("eventPurchase:changed")!({
+      purchaseId: "p1",
+      eventId: "e1",
+      status: "PAID",
+    });
+
+    expect(first).not.toHaveBeenCalled();
+    expect(latest).toHaveBeenCalledTimes(1);
+  });
+
   it("se desuscribe al desmontar", () => {
     const { unmount } = renderHook(() =>
       useRealtimeEventPurchase("p1", vi.fn()),

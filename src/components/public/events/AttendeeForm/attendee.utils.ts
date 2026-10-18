@@ -81,7 +81,11 @@ export const checkAvailability = (
   ];
 
   if (ctx.seatsRemaining !== null && typeIds.length > ctx.seatsRemaining) {
-    return { ok: false, message: `Solo quedan ${ctx.seatsRemaining} cupos disponibles` };
+    const message =
+      ctx.seatsRemaining === 1
+        ? "Solo queda 1 cupo disponible"
+        : `Solo quedan ${ctx.seatsRemaining} cupos disponibles`;
+    return { ok: false, message };
   }
 
   const countByType: Record<string, number> = {};

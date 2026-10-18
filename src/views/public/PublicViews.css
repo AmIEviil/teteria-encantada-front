@@ -340,6 +340,8 @@
 .publicMenuGroup { border: 1px solid #eee; border-radius: 8px; margin-top: 0.75rem; padding: 0.5rem 0.75rem; }
 .publicMenuOption { display: flex; gap: 0.5rem; align-items: center; padding: 0.2rem 0; }
 .publicLinkButton { background: none; border: none; color: #7a5c3e; font-weight: 600; cursor: pointer; }
+.publicLinkButton:disabled { color: #b8ad9f; cursor: not-allowed; }
+.publicHint { font-size: 0.875rem; margin: 0.25rem 0 0; }
 .publicCartList { list-style: none; padding: 0; margin: 0; }
 .publicCartRow { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid #f0ebe3; }
 .publicActionsRow { display: flex; gap: 1rem; margin-top: 1rem; }

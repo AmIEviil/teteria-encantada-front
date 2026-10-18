@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { getSocket } from "./socket";
 
 export interface EventPurchaseChangedPayload {
@@ -8,14 +8,13 @@ export interface EventPurchaseChangedPayload {
 }
 
 // El gateway emite a todos los clientes conectados: el filtro por purchaseId
-// se hace acá. onChange va por ref para que un callback nuevo en cada render
-// no provoque re-suscripciones al socket.
+// se hace acá. onChange va por useEffectEvent para que un callback nuevo en
+// cada render no provoque re-suscripciones al socket.
 export const useRealtimeEventPurchase = (
   purchaseId: string | null,
   onChange: (payload: EventPurchaseChangedPayload) => void,
 ): void => {
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+  const onChangeEvent = useEffectEvent(onChange);
 
   useEffect(() => {
     if (!purchaseId) return;
@@ -23,7 +22,7 @@ export const useRealtimeEventPurchase = (
     const socket = getSocket();
     const handler = (payload: EventPurchaseChangedPayload) => {
       if (payload.purchaseId !== purchaseId) return;
-      onChangeRef.current(payload);
+      onChangeEvent(payload);
     };
 
     socket.on("eventPurchase:changed", handler);

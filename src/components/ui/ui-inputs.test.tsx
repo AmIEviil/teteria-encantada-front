@@ -75,6 +75,17 @@ describe("CustomInputText", () => {
     expect(document.getElementById("input-field-Pass")).toBeTruthy();
   });
 
+  it("usa el id explícito para asociar label e input", () => {
+    render(
+      <>
+        <CustomInputText id="p1-nombre" title="Nombre" value="Ana" />
+        <CustomInputText id="p2-nombre" title="Nombre" value="Luis" />
+      </>,
+    );
+    const inputs = screen.getAllByLabelText(/Nombre/) as HTMLInputElement[];
+    expect(inputs.map((input) => input.value)).toEqual(["Ana", "Luis"]);
+  });
+
   it("disabled no dispara onChange", () => {
     const onChange = vi.fn();
     render(<CustomInputText title="D" value="x" disabled onChange={onChange} />);
