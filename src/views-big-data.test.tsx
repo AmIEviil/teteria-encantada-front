@@ -303,6 +303,10 @@ vi.mock("./core/api/events.hooks", () => ({
   useUpdateEventTicketMutation: mResult,
   useDeleteEventTicketMutation: mResult,
 }));
+vi.mock("./core/api/eventPurchases.hooks", () => ({
+  useEventPurchasesQuery: () => ({ data: undefined, isLoading: false, isFetching: false }),
+  useEventPurchaseDetailQuery: () => ({ data: undefined, isLoading: false }),
+}));
 vi.mock("./core/api/migrations.hooks", () => ({
   useMigrationsStatusQuery: () => qResult(data.migStatus),
   useMigrationsHistoryQuery: () => qResult(data.migHistory),

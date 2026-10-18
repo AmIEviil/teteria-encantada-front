@@ -129,6 +129,10 @@ vi.mock("./core/api/events.hooks", () => ({
   useUpdateEventTicketMutation: shared.m,
   useDeleteEventTicketMutation: shared.m,
 }));
+vi.mock("./core/api/eventPurchases.hooks", () => ({
+  useEventPurchasesQuery: () => ({ data: undefined, isLoading: false, isFetching: false }),
+  useEventPurchaseDetailQuery: () => ({ data: undefined, isLoading: false }),
+}));
 vi.mock("./core/api/payments.hooks", () => ({
   useCreateQrCheckoutMutation: shared.m,
   useCancelQrCheckoutMutation: shared.m,
