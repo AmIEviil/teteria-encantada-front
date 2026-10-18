@@ -69,6 +69,7 @@ beforeEach(() => {
   mocks.useEventPurchaseDetailQuery.mockImplementation((id: string | null) => ({
     data: id ? currentDetail : undefined,
     isLoading: false,
+    isError: false,
   }));
 });
 
@@ -156,5 +157,66 @@ describe("EventPurchasesTab", () => {
       screen.getByRole("button", { name: "Descargar tickets (PDF)" }),
     );
     expect(mocks.downloadFile).toHaveBeenCalledWith("p1", "tickets");
+  });
+
+  it("muestra asistentes con tipo de entrada", () => {
+    currentDetail = detail({
+      attendees: [
+        { firstName: "Ana", lastName: "Pérez", ticketTypeName: "General", attendanceDate: null, sessionId: null },
+        { firstName: "Juan", lastName: "Pérez", ticketTypeName: null, attendanceDate: null, sessionId: null },
+      ],
+    });
+    render(<EventPurchasesTab />);
+    openDetail();
+    expect(
+      screen.getByText(/Ana Pérez \(General\), Juan Pérez$/),
+    ).toBeInTheDocument();
+  });
+
+  it("la linea Fecha pago incluye medio y estado", () => {
+    render(<EventPurchasesTab />);
+    openDetail();
+    expect(screen.getByText(/Fecha pago:/).closest("p")!.textContent).toMatch(
+      / · visa · Pagada$/,
+    );
+  });
+
+  it("muestra error si falla la carga del detalle", () => {
+    mocks.useEventPurchaseDetailQuery.mockImplementation(() => ({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+    }));
+    render(<EventPurchasesTab />);
+    openDetail();
+    expect(screen.getByText("No se pudo cargar el detalle")).toBeInTheDocument();
+  });
+
+  it("singular '1 entrada' en otras compras", () => {
+    currentDetail = detail({
+      otherPurchases: [row({ id: "p2", ticketsCount: 1 })],
+    });
+    render(<EventPurchasesTab />);
+    openDetail();
+    expect(screen.getByText(/ · 1 entrada · /)).toBeInTheDocument();
+  });
+
+  it("limpia el error de descarga al cambiar de compra", async () => {
+    mocks.downloadFile.mockRejectedValueOnce(new Error("x"));
+    currentDetail = detail({
+      otherPurchases: [row({ id: "p2", eventTitle: "Cena" })],
+    });
+    render(<EventPurchasesTab />);
+    openDetail();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Descargar tickets (PDF)" }),
+    );
+    await screen.findByText("No se pudo descargar el archivo");
+    fireEvent.click(screen.getByText("ver"));
+    await waitFor(() =>
+      expect(
+        screen.queryByText("No se pudo descargar el archivo"),
+      ).not.toBeInTheDocument(),
+    );
   });
 });

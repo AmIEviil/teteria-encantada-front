@@ -14,6 +14,9 @@ import type { EventPurchaseRow } from "../../core/api/types";
 import { PURCHASE_STATUS_LABEL } from "./purchaseStatus.constants";
 import { formatCurrency, formatDateTime } from "../../utils/sales.utils";
 
+const entradasLabel = (count: number): string =>
+  `${count} ${count === 1 ? "entrada" : "entradas"}`;
+
 const paymentLabel = (purchase: EventPurchaseRow): string => {
   if (purchase.mpPaymentId) {
     return `Pago MP ${purchase.mpPaymentId}`;
@@ -32,8 +35,16 @@ export const EventPurchaseDetailDialog = ({
   onClose,
   onOpenPurchase,
 }: EventPurchaseDetailDialogProps) => {
-  const { data: detail, isLoading } = useEventPurchaseDetailQuery(purchaseId);
-  const [downloadError, setDownloadError] = useState("");
+  const { data: detail, isLoading, isError } = useEventPurchaseDetailQuery(purchaseId);
+  const [downloadErrorState, setDownloadErrorState] = useState<{
+    id: string | null;
+    message: string;
+  }>({ id: null, message: "" });
+  // El error pertenece a la compra en que ocurrió: al cambiar de compra desaparece.
+  const downloadError =
+    downloadErrorState.id === purchaseId ? downloadErrorState.message : "";
+  const setDownloadError = (message: string) =>
+    setDownloadErrorState({ id: purchaseId, message });
 
   const download = async (kind: "tickets" | "comprobante") => {
     if (!detail) return;
@@ -47,6 +58,24 @@ export const EventPurchaseDetailDialog = ({
 
   const paidAt =
     detail?.paidAt ?? (detail?.status === "PAID" ? detail.createdAt : null);
+  const paidLine = detail
+    ? [
+        paidAt ? formatDateTime(paidAt) : "No informado",
+        detail.mpPaymentMethod,
+        PURCHASE_STATUS_LABEL[detail.status],
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : "";
+  const attendeesLine = detail
+    ? detail.attendees
+        .map((a) =>
+          a.ticketTypeName
+            ? `${a.firstName} ${a.lastName} (${a.ticketTypeName})`
+            : `${a.firstName} ${a.lastName}`,
+        )
+        .join(", ")
+    : "";
 
   const downloadButton = (
     kind: "tickets" | "comprobante",
@@ -80,6 +109,9 @@ export const EventPurchaseDetailDialog = ({
       <DialogTitle>Detalle de compra</DialogTitle>
       <DialogContent>
         {isLoading && <Typography>Cargando...</Typography>}
+        {isError && !detail && (
+          <Typography color="error">No se pudo cargar el detalle</Typography>
+        )}
         {detail && (
           <Stack
             direction={{ xs: "column", md: "row" }}
@@ -112,13 +144,14 @@ export const EventPurchaseDetailDialog = ({
               </Typography>
               <Typography>
                 <strong>Fecha pago:</strong>{" "}
-                {paidAt ? formatDateTime(paidAt) : "No informado"}
+                {paidLine}
               </Typography>
               <Typography>
                 <strong>Total:</strong> {formatCurrency(detail.total)}
               </Typography>
               <Typography>
-                <strong>Entradas:</strong> {detail.ticketsCount}
+                <strong>Entradas:</strong>{" "}
+                {attendeesLine || entradasLabel(detail.ticketsCount)}
               </Typography>
 
               <Stack spacing={1} pt={1}>
@@ -152,7 +185,7 @@ export const EventPurchaseDetailDialog = ({
               {detail.otherPurchases.map((other) => (
                 <Paper key={other.id} variant="outlined" sx={{ p: 1.25 }}>
                   <Typography variant="body2">
-                    {`${formatDateTime(other.createdAt)} · ${other.eventTitle ?? "-"} · ${other.ticketsCount} entradas · ${formatCurrency(other.total)} · ${PURCHASE_STATUS_LABEL[other.status]}`}
+                    {`${formatDateTime(other.createdAt)} · ${other.eventTitle ?? "-"} · ${entradasLabel(other.ticketsCount)} · ${formatCurrency(other.total)} · ${PURCHASE_STATUS_LABEL[other.status]}`}
                   </Typography>
                   <Stack
                     direction="row"

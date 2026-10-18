@@ -40,7 +40,7 @@ const tableTitles = [
   { label: "Entradas", key: "tickets" },
   { label: "Total", key: "total" },
   { label: "Estado", key: "status" },
-  { label: "Accion", key: "action" },
+  { label: "Acción", key: "action" },
 ];
 
 export const EventPurchasesTab = () => {
