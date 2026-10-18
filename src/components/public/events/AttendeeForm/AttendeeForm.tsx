@@ -63,6 +63,7 @@ export const AttendeeForm = ({
 
       <div className="publicAttendeeGrid">
         <CustomInputText
+          id={`${draft.id}-firstName`}
           title="Nombre"
           require
           value={draft.firstName}
@@ -70,6 +71,7 @@ export const AttendeeForm = ({
           type="text"
         />
         <CustomInputText
+          id={`${draft.id}-lastName`}
           title="Apellido"
           require
           value={draft.lastName}

@@ -82,7 +82,14 @@ describe("checkAvailability", () => {
       remainingByType: { t1: null }, seatsRemaining: 2,
     });
     expect(r.ok).toBe(false);
-    expect(r.message).toContain("2");
+    expect(r.message).toBe("Solo quedan 2 cupos disponibles");
+  });
+
+  it("uses singular wording when only one seat remains", () => {
+    const r = checkAvailability([], [draft(), draft()], {
+      remainingByType: { t1: null }, seatsRemaining: 1,
+    });
+    expect(r.message).toBe("Solo queda 1 cupo disponible");
   });
 
   it("blocks when a per-type cap is exceeded", () => {

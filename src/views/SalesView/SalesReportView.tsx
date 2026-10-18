@@ -8,6 +8,8 @@ import {
   MenuItem,
   Paper,
   Stack,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -22,6 +24,8 @@ import type {
   OrderReportSortBy,
   OrderStatus,
 } from "../../core/api/types";
+import { formatCurrency, formatDateTime } from "../../utils/sales.utils";
+import { EventPurchasesTab } from "./EventPurchasesTab";
 import "./SalesReportView.css";
 
 type StatusFilter = OrderStatus | "ALL";
@@ -84,21 +88,6 @@ const normalizeTableLabel = (
   return `MESA_${Number.parseInt(numberMatch, 10)}`;
 };
 
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: "CLP",
-    maximumFractionDigits: 0,
-  }).format(value || 0);
-};
-
-const formatDateTime = (value: string): string => {
-  return new Intl.DateTimeFormat("es-CL", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-};
-
 const formatMonthLabel = (month: string): string => {
   const [yearText, monthText] = month.split("-");
   const year = Number(yearText);
@@ -109,9 +98,12 @@ const formatMonthLabel = (month: string): string => {
   }
 
   const monthDate = new Date(Date.UTC(year, monthNumber - 1, 1));
+  // El instante se construye en UTC: hay que formatearlo en UTC tambien, o en
+  // zonas al oeste de Greenwich (Chile) el mes retrocede uno.
   const label = new Intl.DateTimeFormat("es-CL", {
     month: "long",
     year: "numeric",
+    timeZone: "UTC",
   }).format(monthDate);
 
   return label.charAt(0).toUpperCase() + label.slice(1);
@@ -163,6 +155,7 @@ export const SalesReportView = () => {
   const [orderDirection, setOrderDirection] =
     useState<OrderReportOrderDirection>("DESC");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [tab, setTab] = useState(0);
 
   const { data: tables = [] } = useTablesQuery();
 
@@ -227,9 +220,18 @@ export const SalesReportView = () => {
     <Stack spacing={2}>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography variant="h4" fontWeight={600}>
-          Ventas por Mesa
+          Ventas
         </Typography>
       </Stack>
+
+      <Tabs value={tab} onChange={(_, value: number) => setTab(value)}>
+        <Tab label="Mesas" />
+        <Tab label="Entradas (Mercado Pago)" />
+      </Tabs>
+
+      {tab === 1 && <EventPurchasesTab />}
+      {tab === 0 && (
+        <>
 
       <Paper sx={{ p: 2 }}>
         <Stack spacing={2}>
@@ -524,6 +526,8 @@ export const SalesReportView = () => {
           </button>
         </DialogActions>
       </Dialog>
+        </>
+      )}
     </Stack>
   );
 };

@@ -35,6 +35,7 @@ export const PAGE_ROUTES = {
   PublicEventSession: "/publico/eventos/:id/jornada/:sessionId",
   PublicEventReserva: "/publico/eventos/:id/reserva",
   PublicEventPago: "/publico/eventos/:id/pago",
+  PublicPagoResultado: "/publico/pago/resultado",
 };
 
 export const topbarOptions: IRoute[] = [

@@ -51,6 +51,68 @@ export const FloorPlan = ({
     height: canUseWindow ? globalThis.window.innerHeight : 720,
   });
   const [workspaceEl, setWorkspaceEl] = useState<HTMLDivElement | null>(null);
+  const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null);
+  // Medidas reales del layout:
+  // - containerInnerWidth: estimarlo como "viewport - padding fijo" se queda
+  //   corto (el layout mete padding propio) y el plano termina cortado.
+  // - workspaceBorderWidth: .workspace es content-box con borde propio (2px,
+  //   1px en pantallas chicas) que escala junto al transform, asi que hay que
+  //   contarlo o el grid desborda al wrapper.
+  const [layoutMetrics, setLayoutMetrics] = useState({
+    containerInnerWidth: 0,
+    workspaceBorderWidth: 2,
+  });
+
+  useEffect(() => {
+    if (!containerEl) {
+      return;
+    }
+
+    const readMetrics = () => {
+      const containerStyles = globalThis.getComputedStyle(containerEl);
+      const horizontalPadding =
+        Number.parseFloat(containerStyles.paddingLeft) +
+        Number.parseFloat(containerStyles.paddingRight);
+      const nextInnerWidth = Math.max(
+        0,
+        containerEl.clientWidth - horizontalPadding,
+      );
+      const measuredBorder = workspaceEl
+        ? Number.parseFloat(
+            globalThis.getComputedStyle(workspaceEl).borderLeftWidth,
+          )
+        : Number.NaN;
+
+      setLayoutMetrics((current) => {
+        const nextBorder = Number.isFinite(measuredBorder)
+          ? measuredBorder
+          : current.workspaceBorderWidth;
+
+        if (
+          Math.abs(current.containerInnerWidth - nextInnerWidth) < 0.5 &&
+          current.workspaceBorderWidth === nextBorder
+        ) {
+          return current;
+        }
+
+        return {
+          containerInnerWidth: nextInnerWidth,
+          workspaceBorderWidth: nextBorder,
+        };
+      });
+    };
+
+    readMetrics();
+
+    const observer = new ResizeObserver(readMetrics);
+    observer.observe(containerEl);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [containerEl, workspaceEl]);
+
+  const { containerInnerWidth, workspaceBorderWidth } = layoutMetrics;
 
   useEffect(() => {
     const handleResize = () => {
@@ -69,14 +131,27 @@ export const FloorPlan = ({
 
   const baseWorkspaceWidth = gridSize.cols * CELL_SIZE;
   const baseWorkspaceHeight = gridSize.rows * CELL_SIZE;
+  const outerWorkspaceWidth = baseWorkspaceWidth + workspaceBorderWidth * 2;
+  const outerWorkspaceHeight = baseWorkspaceHeight + workspaceBorderWidth * 2;
   const isPhoneViewport = viewportSize.width <= 680;
   const isNarrowPhoneViewport = viewportSize.width <= 430;
   const isVeryNarrowViewport = viewportSize.width <= 375;
   const isTabletViewport = viewportSize.width <= 1080;
 
-  const workspaceScale = useMemo(() => {
+  // Un plano apaisado (mas columnas que filas) dentro de una pantalla vertical
+  // desperdicia casi todo el alto: queda una franja chica arriba. En ese caso
+  // rotamos el plano completo 90deg para que use el alto disponible. Solo en
+  // modo vista: en edicion el drag trabaja en coordenadas sin rotar.
+  const fitScale = (
+    availableWidth: number,
+    availableHeight: number,
+    contentWidth: number,
+    contentHeight: number,
+  ) => Math.min(availableWidth / contentWidth, availableHeight / contentHeight);
+
+  const { workspaceScale, isRotatedLayout } = useMemo(() => {
     if (!isWideMode) {
-      return 1;
+      return { workspaceScale: 1, isRotatedLayout: false };
     }
 
     let horizontalPadding = 130;
@@ -107,17 +182,46 @@ export const FloorPlan = ({
       minScale = 0.4;
     }
 
-    const availableWidth = Math.max(240, viewportSize.width - horizontalPadding);
+    const availableWidth = Math.max(
+      240,
+      containerInnerWidth || viewportSize.width - horizontalPadding,
+    );
     const availableHeight = Math.max(240, viewportSize.height - verticalPadding);
 
-    const scaleByWidth = availableWidth / baseWorkspaceWidth;
-    const scaleByHeight = availableHeight / baseWorkspaceHeight;
-    const fittedScale = Math.min(scaleByWidth, scaleByHeight);
+    const fittedScale = fitScale(
+      availableWidth,
+      availableHeight,
+      outerWorkspaceWidth,
+      outerWorkspaceHeight,
+    );
 
-    return Math.max(minScale, Math.min(2.2, fittedScale));
+    // Al rotar, el plano necesita el alto donde antes pedia ancho: se compara
+    // contra el mismo hueco con las medidas del contenido intercambiadas.
+    const rotatedScale = fitScale(
+      availableWidth,
+      availableHeight,
+      outerWorkspaceHeight,
+      outerWorkspaceWidth,
+    );
+
+    const isPortraitViewport = availableHeight > availableWidth;
+    const isLandscapeLayout = outerWorkspaceWidth > outerWorkspaceHeight;
+    // El 15% evita rotar cuando la ganancia es marginal y solo desorienta.
+    const rotationPaysOff = rotatedScale > fittedScale * 1.15;
+    const shouldRotate =
+      !isEditing && isPortraitViewport && isLandscapeLayout && rotationPaysOff;
+
+    const chosenScale = shouldRotate ? rotatedScale : fittedScale;
+
+    return {
+      workspaceScale: Math.max(minScale, Math.min(2.2, chosenScale)),
+      isRotatedLayout: shouldRotate,
+    };
   }, [
-    baseWorkspaceHeight,
-    baseWorkspaceWidth,
+    containerInnerWidth,
+    outerWorkspaceHeight,
+    outerWorkspaceWidth,
+    isEditing,
     isWideMode,
     isPhoneViewport,
     isNarrowPhoneViewport,
@@ -127,8 +231,19 @@ export const FloorPlan = ({
     viewportSize.width,
   ]);
 
-  const scaledWorkspaceWidth = baseWorkspaceWidth * workspaceScale;
-  const scaledWorkspaceHeight = baseWorkspaceHeight * workspaceScale;
+  const scaledWorkspaceWidth = outerWorkspaceWidth * workspaceScale;
+  const scaledWorkspaceHeight = outerWorkspaceHeight * workspaceScale;
+  // Rotado con transform-origin top-left, el plano cae sobre las X negativas:
+  // el translate lo devuelve al cuadrante visible.
+  const workspaceTransform = isRotatedLayout
+    ? `translateX(${scaledWorkspaceHeight}px) rotate(90deg) scale(${workspaceScale})`
+    : `scale(${workspaceScale})`;
+  const wrapperWidth = isRotatedLayout
+    ? scaledWorkspaceHeight
+    : scaledWorkspaceWidth;
+  const wrapperHeight = isRotatedLayout
+    ? scaledWorkspaceWidth
+    : scaledWorkspaceHeight;
 
   return (
     <div className={`${s.layout} ${isWideMode ? s.layoutWide : ""} ${previewOnly ? s.layoutPreview : ""}`}>
@@ -143,13 +258,14 @@ export const FloorPlan = ({
       )}
 
       <div
+        ref={setContainerEl}
         className={`${s.workspaceContainer} ${isWideMode ? s.workspaceContainerWide : ""} ${previewOnly ? s.workspaceContainerPreview : ""}`}
       >
         <div
           className={s.workspaceScaleWrapper}
           style={{
-            width: `${scaledWorkspaceWidth}px`,
-            height: `${scaledWorkspaceHeight}px`,
+            width: `${wrapperWidth}px`,
+            height: `${wrapperHeight}px`,
           }}
         >
           <div
@@ -159,7 +275,7 @@ export const FloorPlan = ({
               width: `${baseWorkspaceWidth}px`,
               height: `${baseWorkspaceHeight}px`,
               backgroundSize: `${CELL_SIZE}px ${CELL_SIZE}px`,
-              transform: `scale(${workspaceScale})`,
+              transform: workspaceTransform,
               transformOrigin: "top left",
             }}
           >
@@ -172,6 +288,7 @@ export const FloorPlan = ({
                 type={table.type}
                 cellSize={CELL_SIZE}
                 scale={workspaceScale}
+                contentRotation={isRotatedLayout ? -90 : 0}
                 position={table.position}
                 isRotated={table.isRotated}
                 status={table.status}

@@ -3,6 +3,7 @@ import "./InputText.css";
 import EyeIcon from "../icons/EyeIcon";
 
 interface InputTextProps {
+  id?: string;
   title?: string;
   caption?: string;
   value?: string | number;
@@ -20,6 +21,7 @@ interface InputTextProps {
 }
 
 const CustomInputText = ({
+  id,
   title = "",
   value = "",
   disabled = false,
@@ -41,11 +43,11 @@ const CustomInputText = ({
   };
 
   const isPasswordType = type === "password";
+  // id explícito cuando el mismo título se repite en pantalla (ej. una tarjeta por persona)
+  const inputId = id ?? `input-field-${title}`;
 
   const handleSeePassword = () => {
-    const inputField = document.getElementById(
-      `input-field-${title}`,
-    ) as HTMLInputElement;
+    const inputField = document.getElementById(inputId) as HTMLInputElement;
     if (isPasswordType && inputField.type === "password") {
       inputField.type = "text";
     } else {
@@ -67,7 +69,7 @@ const CustomInputText = ({
     >
       {title && (
         <div className={`title-container ${customClassTitle}`}>
-          <label className="input-title" htmlFor={`input-field-${title}`}>
+          <label className="input-title" htmlFor={inputId}>
             {title} {require && <span className="required">*</span>}
           </label>
         </div>
@@ -79,7 +81,7 @@ const CustomInputText = ({
             disabled ? "disabled" : ""
           } ${icon ? "with-icon" : "pl-2!"}`}
           type={type}
-          id={`input-field-${title}`}
+          id={inputId}
           value={value}
           onChange={handleChange}
           disabled={disabled}

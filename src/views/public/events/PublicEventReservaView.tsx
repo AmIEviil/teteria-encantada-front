@@ -93,13 +93,21 @@ export const PublicEventReservaView = () => {
 
   // ¿cabe una persona más? probamos con un borrador extra del primer tipo disponible.
   // Además: no se agrega otra persona hasta completar nombre y apellido de las actuales.
-  const canAddPerson =
-    drafts.every((d) => d.firstName.trim() && d.lastName.trim()) &&
-    checkAvailability(
-      items,
-      [...drafts, newDraft(availableTypes[0]?.id ?? "")],
-      availabilityCtx,
-    ).ok;
+  // El motivo se muestra bajo el botón: deshabilitado sin explicación parece roto.
+  const namesComplete = drafts.every(
+    (d) => d.firstName.trim() && d.lastName.trim(),
+  );
+  const extraSeat = checkAvailability(
+    items,
+    [...drafts, newDraft(availableTypes[0]?.id ?? "")],
+    availabilityCtx,
+  );
+  const canAddPerson = namesComplete && extraSeat.ok;
+  const addPersonHint = !extraSeat.ok
+    ? (extraSeat.message ?? "No hay cupos disponibles")
+    : !namesComplete
+      ? "Completa nombre y apellido para agregar otra persona"
+      : null;
 
   const removeDraft = (draftId: string) =>
     setDrafts((prev) => prev.filter((d) => d.id !== draftId));
@@ -160,6 +168,9 @@ export const PublicEventReservaView = () => {
           >
             + Agregar otra persona
           </button>
+          {addPersonHint && (
+            <p className="publicMuted publicHint">{addPersonHint}</p>
+          )}
         </section>
 
         {items.length > 0 && (

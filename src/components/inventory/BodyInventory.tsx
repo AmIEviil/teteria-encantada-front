@@ -618,7 +618,8 @@ export const BodyInventory = () => {
               }}
               fullWidth
             />
-            <Stack direction="row" spacing={2}>
+            {/* En fila los tres labels se truncan a "Cantida..." bajo 600px. */}
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <TextField
                 label="Cantidad minima"
                 type="number"
